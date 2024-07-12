@@ -28,7 +28,7 @@ export default function Login() {
             <main className="bg-slate-200 min-h-screen flex justify-center items-center">
 
                 <div className="login-container h-3/4 w-11/12 md:w-1/2 bg-white py-16 min-w-80 shadow-2xl">
-                    <div className="title flex flex-col justify-center items-center gap-2">
+                    <div className="title flex flex-col justify-center items-center gap-5 mb-8">
                         <img className="min-w-max size-50 md:size-60 transition-all size-44" src={cabuyao_logo} alt="City of Cabuyao Logo" />
                         <h2 className="text-black font-bold text-2xl uppercase">login</h2>
                     </div>
