@@ -6,7 +6,7 @@ function App() {
     return (
       <>
         {/* <Appointment /> */}
-        <Login imageProp={cabuyao_logo}/>
+        <Login image={cabuyao_logo}/>
       </>
     );
 }

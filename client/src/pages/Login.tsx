@@ -5,11 +5,11 @@ import show_password from "../assets/show_password.png";
 import { useState } from "react";
 
 // For specifying the logo to be displayed based on inputted department.
-type ImageProp = {
-    imageProp: string,
+type LoginProp = {
+    image: string,
 }
 
-export default function Login( { imageProp } :  ImageProp ) {
+export default function Login( { image } :  LoginProp ) {
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
     const [passwordState, setPasswordState] = useState(hide_password);
@@ -33,7 +33,7 @@ export default function Login( { imageProp } :  ImageProp ) {
 
                 <div className="w-11/12 py-16 bg-white shadow-2xl login-container h-3/4 md:w-1/2 min-w-80">
                     <div className="flex flex-col items-center justify-center gap-5 mb-8 title">
-                        <img className="transition-all min-w-max size-50 md:size-60 size-44" src={imageProp} alt="City of Cabuyao Logo" />
+                        <img className="transition-all min-w-max size-50 md:size-60 size-44" src={image} alt="City of Cabuyao Logo" />
                         <h2 className="text-2xl font-bold text-black uppercase">login</h2>
                     </div>
 
