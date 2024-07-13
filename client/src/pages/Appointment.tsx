@@ -15,7 +15,6 @@ export default function Appointment() {
                     <h2 className="text-2xl font-bold text-black uppercase">book appointment</h2>
                 </div>
 
-                
                 <div id="dividing-line" className="w-11/12 h-1 bg-black rounded"></div>
                 
                 {/* Appointment Information */}
