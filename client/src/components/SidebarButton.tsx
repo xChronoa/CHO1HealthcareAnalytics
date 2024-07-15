@@ -1,16 +1,27 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
+import { memo } from "react";
 
-type Prop = {
-    icon?: IconProp
+interface SidebarButtonProps {
+    icon: IconProp;
+    labelText: string;
+    additionalStyle?: string;
+    isMinimized: boolean;
 }
 
-export const SideBarButton = ({ icon }: Prop) => {
-    return(
-        <div className="flex flex-row items-center w-11/12 gap-5 p-3 border-2 border-black rounded-md shadow-2xl">
-            <FontAwesomeIcon icon={faClockRotateLeft} className="justify-self-start"/>
-            <h3 className="justify-self-center">History</h3>
+const SideBarButton: React.FC<SidebarButtonProps> = memo(
+    ({ icon, labelText, additionalStyle = "", isMinimized }) => (
+        <div
+            className={`${additionalStyle} flex ${
+                isMinimized ? "justify-center" : "justify-self-end"
+            } items-center w-11/12 gap-5 p-3 border-2 border-black rounded-md shadow-2xl cursor-pointer hover:scale-95 transition`}
+        >
+            <FontAwesomeIcon icon={icon} className="justify-self-start" />
+            {!isMinimized && (
+                <h3 className="flex-1 text-justify text-nowrap">{labelText}</h3>
+            )}
         </div>
-    );
-}
+    )
+);
+
+export { SideBarButton };
