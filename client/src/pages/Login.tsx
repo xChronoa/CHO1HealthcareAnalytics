@@ -1,14 +1,11 @@
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import hide_password from "../assets/hide_password.png";
-import show_password from "../assets/show_password.png";
 import { useState } from "react";
+import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 
 import cabuyao_logo from "../assets/cabuyao_logo.png";
-import { Sidebar } from "../components/Sidebar";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // For specifying the logo to be displayed based on inputted department.
 type LoginProp = {
@@ -26,7 +23,6 @@ export default function Login({ image }: LoginProp) {
 
     return (
         <>
-            <Sidebar />
             <Header logoPath={cabuyao_logo} />
 
             <main className="flex items-center justify-center min-h-screen bg-slate-200">
