@@ -1,4 +1,4 @@
-export default function Footer() {
+export const Footer: React.FC = () => {
     return (
         <footer className="sticky z-50 py-4 bg-gray-700">
             <h2 className="text-center text-white">
@@ -6,4 +6,4 @@ export default function Footer() {
             </h2>
         </footer>
     );
-}
+};
