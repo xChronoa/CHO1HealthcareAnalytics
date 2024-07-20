@@ -9,11 +9,13 @@ interface HeaderProp {
 export const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
     return (
         <header className={`box-border flex items-center justify-between w-full px-8 ${logoPath ? "py-2" : "py-8"} shadow-lg bg-green`}>
-            <FontAwesomeIcon
+            {collapseSidebar && (
+                <FontAwesomeIcon
                 icon={faBars}
                 className="self-center p-[4px] lg:hidden cursor-pointer hover:bg-lime-800 transition-all duration-300 text-white border-2 border-white rounded-lg size-6"
                 onClick={collapseSidebar}
             />
+            )}
 
             <div className="flex justify-center flex-1">
                 {logoPath && (
