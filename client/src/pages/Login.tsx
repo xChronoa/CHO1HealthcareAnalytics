@@ -68,7 +68,6 @@ export default function Login({ image }: LoginProp) {
                                         placeholder="Must be 8 characters long"
                                         required
                                     />
-                                    {/* <img onClick={togglePassword} src={passwordState} id="toggle-password" onContextMenu={(e) => e.preventDefault()} className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"/> */}
                                     {showPassword ? (
                                         <FontAwesomeIcon
                                             onClick={togglePassword}
