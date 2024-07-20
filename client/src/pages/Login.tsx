@@ -26,7 +26,7 @@ export default function Login({ image }: LoginProp) {
             <Header logoPath={cabuyao_logo} />
 
             <main className="flex items-center justify-center min-h-screen bg-slate-200">
-                <div className="w-11/12 py-16 bg-white shadow-2xl login-container h-3/4 md:w-1/2 min-w-80">
+                <div className="w-11/12 py-16 bg-white shadow-2xl sm:w-[512px] login-container min-w-80">
                     <div className="flex flex-col items-center justify-center gap-5 mb-8 title">
                         <img
                             className="transition-all min-w-max size-50 md:size-60 size-44"
