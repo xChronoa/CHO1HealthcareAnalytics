@@ -5,7 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, useRef } from "react";
-import { SideBarButton } from "./SidebarButton";
+import { SidebarButton } from "./SidebarButton";
 
 interface SidebarProps {
     logoPath: string;
@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
         return (
             <nav
                 ref={sidebarRef}
-                className={`absolute left-0 z-40 h-full transition-all bg-white shadow-2xl ${
+                className={`fixed z-40 h-full transition-all bg-white shadow-2xl ${
                     isMinimized ? "w-20" : "w-56"
                 } ${isCollapsed ? "px-2" : "!w-0 [&>*]:hidden"}`}
             >
@@ -53,17 +53,26 @@ const Sidebar: React.FC<SidebarProps> = memo(
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
                         </div>
                     )}
+                    {/* Barangay */}
                     <div className="flex flex-col items-center w-full h-full gap-5">
-                        <SideBarButton
+                        <SidebarButton
+                            icon={faClockRotateLeft}
+                            labelText="Reports"
+                            isMinimized={isMinimized}
+                            destination="barangay/report"
+                        />
+                        <SidebarButton
                             icon={faClockRotateLeft}
                             labelText="Submittal History"
                             isMinimized={isMinimized}
+                            destination="barangay/history"
                         />
-                        <SideBarButton
+                        <SidebarButton
                             icon={faRightFromBracket}
                             labelText="Log out"
                             additionalStyle="absolute bottom-0 py-2 mb-24 text-white uppercase bg-red-700"
                             isMinimized={isMinimized}
+                            destination="logout"
                         />
                     </div>
                     <div
