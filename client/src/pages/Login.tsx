@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { Footer } from "../components/Footer";
-import { Header } from "../components/Header";
 
-import cabuyao_logo from "../assets/cabuyao_logo.png";
 
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
