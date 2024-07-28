@@ -1,0 +1,11 @@
+.input-group input:not([type='radio']) {
+    padding-left: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.input-group select,
+.input-group textarea {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
