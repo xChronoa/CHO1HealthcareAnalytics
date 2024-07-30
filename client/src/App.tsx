@@ -1,64 +1,73 @@
-// Assets
+// Import Assets
 import cabuyao_logo from "./assets/cabuyao_logo.png";
 import cho_logo from "./assets/cho_logo.png";
 
-// Routing
+// Import Routing Components
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./utils/PrivateRoute";
 
-// Pages
+// Import Pages
+// Guest Pages
+import Overview from "./pages/Overview";
 import Appointment from "./pages/Appointment";
-import History from "./pages/Barangay/History";
 import Login from "./pages/Login";
+
+// Barangay Pages
+import History from "./pages/Barangay/History";
 import Report from "./pages/Barangay/Report";
 
-// Components
-import { Footer } from "./components/Footer";
-import { Header } from "./components/Header";
-import { Sidebar } from "./components/Sidebar";
+// Admin Pages
+import Dashboard from "./pages/Admin/Dashboard";
+import Transaction from "./pages/Admin/Transaction";
+import BarangayList from "./pages/Admin/BarangayList";
+import AppointmentList from "./pages/Admin/AppointmentList";
+import ManageAccount from "./pages/Admin/ManageAccount";
+import CreateAccount from "./pages/Admin/CreateAccount";
+import UpdateAccount from "./pages/Admin/UpdateAccount";
 
-// Hook
-import useSidebar from "./hooks/useSidebar";
+// Import Components
+import NotFound from "./pages/NotFound";
+import MainLayout from "./components/MainLayout";
+import GuestLayout from "./components/GuestLayout";
 
 function App() {
-    const { isMinimized, isCollapsed, toggleSidebar, collapseSidebar } =
-        useSidebar();
-
     return (
         <BrowserRouter>
-            <Sidebar
-                barangay="Marinig"
-                logoPath={cabuyao_logo}
-                isMinimized={isMinimized}
-                isCollapsed={isCollapsed}
-                toggleSidebar={toggleSidebar}
-                collapseSidebar={collapseSidebar}
-            />
-            <Header collapseSidebar={collapseSidebar} />
-            <main className={`transition-all flex flex-col items-center min-h-screen bg-almond ${!isMinimized && isCollapsed ? "lg:pl-56" : ""}`}>
-                <Routes>
+            <Routes>
+
+                {/* Guest Routes */}
+                <Route element={<GuestLayout/>}>
+                    <Route index element={<Overview />} />
                     <Route element={<Appointment />} path="/appointment" />
+                    <Route element={<Login image={cabuyao_logo} />} path="/barangay/login" />
+                    <Route element={<Login image={cho_logo} />} path="/admin/login" />
+                </Route>
 
-                    <Route
-                        element={<Login image={cabuyao_logo} />}
-                        path="/barangay/login"
-                    />
-                    <Route
-                        element={<Login image={cho_logo} />}
-                        path="/admin/login"
-                    />
-
-                    <Route element={<PrivateRoute />} path="/admin"></Route>
-
-                    <Route element={<PrivateRoute />} path="/barangay">
-                        {/* <Route element={<BarangayDashboard/>}/> */}
+                {/* Admin Routes */}
+                <Route element={<PrivateRoute />}>
+                    <Route element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
+                        <Route element={<Dashboard />} path="/admin" />
+                        <Route element={<Transaction />} path="/admin/transactions" />
+                        <Route element={<BarangayList />} path="/admin/barangays" />
+                        <Route element={<AppointmentList />} path="/admin/appointments" />
+                        <Route element={<ManageAccount />} path="/admin/manage">
+                            <Route element={<CreateAccount />} path="create-account" />
+                            <Route element={<UpdateAccount />} path="update-account" />
+                        </Route>
                     </Route>
+                </Route>
 
-                    <Route element={<History />} path="/barangay/history" />
-                    <Route element={<Report />} path="/barangay/report" />
-                </Routes>
-            </main>
-            <Footer />
+                {/* Barangay Routes */}
+                <Route element={<PrivateRoute />}>
+                    <Route element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
+                        <Route index element={<Dashboard />} path="/barangay" />
+                        <Route element={<History />} path="/barangay/history" />
+                        <Route element={<Report />} path="/barangay/report" />
+                    </Route>
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+            </Routes>
         </BrowserRouter>
     );
 }
