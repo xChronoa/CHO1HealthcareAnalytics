@@ -5,7 +5,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, useRef } from "react";
-import { SidebarButton } from "./SidebarButton";
+import SidebarButton from "./SidebarButton";
 
 interface SidebarProps {
     type: string;
@@ -162,4 +162,4 @@ const Sidebar: React.FC<SidebarProps> = memo(
     }
 );
 
-export { Sidebar };
+export default Sidebar;

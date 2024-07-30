@@ -1,7 +1,9 @@
 import { MorbidityForm } from "./MorbidityForm";
 
-export default function Report() {
+const Report: React.FC = () => {
     return(
         <MorbidityForm />
     );
-}
+};
+
+export default Report;

@@ -11,7 +11,7 @@ interface SidebarButtonProps {
     destination: string;
 }
 
-export const SidebarButton: React.FC<SidebarButtonProps> = memo(
+const SidebarButton: React.FC<SidebarButtonProps> = memo(
     ({ icon, labelText, additionalStyle = "", isMinimized, destination }) => (
         <Link
             to={destination}
@@ -32,3 +32,5 @@ export const SidebarButton: React.FC<SidebarButtonProps> = memo(
         </Link>
     )
 );
+
+export default SidebarButton;
