@@ -1,7 +1,7 @@
 import cabuyao_logo from "../assets/cabuyao_logo.png";
 import "../styles/appointment.css";
 
-export default function Appointment() {
+const Appointment: React.FC = () => {
     return (
         <>
             <div className="flex flex-col items-center justify-center gap-2 my-5 title">
@@ -21,14 +21,14 @@ export default function Appointment() {
             ></div>
 
             {/* Appointment Information */}
-            <div className="flex flex-col items-center justify-center w-4/5 appointment-details">
+            <div className="flex flex-col items-center justify-center w-full px-2 sm:w-3/4 appointment-details">
                 <h2 className="self-center my-5 text-lg font-bold uppercase md:self-start">
                     Personal Information
                 </h2>
 
                 <form
                     id="appointment"
-                    className="flex flex-col justify-center w-3/4 p-5 px-8 mt-2 mb-16 border-2 border-black rounded min-w-96"
+                    className="flex flex-col justify-center w-full p-5 mt-2 mb-16 border-2 border-black rounded sm:w-3/4"
                 >
                     {/* Full Name */}
                     <div className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
@@ -251,3 +251,5 @@ export default function Appointment() {
         </>
     );
 }
+
+export default Appointment;
