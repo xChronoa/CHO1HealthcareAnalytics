@@ -1,4 +1,4 @@
-export default function History() {
+const History: React.FC = () => {
     return (
         <div className="w-11/12 py-16">
             <header className="mb-4 ">
@@ -52,3 +52,5 @@ export default function History() {
         </div>
     );
 }
+
+export default History;
