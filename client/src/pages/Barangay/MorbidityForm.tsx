@@ -189,10 +189,10 @@ export const MorbidityForm: React.FC = () => {
                         {/* Conditionally render the input fields based on section visibility */}
                         {openSections.includes(disease.name) && (
                             <div className="p-4 bg-gray-100">
-                                <div className="flex flex-row justify-end gap-5 sex-label">
-                                    <div className="flex-1"></div>
-                                    <h3 className="flex-1">Male</h3>
-                                    <h3 className="flex-1">Female</h3>
+                                <div className="flex flex-row mb-2 text-center">
+                                    <div className="w-full md:w-1/3"></div>
+                                    <h3 className="w-full md:w-1/6">Male</h3>
+                                    <h3 className="w-full md:w-1/6">Female</h3>
                                 </div>
                                 {/* Input fields for each age group */}
                                 {ageGroup.map((group) => (
