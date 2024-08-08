@@ -5,6 +5,8 @@ import Header from "./Header";
 import Footer from "./Footer";
 import useSidebar from "../hooks/useSidebar";
 
+import cabuyao_logo from "../assets/images/cabuyao_logo.png";
+
 // Interface for Sidebar Configuration
 interface SidebarConfig {
     logo: string;  // Path to the logo image
@@ -38,7 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
                 type={sidebarConfig.type}
                 barangay={sidebarConfig.barangay}
             />
-            <Header collapseSidebar={collapseSidebar} />
+            <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
             <main className={`flex flex-col items-center flex-grow transition-all ${!isMinimized && isCollapsed ? "lg:pl-64" : "lg:pl-28"} bg-almond min-h-screen`}>
                 <Outlet />
             </main>
