@@ -14,7 +14,7 @@ const ManageAccount: React.FC = () => {
                 <section className="flex flex-col items-center w-10/12 gap-16 sm:flex-row">
                     <div className="rounded-lg border border-1 border-black sm:w-1/2 bg-white shadow-lg h-1/2 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] transition-all">
                         <Link
-                            to="create-account"
+                            to="create"
                             className="flex flex-col items-center justify-center gap-5 p-10"
                             aria-label="Create a new account"
                         >
