@@ -5,6 +5,7 @@ interface DashboardProp {
 const Dashboard: React.FC<DashboardProp> = () => {
     return(
         <>
+            Dashboard
         </>
     );
 }
