@@ -32,9 +32,9 @@ const Sidebar: React.FC<SidebarProps> = memo(
         return (
             <nav
                 ref={sidebarRef}
-                className={`fixed z-50 h-full transition-all bg-white shadow-2xl ${
+                className={`fixed z-50 h-screen transition-all bg-white shadow-2xl ${
                     isMinimized ? "w-20" : "w-56"
-                } ${isCollapsed ? "px-2" : "!w-0 [&>*]:hidden"} overflow-y-auto sm:no-scrollbar`}
+                } ${isCollapsed ? "!w-0 [&>*]:hidden" : "px-2"} overflow-y-scroll no-scrollbar`}
             >
                 <div
                     className={`relative flex flex-col items-center justify-between w-full h-full ${
@@ -63,13 +63,13 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     icon={faClockRotateLeft}
                                     labelText="Reports"
                                     isMinimized={isMinimized}
-                                    destination="barangay/report"
+                                    destination="report"
                                 />
                                 <SidebarButton
                                     icon={faClockRotateLeft}
                                     labelText="Submittal History"
                                     isMinimized={isMinimized}
-                                    destination="barangay/history"
+                                    destination="history"
                                 />
                                 <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
                                     <SidebarButton
@@ -88,31 +88,31 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     icon={faClockRotateLeft}
                                     labelText="Dashboard"
                                     isMinimized={isMinimized}
-                                    destination="admin/"
+                                    destination=""
                                 />
                                 <SidebarButton
                                     icon={faClockRotateLeft}
                                     labelText="Transaction"
                                     isMinimized={isMinimized}
-                                    destination="admin/transactions"
+                                    destination="transactions"
                                 />
                                 <SidebarButton
                                     icon={faRightFromBracket}
                                     labelText="Barangay"
                                     isMinimized={isMinimized}
-                                    destination="admin/barangays"
+                                    destination="barangays"
                                 />
                                 <SidebarButton
                                     icon={faClockRotateLeft}
                                     labelText="Appointments"
                                     isMinimized={isMinimized}
-                                    destination="admin/appointments"
+                                    destination="appointments"
                                 />
                                 <SidebarButton
                                     icon={faClockRotateLeft}
                                     labelText="Manage Account"
                                     isMinimized={isMinimized}
-                                    destination="admin/manage"
+                                    destination="manage"
                                 />
                                 <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
                                     <SidebarButton
