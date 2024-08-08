@@ -1,6 +1,6 @@
 // Import Assets
-import cabuyao_logo from "./assets/cabuyao_logo.png";
-import cho_logo from "./assets/cho_logo.png";
+import cabuyao_logo from "./assets/images/cabuyao_logo.png";
+import cho_logo from "./assets/images/cho_logo.png";
 
 // Import Routing Components
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -22,6 +22,7 @@ import Transaction from "./pages/Admin/Transaction";
 import BarangayList from "./pages/Admin/BarangayList";
 import AppointmentList from "./pages/Admin/AppointmentList";
 import ManageAccount from "./pages/Admin/ManageAccount";
+import AccountList from "./pages/Admin/AccountList";
 import CreateAccount from "./pages/Admin/CreateAccount";
 import UpdateAccount from "./pages/Admin/UpdateAccount";
 
@@ -29,6 +30,7 @@ import UpdateAccount from "./pages/Admin/UpdateAccount";
 import NotFound from "./pages/NotFound";
 import MainLayout from "./components/MainLayout";
 import GuestLayout from "./components/GuestLayout";
+import ManageAccountLayout from "./components/ManageAccountLayout";
 
 function App() {
     return (
@@ -45,24 +47,27 @@ function App() {
 
                 {/* Admin Routes */}
                 <Route element={<PrivateRoute />}>
-                    <Route element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
-                        <Route element={<Dashboard />} path="/admin" />
-                        <Route element={<Transaction />} path="/admin/transactions" />
-                        <Route element={<BarangayList />} path="/admin/barangays" />
-                        <Route element={<AppointmentList />} path="/admin/appointments" />
-                        <Route element={<ManageAccount />} path="/admin/manage">
-                            <Route element={<CreateAccount />} path="create-account" />
-                            <Route element={<UpdateAccount />} path="update-account" />
+                    <Route path="admin" element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
+                        <Route index element={<Dashboard />} />
+                        <Route element={<Transaction />} path="transactions" />
+                        <Route element={<BarangayList />} path="barangays" />
+                        <Route element={<AppointmentList />} path="appointments" />
+
+                        <Route path="manage" element={<ManageAccountLayout />}>
+                            <Route index element={<ManageAccount />} />
+                            <Route element={<CreateAccount />} path="create" />
+                            <Route element={<UpdateAccount />} path="update" />
+                            <Route element={<AccountList />} path="accounts" />
                         </Route>
                     </Route>
                 </Route>
 
                 {/* Barangay Routes */}
                 <Route element={<PrivateRoute />}>
-                    <Route element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
-                        <Route index element={<Dashboard />} path="/barangay" />
-                        <Route element={<History />} path="/barangay/history" />
-                        <Route element={<Report />} path="/barangay/report" />
+                    <Route path="barangay" element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
+                        <Route index element={<Dashboard />} />
+                        <Route element={<History />} path="history" />
+                        <Route element={<Report />} path="report" />
                     </Route>
                 </Route>
                 
