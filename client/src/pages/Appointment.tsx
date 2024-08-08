@@ -1,4 +1,4 @@
-import cabuyao_logo from "../assets/cabuyao_logo.png";
+import cabuyao_logo from "../assets/images/cabuyao_logo.png";
 import "../styles/appointment.css";
 
 const Appointment: React.FC = () => {
