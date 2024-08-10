@@ -6,7 +6,7 @@ interface HeaderProp {
     collapseSidebar?: () => void;
 }
 
-export const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
+const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
     return (
         <header className={`box-border flex items-center justify-between w-full px-8 ${logoPath ? "py-2" : "py-8"} shadow-lg bg-green`}>
             {collapseSidebar && (
@@ -29,3 +29,5 @@ export const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
         </header>
     );
 };
+
+export default Header;

@@ -5,11 +5,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, useRef } from "react";
-import { SidebarButton } from "./SidebarButton";
+import SidebarButton from "./SidebarButton";
 
 interface SidebarProps {
+    type: string;
     logoPath: string;
-    barangay: string;
+    barangay?: string;
     isCollapsed: boolean;
     isMinimized: boolean;
     toggleSidebar: () => void;
@@ -18,6 +19,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = memo(
     ({
+        type,
         logoPath,
         barangay,
         toggleSidebar,
@@ -30,22 +32,22 @@ const Sidebar: React.FC<SidebarProps> = memo(
         return (
             <nav
                 ref={sidebarRef}
-                className={`fixed z-40 h-full transition-all bg-white shadow-2xl ${
+                className={`fixed z-50 h-screen transition-all bg-white shadow-2xl ${
                     isMinimized ? "w-20" : "w-56"
-                } ${isCollapsed ? "px-2" : "!w-0 [&>*]:hidden"}`}
+                } ${isCollapsed ? "!w-0 [&>*]:hidden" : "px-2"} overflow-y-scroll no-scrollbar`}
             >
                 <div
                     className={`relative flex flex-col items-center justify-between w-full h-full ${
                         isMinimized ? "pt-16 " : ""
-                    }pb-20`}
+                    }`}
                 >
                     {!isMinimized && (
-                        <div className="flex flex-col items-center w-full gap-5 py-10 mt-12">
+                        <div className="flex flex-col items-center w-full gap-2 pt-10 pb-5 mt-4">
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
                             <img
                                 src={logoPath}
                                 alt="Logo"
-                                className="size-40"
+                                className="origin-center scale-95"
                             />
                             <h3 className="text-center text-nowrap">
                                 Barangay {barangay}
@@ -55,25 +57,74 @@ const Sidebar: React.FC<SidebarProps> = memo(
                     )}
                     {/* Barangay */}
                     <div className="flex flex-col items-center w-full h-full gap-5">
-                        <SidebarButton
-                            icon={faClockRotateLeft}
-                            labelText="Reports"
-                            isMinimized={isMinimized}
-                            destination="barangay/report"
-                        />
-                        <SidebarButton
-                            icon={faClockRotateLeft}
-                            labelText="Submittal History"
-                            isMinimized={isMinimized}
-                            destination="barangay/history"
-                        />
-                        <SidebarButton
-                            icon={faRightFromBracket}
-                            labelText="Log out"
-                            additionalStyle="absolute bottom-0 py-2 mb-24 text-white uppercase bg-red-700"
-                            isMinimized={isMinimized}
-                            destination="logout"
-                        />
+                        {type === "barangay" ? (
+                            <>
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Reports"
+                                    isMinimized={isMinimized}
+                                    destination="report"
+                                />
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Submittal History"
+                                    isMinimized={isMinimized}
+                                    destination="history"
+                                />
+                                <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
+                                    <SidebarButton
+                                        icon={faRightFromBracket}
+                                        labelText="Log out"
+                                        additionalStyle="py-2 text-white uppercase bg-red-700"
+                                        isMinimized={isMinimized}
+                                        destination="logout"
+                                    />
+                                </div>
+                            </>
+                        ) : 
+                        (
+                            <>
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Dashboard"
+                                    isMinimized={isMinimized}
+                                    destination=""
+                                />
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Transaction"
+                                    isMinimized={isMinimized}
+                                    destination="transactions"
+                                />
+                                <SidebarButton
+                                    icon={faRightFromBracket}
+                                    labelText="Barangay"
+                                    isMinimized={isMinimized}
+                                    destination="barangays"
+                                />
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Appointments"
+                                    isMinimized={isMinimized}
+                                    destination="appointments"
+                                />
+                                <SidebarButton
+                                    icon={faClockRotateLeft}
+                                    labelText="Manage Account"
+                                    isMinimized={isMinimized}
+                                    destination="manage"
+                                />
+                                <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
+                                    <SidebarButton
+                                        icon={faRightFromBracket}
+                                        labelText="Log out"
+                                        additionalStyle="py-2 text-white uppercase bg-red-700"
+                                        isMinimized={isMinimized}
+                                        destination="logout"
+                                    />
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div
                         className={`absolute top-0 ${
@@ -111,4 +162,4 @@ const Sidebar: React.FC<SidebarProps> = memo(
     }
 );
 
-export { Sidebar };
+export default Sidebar;

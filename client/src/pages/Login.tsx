@@ -9,7 +9,7 @@ type LoginProp = {
     image: string;
 };
 
-export default function Login({ image }: LoginProp) {
+const Login: React.FC<LoginProp> = ({ image }) => {
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
 
@@ -88,3 +88,5 @@ export default function Login({ image }: LoginProp) {
         </div>
     );
 }
+
+export default Login;

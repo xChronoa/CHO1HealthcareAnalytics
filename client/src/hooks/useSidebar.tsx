@@ -25,12 +25,12 @@ function useSidebar() {
         if (window.innerWidth < 1024) {
             setIsMinimized(false)
 
-            if(!isCollapsed) {
-                setIsCollapsed(false);
+            if(isCollapsed) {
+                setIsCollapsed(true);
             }
         } else {
             setIsMinimized(prevMinimizedState);
-            setIsCollapsed(true);
+            setIsCollapsed(false);
         }
     }, [isCollapsed, prevMinimizedState]);
 

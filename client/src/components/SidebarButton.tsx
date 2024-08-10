@@ -11,18 +11,26 @@ interface SidebarButtonProps {
     destination: string;
 }
 
-export const SidebarButton: React.FC<SidebarButtonProps> = memo(
+const SidebarButton: React.FC<SidebarButtonProps> = memo(
     ({ icon, labelText, additionalStyle = "", isMinimized, destination }) => (
         <Link
             to={destination}
-            className={`${additionalStyle} flex ${
+            className={`${additionalStyle} relative overflow-hidden flex ${
                 isMinimized ? "justify-center" : "justify-self-end"
-            } items-center w-11/12 gap-5 p-3 border-2 border-black rounded-md shadow-2xl cursor-pointer hover:scale-95 transition`}
+            } items-center w-11/12 gap-5 p-3 border-2 border-black rounded-md shadow-2xl cursor-pointer hover:scale-95 transition-transform`}
         >
             <FontAwesomeIcon icon={icon} className="justify-self-start" />
-            {!isMinimized && (
-                <h3 className="flex-1 text-justify text-nowrap">{labelText}</h3>
-            )}
+            <h3
+                className={`flex-1 text-nowrap text-justify transition-transform ${
+                    isMinimized
+                        ? "absolute -translate-x-full opacity-0"
+                        : "translate-x-0 opacity-100"
+                }`}
+            >
+                {labelText}
+            </h3>
         </Link>
     )
 );
+
+export default SidebarButton;
