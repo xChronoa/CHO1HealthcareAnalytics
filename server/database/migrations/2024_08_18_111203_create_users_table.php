@@ -12,20 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('userId');
+            $table->id('user_id');
             $table->string('username');
             $table->string('password');
             $table->string('email')->unique();
-            $table->string('role');
-            $table->timestamp('email_verified_at')->nullable();
-            $table->unsignedBigInteger('barangayId');
-            $table->string('status');
+            $table->enum('role', ['encoder', 'admin']);
+            $table->foreignId('barangay_id')->nullable()->constrained('barangays', 'barangay_id');
+            $table->enum('status', ['active', 'disabled']);
             $table->rememberToken();
             $table->timestamps();
-
-            $table->foreign('barangayId')->references('barangayId')->on('barangays');
-            $table->check('role in ("Admin", "Encoder")');
-            $table->check('status in ("Inactive", "Active")');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

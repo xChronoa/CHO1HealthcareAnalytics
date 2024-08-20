@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointment_categories', function (Blueprint $table) {
-            $table->id('apptCategoryId');
-            $table->string('apptCategoryName');
+        Schema::create('indicators', function (Blueprint $table) {
+            $table->id('indicator_id');
+            $table->string('indicator_name');
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('appointment_categories');
+        Schema::dropIfExists('indicators');
     }
 };

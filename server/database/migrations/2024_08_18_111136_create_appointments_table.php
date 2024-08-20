@@ -12,15 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('appointments', function (Blueprint $table) {
-            $table->id('apptId');
-            $table->unsignedBigInteger('patientId');
-            $table->date('apptDate');
-            $table->unsignedBigInteger('apptCategoryId');
-            $table->string('patientNote');
+            $table->id('appointment_id');
+            $table->foreignId('patient_id')->constrained('patients', 'patient_id');
+            $table->date('appointment_date');
+            $table->foreignId('appointment_category_id')->constrained('appointment_categories', 'appointment_category_id');
+            $table->text('patient_note')->nullable();
+            $table->integer('queue_number')->nullable();
             $table->timestamps();
-
-            $table->foreign('patientId')->references('patientId')->on('patients');
-            $table->foreign('apptCategoryId')->references('apptCategoryId')->on('appointment_categories');
         });
     }
 

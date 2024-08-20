@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('family_planning_methods', function (Blueprint $table) {
-            $table->id('fpMethodId');
-            $table->text('fpMethodName');
+        Schema::create('services', function (Blueprint $table) {
+            $table->id('service_id');
+            $table->string('service_name');
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('family_planning_methods');
+        Schema::dropIfExists('services');
     }
 };

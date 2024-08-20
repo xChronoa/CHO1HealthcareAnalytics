@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('indicators', function (Blueprint $table) {
-            $table->id('indicatorId');
-            $table->unsignedBigInteger('serviceId');
-            $table->string('indicatorName');
+        Schema::create('age_categories', function (Blueprint $table) {
+            $table->id('age_category_id');
+            $table->string('age_category');
             $table->timestamps();
-
-            $table->foreign('serviceId')->references('serviceId')->on('services');
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('indicators');
+        Schema::dropIfExists('age_categories');
     }
 };

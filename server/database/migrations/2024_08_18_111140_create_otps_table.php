@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('diseases', function (Blueprint $table) {
-            $table->id('diseaseId');
-            $table->text('diseaseName');
-            $table->string('diseaseCode', 75);
+        Schema::create('otps', function (Blueprint $table) {
+            $table->id('otp_id');
+            $table->foreignId('patient_id')->constrained('patients', 'patient_id');
+            $table->string('otp_code', 6);
+            $table->boolean('is_verified')->default(false);
+            $table->timestamp('expires_at')->useCurrent();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('diseases');
+        Schema::dropIfExists('otps');
     }
 };

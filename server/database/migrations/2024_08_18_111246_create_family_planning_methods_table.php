@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('age_categories', function (Blueprint $table) {
-            $table->id('ageId');
-            $table->string('ageCategory');
+        Schema::create('family_planning_methods', function (Blueprint $table) {
+            $table->id('method_id');
+            $table->string('method_name');
+            $table->foreignId('parent_method_id')->nullable()->constrained('family_planning_methods', 'method_id')->onDelete('set null');
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('age_categories');
+        Schema::dropIfExists('family_planning_methods');
     }
 };
