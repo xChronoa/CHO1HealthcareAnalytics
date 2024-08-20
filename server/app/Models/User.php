@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * User Model
@@ -14,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -23,15 +24,8 @@ class User extends Authenticatable
      */
 
     protected $table = 'users';
-    protected $primaryKey = 'userId';
-    protected $fillable = [
-        'username',
-        'email',
-        'password',
-        'role',
-        'barangayId',
-        'status'
-    ];
+    protected $primaryKey = 'user_id';
+    protected $fillable = ['username', 'password', 'email', 'role', 'barangay_id', 'status'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -58,42 +52,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the barangay that the user belongs to.
+     * Get the barangay the user belongs to.
      */
     public function barangay()
     {
-        return $this->belongsTo(Barangay::class, 'barangayId');
-    }
-
-    /**
-     * Get the report statuses associated with the user.
-     */
-    public function reportStatuses()
-    {
-        return $this->hasMany(ReportStatus::class, 'userId');
-    }
-
-    /**
-     * Get the family planning reports submitted by the user.
-     */
-    public function familyPlanningReports()
-    {
-        return $this->hasMany(FamilyPlanningReport::class, 'userId');
-    }
-
-    /**
-     * Get the morbidity reports submitted by the user.
-     */
-    public function morbidityReports()
-    {
-        return $this->hasMany(MorbidityReport::class, 'userId');
-    }
-
-    /**
-     * Get the service data entries created by the user.
-     */
-    public function serviceData()
-    {
-        return $this->hasMany(ServiceData::class, 'userId');
+        return $this->belongsTo(Barangay::class);
     }
 }

@@ -5,25 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Report Status Model
- *
- * Represents the status of a report submitted by a user.
- */
-
 class ReportStatus extends Model
 {
     use HasFactory;
 
-    protected $table = 'report_statuses';
-    protected $primaryKey = 'reportStatusId';
-    protected $fillable = ['userId', 'dateSubmitted', 'status'];
+    protected $fillable = [
+        'report_submission_id', 'user_id', 'status', 'submitted_at', 'admin_note'
+    ];
 
     /**
-     * Get the user that submitted the report.
+     * Get the report submission associated with this status.
+     */
+    public function reportSubmission()
+    {
+        return $this->belongsTo(ReportSubmission::class, 'report_submission_id');
+    }
+
+    /**
+     * Get the user associated with this status.
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'userId');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
