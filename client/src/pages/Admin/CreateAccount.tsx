@@ -1,14 +1,65 @@
-import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { useBarangay } from "../../hooks/useBarangay";
+import { useUser } from "../../hooks/useUser";
+import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
+import { User } from "../../types/User";
+import { useNavigate } from "react-router-dom";
+import Loading from "../../components/Loading";
 
 const CreateAccount: React.FC = () => {
+    const { createUser, loading, success, errorMessage } = useUser();
+    const { barangays, barangayLoading } = useBarangay();
+    const [user, setUser] = useState<User>({
+        username: "",
+        password: "",
+        email: "",
+        role: "encoder",
+        barangay_name: "",
+    });
+    const [redirecting, setRedirecting] = useState(false);
+    
+    const hasErrors = errorMessage && Object.values(errorMessage).some(value => value !== '');
+
+    const navigate = useNavigate();
+
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
 
     // Handles toggling of password visibility
     const togglePassword = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        
+        if (user === null) return;
+        
+        const createSuccess = await createUser(user);
+
+        if (createSuccess) {
+            setTimeout(() => {
+                setRedirecting(true);
+                setUser({
+                    username: "",
+                    password: "",
+                    email: "",
+                    role: "encoder",
+                    barangay_name: "",
+                });
+                navigate("/admin/manage/accounts");
+            }, 1500);
+        }
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = event.target;
+        setUser((prevUser) => ({
+            ...prevUser,
+            [name]: value,
+        }));
     };
 
     return (
@@ -23,14 +74,52 @@ const CreateAccount: React.FC = () => {
                         Create Account
                     </h2>
 
+                    {hasErrors && (
+                        <div
+                            className="flex items-center gap-2 p-4 mb-2 text-sm text-red-800 bg-red-100 rounded-lg"
+                            role="alert"
+                        >
+                            <FontAwesomeIcon
+                                icon={faCircleInfo}
+                                className="color   -[#d66666]"
+                            />
+                            <span className="sr-only">Info</span>
+                            <div>
+                                {errorMessage.email && <p>{errorMessage.email}</p>}
+                                {errorMessage.username && <p>{errorMessage.username}</p>}
+                                {errorMessage.password && <p>{errorMessage.password}</p>}
+                                {errorMessage.barangay_name && <p>{errorMessage.barangay_name}</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {success && (
+                        <div
+                            className="flex items-center gap-2 p-4 mb-2 text-sm text-[#ffffff] bg-[#5cb85c] rounded-lg"
+                            role="alert"
+                        >
+                            <FontAwesomeIcon
+                                icon={faCircleInfo}
+                                className="color-[#4a934a]"
+                            />
+                            <span className="sr-only">Info</span>
+                            <div>
+                                <p>Successfully created the account.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="email">Email</label>
                         <input
                             className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
-                            type="text"
+                            type="email"
                             name="email"
                             id="email"
                             required
+                            value={user.email}
+                            onChange={handleChange}
+                            placeholder="email@email.com"
                         />
                     </div>
 
@@ -42,6 +131,9 @@ const CreateAccount: React.FC = () => {
                             name="username"
                             id="username"
                             required
+                            value={user.username}
+                            onChange={handleChange}
+                            placeholder="Username"
                         />
                     </div>
 
@@ -55,6 +147,9 @@ const CreateAccount: React.FC = () => {
                                 name="password"
                                 id="password"
                                 required
+                                value={user.password}
+                                onChange={handleChange}
+                                placeholder="Password"
                             />
                             {showPassword ? (
                                 <FontAwesomeIcon
@@ -73,37 +168,42 @@ const CreateAccount: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="barangay">Barangay</label>
+                        <label htmlFor="barangay_name">Barangay</label>
                         <select
                             className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
-                            name="barangay"
-                            id="barangay"
+                            name="barangay_name"
+                            id="barangay_name"
                             required
+                            value={user.barangay_name}
+                            onChange={handleChange}
                         >
                             {/* Can be replaced with the barangay values from the database */}
                             <option hidden>Select Barangay</option>
-                            <option value="bigaa">Bigaa</option>
-                            <option value="butong">Butong</option>
-                            <option value="gulod">Gulod</option>
-                            <option value="marinig">Marining</option>
-                            <option value="niugan">Niugan</option>
-                            <option value="poblacion-uno">Poblacion Uno</option>
-                            <option value="poblacion-dos">Poblacion Dos</option>
-                            <option value="poblacion-tres">
-                                Poblacion Tres
-                            </option>
-                            <option value="sala">Sala</option>
+                            {barangayLoading ? (
+                                <option disabled>Loading...</option>
+                            ) : (
+                                barangays.map((barangay) => (
+                                <option
+                                    key={barangay.barangay_id}
+                                    value={barangay.barangay_name}
+                                >
+                                    {barangay.barangay_name}
+                                </option>
+                            )))}
                         </select>
                     </div>
 
                     <button
                         className="w-full p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg shadow-gray-400 bg-green hover:opacity-75"
                         type="submit"
+                        onClick={handleSubmit}
+                        disabled={redirecting}
                     >
-                        Create
+                        {redirecting ? "Redirecting..." : loading ? "Creating..." : "Create"}
                     </button>
                 </form>
             </div>
+            {loading && <Loading />}
         </div>
     );
 };
