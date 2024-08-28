@@ -1,17 +1,31 @@
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Loading from "../components/Loading";
 
-export const PrivateRoute: React.FC = () => {
-    // Simulating user authentication status; this should be replaced with actual authentication logic
-    const user: boolean = false; // false indicates the user is not authenticated
-    const location = useLocation();
-    
-    // Determine the type of login needed based on the current path
-    const loginPath = location.pathname.startsWith("/admin") ? "/admin/login" : "/barangay/login";
+export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
+    allowedRoles,
+}) => {
+    const { role, authenticated, loading } = useAuth();
 
+    if (loading) {
+        // Show a loading spinner or placeholder while checking authentication
+        return <Loading />;
+    }
 
-    return(
-        <>
-            {user ? <Outlet/> : <Navigate to={loginPath}/>}
-        </>
-    );
+    if (!authenticated && !loading) {
+        // If the user is not authenticated, redirect to the appropriate login page
+        const loginPath = location.pathname.startsWith("/admin")
+            ? "/admin/login"
+            : "/barangay/login";
+        return <Navigate to={loginPath} />;
+    }
+
+    if (authenticated && role) {
+        if (!allowedRoles.includes(role)) {
+            // If the user is authenticated but doesn't have the required role, redirect them to a not authorized page
+            return <Navigate to="/not-found" />;
+        }
+    }
+
+    return <Outlet />;
 };
