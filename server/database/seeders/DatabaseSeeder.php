@@ -36,5 +36,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'Encoder',
             'status' => 'active'
         ]);
+
+        $this->call(AppointmentCategorySeeder::class);
+        $this->call(BarangaySeeder::class);
+        $this->call(AgeCategorySeeder::class);
+        $this->call(DiseaseSeeder::class);
+        $this->call(FamilyPlanningMethodSeeder::class);
+        $this->call(ServiceSeeder::class);
+        $this->call(IndicatorSeeder::class);
     }
 }

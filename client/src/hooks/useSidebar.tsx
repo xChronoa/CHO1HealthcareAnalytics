@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 function useSidebar() {
     // Determines sidebar state
     const [isMinimized, setIsMinimized] = useState(window.innerWidth < 1024);
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
     const [prevMinimizedState, setPrevMinimizedState] = useState(window.innerWidth < 1024);
 
     // Minimizes or maximizes sidebar

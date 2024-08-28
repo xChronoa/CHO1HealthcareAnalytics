@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('indicators', function (Blueprint $table) {
             $table->id('indicator_id');
             $table->string('indicator_name');
+            $table->foreignId('parent_indicator_id')->nullable()->constrained('indicators', 'indicator_id')->onDelete('set null');
+            $table->foreignId('service_id')->constrained('services', 'service_id');
             $table->timestamps();
         });
     }

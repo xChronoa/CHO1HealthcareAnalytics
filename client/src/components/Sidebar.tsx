@@ -6,6 +6,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, useRef } from "react";
 import SidebarButton from "./SidebarButton";
+import { useAuth } from "../context/AuthContext";
 
 interface SidebarProps {
     type: string;
@@ -27,6 +28,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
         isMinimized,
         isCollapsed,
     }) => {
+        const { logout } = useAuth();
         const sidebarRef = useRef<HTMLDivElement>(null);
 
         return (
@@ -77,7 +79,8 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                         labelText="Log out"
                                         additionalStyle="py-2 text-white uppercase bg-red-700"
                                         isMinimized={isMinimized}
-                                        destination="logout"
+                                        destination=""
+                                        logout={logout}
                                     />
                                 </div>
                             </>
@@ -120,7 +123,8 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                         labelText="Log out"
                                         additionalStyle="py-2 text-white uppercase bg-red-700"
                                         isMinimized={isMinimized}
-                                        destination="logout"
+                                        destination=""
+                                        logout={logout}
                                     />
                                 </div>
                             </>

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\AttachSanctumTokenFromCookie;
+use App\Http\Middleware\VerifyAuthToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
+        // $middleware->alias([
+        //     'verify.token' => VerifyAuthToken::class
+        // ]);
+        // $middleware->statefulApi();
+        $middleware->api(prepend: [
+            AttachSanctumTokenFromCookie::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

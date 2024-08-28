@@ -41,7 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
                 barangay={sidebarConfig.barangay}
             />
             <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
-            <main className={`flex flex-col items-center flex-grow transition-all ${!isMinimized && isCollapsed ? "lg:pl-64" : "lg:pl-28"} bg-almond min-h-screen`}>
+            <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && isCollapsed ? "lg:pl-64" : "lg:pl-28"} bg-almond min-h-screen`}>
                 <Outlet />
             </main>
             <Footer />

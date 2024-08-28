@@ -9,13 +9,15 @@ class Barangay extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['barangay_name'];
+    protected $primaryKey = "barangay_id";
+
+    protected $fillable = ['barangay_id', 'barangay_name'];
 
     /**
      * Get all users associated with the barangay.
      */
     public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'barangay_id');
     }
 }

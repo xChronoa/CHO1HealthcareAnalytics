@@ -1,8 +1,11 @@
 import { useState } from "react";
 
-
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
+import Loading from "../components/Loading";
 
 // For specifying the logo to be displayed based on inputted department.
 type LoginProp = {
@@ -10,6 +13,15 @@ type LoginProp = {
 };
 
 const Login: React.FC<LoginProp> = ({ image }) => {
+    const { role, authenticated, login, error, loading } = useAuth();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await login(email, password);
+    };
+
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
 
@@ -17,6 +29,12 @@ const Login: React.FC<LoginProp> = ({ image }) => {
     const togglePassword = () => {
         setShowPassword(!showPassword);
     };
+
+    // Redirect if the user is already authenticated
+    if (authenticated && !loading) {
+        const redirectPath = role === "admin" ? "/admin" : "/barangay";
+        return <Navigate to={redirectPath} />;
+    }
 
     return (
         <div className="flex items-center justify-center w-full min-h-screen bg-slate-200">
@@ -32,8 +50,27 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                     </h2>
                 </div>
 
-                <form className="flex flex-col items-center justify-center">
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col items-center justify-center"
+                >
                     <div className="flex flex-col w-4/5 gap-5 form-wrapper">
+                        {error && (
+                            <div
+                                className="flex items-center gap-2 p-4 mb-0 text-sm text-red-800 bg-red-100 rounded-lg"
+                                role="alert"
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCircleInfo}
+                                    className="color   -[#d66666]"
+                                />
+                                <span className="sr-only">Info</span>
+                                <div>
+                                    <span className="font-medium">Error.</span>{" "}
+                                    {error}
+                                </div>
+                            </div>
+                        )}
                         {/* Username */}
                         <div className="flex flex-col input-group">
                             <label htmlFor="username">Username</label>
@@ -44,6 +81,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                 id="username"
                                 placeholder="Username or Email"
                                 required
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
 
@@ -59,6 +97,10 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                     id="password"
                                     placeholder="Must be 8 characters long"
                                     required
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    autoComplete=""
                                 />
                                 {showPassword ? (
                                     <FontAwesomeIcon
@@ -80,13 +122,13 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                             type="submit"
                             className="w-full py-2 mt-5 font-bold text-white uppercase rounded-lg shadow-lg bg-green"
                         >
-                            login
+                            {loading ? "Logging in..." : "Login"}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     );
-}
+};
 
 export default Login;

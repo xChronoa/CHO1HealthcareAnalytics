@@ -1,8 +1,38 @@
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { User } from "../../types/User";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { useBarangay } from "../../hooks/useBarangay";
+import { useUser } from "../../hooks/useUser";
+import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import Loading from "../../components/Loading";
 
 const UpdateAccount: React.FC = () => {
+    const location = useLocation();
+    const { getUser, updateUser, loading, success, errorMessage } = useUser();
+    const { fetchBarangays, barangays, barangayLoading } = useBarangay();
+    const [user, setUser] = useState<User>(location.state?.user);
+    const [redirecting, setRedirecting] = useState(false);
+
+    const hasErrors =
+        errorMessage &&
+        Object.values(errorMessage).some((value) => value !== "");
+
+    const navigate = useNavigate();
+
+    useEffectAfterMount(async () => {
+        fetchBarangays();
+        if (!user || user.user_id === undefined) return;
+
+        const userData = await getUser(user.user_id);
+
+        if (userData || userData !== undefined) {
+            setUser(userData);
+        }
+    }, []);
+
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
 
@@ -11,100 +41,212 @@ const UpdateAccount: React.FC = () => {
         setShowPassword(!showPassword);
     };
 
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        if (user === null) return;
+
+        const updateSuccess = await updateUser(user);
+
+        if (updateSuccess) {
+            setTimeout(() => {
+                setRedirecting(true);
+                setUser({
+                    username: "",
+                    password: "",
+                    email: "",
+                    barangay_name: "",
+                    status: "",
+                });
+                navigate("/admin/manage/accounts");
+            }, 1500);
+        }
+    };
+
+    const handleChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = event.target;
+        setUser((prevUser) => ({
+            ...prevUser,
+            [name]: value,
+        }));
+    };
+
     return (
-        <div className="flex flex-col w-11/12 min-h-screen py-16">
-            <header className="mb-4">
-                <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
-                <div className="w-full h-[2px] bg-black"></div>
-            </header>
-            <div className="flex items-center justify-center flex-1 w-full">
-                <form className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1">
-                    <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
-                        Update Account
-                    </h2>
+        <>
+            <div className="flex flex-col w-11/12 min-h-screen py-16">
+                <header className="mb-4">
+                    <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
+                    <div className="w-full h-[2px] bg-black"></div>
+                </header>
+                <div className="flex items-center justify-center flex-1 w-full">
+                    <form className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1">
+                        <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
+                            Update Account
+                        </h2>
 
-                    <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                            className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
-                            type="text"
-                            name="email"
-                            id="email"
-                            required
-                        />
-                    </div>
+                        {hasErrors && (
+                            <div
+                                className="flex items-center gap-2 p-4 mb-2 text-sm text-red-800 bg-red-100 rounded-lg"
+                                role="alert"
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCircleInfo}
+                                    className="color   -[#d66666]"
+                                />
+                                <span className="sr-only">Info</span>
+                                <div>
+                                    {errorMessage.email && (
+                                        <p>{errorMessage.email}</p>
+                                    )}
+                                    {errorMessage.username && (
+                                        <p>{errorMessage.username}</p>
+                                    )}
+                                    {errorMessage.password && (
+                                        <p>{errorMessage.password}</p>
+                                    )}
+                                    {errorMessage.barangay_name && (
+                                        <p>{errorMessage.barangay_name}</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
-                    <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="username">Username</label>
-                        <input
-                            className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
-                            type="text"
-                            name="username"
-                            id="username"
-                            required
-                        />
-                    </div>
+                        {success && (
+                            <div
+                                className="flex items-center gap-2 p-4 mb-2 text-sm text-[#ffffff] bg-[#5cb85c] rounded-lg"
+                                role="alert"
+                            >
+                                <FontAwesomeIcon
+                                    icon={faCircleInfo}
+                                    className="color-[#4a934a]"
+                                />
+                                <span className="sr-only">Info</span>
+                                <div>
+                                    <p>Successfully updated user's details.</p>
+                                </div>
+                            </div>
+                        )}
 
-                    <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="password">Password</label>
-
-                        <div className="relative w-full input">
+                        <div className="flex flex-col mb-3 input-group">
+                            <label htmlFor="email">Email</label>
                             <input
-                                className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                id="password"
+                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                type="email"
+                                name="email"
+                                id="email"
                                 required
+                                value={user.email}
+                                onChange={handleChange}
+                                placeholder="email@email.com"
                             />
-                            {showPassword ? (
-                                <FontAwesomeIcon
-                                    onClick={togglePassword}
-                                    icon={faEye}
-                                    className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                />
-                            ) : (
-                                <FontAwesomeIcon
-                                    onClick={togglePassword}
-                                    icon={faEyeSlash}
-                                    className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                />
-                            )}
                         </div>
-                    </div>
 
-                    <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="barangay">Barangay</label>
-                        <select
-                            className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
-                            name="barangay"
-                            id="barangay"
-                            required
+                        <div className="flex flex-col mb-3 input-group">
+                            <label htmlFor="username">Username</label>
+                            <input
+                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                type="text"
+                                name="username"
+                                id="username"
+                                required
+                                value={user.username}
+                                onChange={handleChange}
+                                placeholder="Username"
+                            />
+                        </div>
+
+                        <div className="flex flex-col mb-3 input-group">
+                            <label htmlFor="password">Password</label>
+
+                            <div className="relative w-full input">
+                                <input
+                                    className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    id="password"
+                                    required
+                                    value={user.password || ""}
+                                    onChange={handleChange}
+                                    placeholder="Password"
+                                />
+                                {showPassword ? (
+                                    <FontAwesomeIcon
+                                        onClick={togglePassword}
+                                        icon={faEye}
+                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                    />
+                                ) : (
+                                    <FontAwesomeIcon
+                                        onClick={togglePassword}
+                                        icon={faEyeSlash}
+                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {user.role === "encoder" ? (
+                            <div className="flex flex-col mb-3 input-group">
+                                <label htmlFor="barangay_name">Barangay</label>
+                                <select
+                                    className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
+                                    name="barangay_name"
+                                    id="barangay_name"
+                                    required
+                                    value={user.barangay_name}
+                                    onChange={handleChange}
+                                >
+                                    {/* Can be replaced with the barangay values from the database */}
+                                    <option hidden>Select Barangay</option>
+                                    {barangayLoading ? (
+                                        <option disabled>Loading...</option>
+                                    ) : (
+                                        barangays.map((barangay) => (
+                                            <option
+                                                key={barangay.barangay_id}
+                                                value={barangay.barangay_name}
+                                            >
+                                                {barangay.barangay_name}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
+                        ) : null}
+
+                        <div className="flex flex-col mb-3 input-group">
+                            <label htmlFor="status">Status</label>
+                            <select
+                                className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
+                                name="status"
+                                id="status"
+                                defaultValue={user.status}
+                                required
+                            >
+                                <option hidden>Select Status</option>
+                                <option value="active">Active</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+
+                        <button
+                            className="w-full p-2 my-5 font-bold text-white uppercase transition-all bg-blue-400 rounded-lg shadow-lg shadow-gray-400 hover:opacity-75"
+                            type="submit"
+                            onClick={handleSubmit}
                         >
-                            {/* Can be replaced with the barangay values from the database */}
-                            <option hidden>Select Barangay</option>
-                            <option value="bigaa">Bigaa</option>
-                            <option value="butong">Butong</option>
-                            <option value="gulod">Gulod</option>
-                            <option value="marinig">Marining</option>
-                            <option value="niugan">Niugan</option>
-                            <option value="poblacion-uno">Poblacion Uno</option>
-                            <option value="poblacion-dos">Poblacion Dos</option>
-                            <option value="poblacion-tres">
-                                Poblacion Tres
-                            </option>
-                            <option value="sala">Sala</option>
-                        </select>
-                    </div>
-
-                    <button
-                        className="w-full p-2 my-5 font-bold text-white uppercase transition-all bg-blue-400 rounded-lg shadow-lg shadow-gray-400 hover:opacity-75"
-                        type="submit"
-                    >
-                        Update
-                    </button>
-                </form>
+                            {redirecting
+                                ? "Redirecting..."
+                                : loading
+                                ? "Updating..."
+                                : "Update"}
+                        </button>
+                    </form>
+                </div>
             </div>
-        </div>
+            {loading && barangayLoading && <Loading />}
+        </>
     );
 };
 

@@ -31,48 +31,51 @@ import NotFound from "./pages/NotFound";
 import MainLayout from "./components/MainLayout";
 import GuestLayout from "./components/GuestLayout";
 import ManageAccountLayout from "./components/ManageAccountLayout";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
     return (
         <BrowserRouter>
-            <Routes>
+            <AuthProvider>
+                <Routes>
+                    {/* Guest Routes */}
+                    <Route element={<GuestLayout/>}>
+                        {/* <Route index element={<Overview />} /> */}
+                        <Route index element={<Login image={cho_logo} />} />
+                        <Route element={<Appointment />} path="/appointment" />
+                        <Route element={<Login image={cabuyao_logo} />} path="/barangay/login" />
+                        <Route element={<Login image={cho_logo} />} path="/admin/login" />
+                    </Route>
 
-                {/* Guest Routes */}
-                <Route element={<GuestLayout/>}>
-                    <Route index element={<Overview />} />
-                    <Route element={<Appointment />} path="/appointment" />
-                    <Route element={<Login image={cabuyao_logo} />} path="/barangay/login" />
-                    <Route element={<Login image={cho_logo} />} path="/admin/login" />
-                </Route>
+                    {/* Admin Routes */}
+                    <Route element={<PrivateRoute allowedRoles={['admin']}/>}>
+                        <Route path="admin" element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
+                            <Route index element={<Dashboard />} />
+                            <Route element={<Transaction />} path="transactions" />
+                            <Route element={<BarangayList />} path="barangays" />
+                            <Route element={<AppointmentList />} path="appointments" />
 
-                {/* Admin Routes */}
-                <Route element={<PrivateRoute />}>
-                    <Route path="admin" element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
-                        <Route index element={<Dashboard />} />
-                        <Route element={<Transaction />} path="transactions" />
-                        <Route element={<BarangayList />} path="barangays" />
-                        <Route element={<AppointmentList />} path="appointments" />
-
-                        <Route path="manage" element={<ManageAccountLayout />}>
-                            <Route index element={<ManageAccount />} />
-                            <Route element={<CreateAccount />} path="create" />
-                            <Route element={<UpdateAccount />} path="update" />
-                            <Route element={<AccountList />} path="accounts" />
+                            <Route path="manage" element={<ManageAccountLayout />}>
+                                <Route index element={<ManageAccount />} />
+                                <Route element={<CreateAccount />} path="create" />
+                                <Route element={<UpdateAccount />} path="update" />
+                                <Route element={<AccountList />} path="accounts" />
+                            </Route>
                         </Route>
                     </Route>
-                </Route>
 
-                {/* Barangay Routes */}
-                <Route element={<PrivateRoute />}>
-                    <Route path="barangay" element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
-                        <Route index element={<Dashboard />} />
-                        <Route element={<History />} path="history" />
-                        <Route element={<Report />} path="report" />
+                    {/* Barangay Routes */}
+                    <Route element={<PrivateRoute allowedRoles={['encoder']}/>}>
+                        <Route path="barangay" element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
+                            <Route index element={<History />} />
+                            <Route element={<History />} path="history" />
+                            <Route element={<Report />} path="report" />
+                        </Route>
                     </Route>
-                </Route>
-                
-                <Route path="*" element={<NotFound />} />
-            </Routes>
+                    
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </AuthProvider>
         </BrowserRouter>
     );
 }

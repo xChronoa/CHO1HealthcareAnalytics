@@ -1,10 +1,32 @@
+import { useNavigate } from "react-router-dom";
+
 const NotFound: React.FC = () => {
+    const navigate = useNavigate();
+
     return (
-        <main className="flex flex-col items-center justify-center min-h-screen gap-5">
-            <h1 className="text-[2rem] font-bold">Page Not Found</h1>
-            <h2 className="text-[1.5rem]">The page you are trying to access does not exist.</h2>
-        </main>
+        <div className="text-gray-900 bg-gradient-to-r from-white to-gray-100">
+            <div className="flex items-center justify-center min-h-screen px-4">
+                <div className="text-center">
+                    <h1 className="font-bold text-gray-900 text-9xl">404</h1>
+                    <p className="mt-4 text-2xl font-medium text-gray-700">
+                        Oops! Page not found
+                    </p>
+                    <p className="mt-4 mb-8 text-gray-600">
+                        The page you're looking for doesn't exist or has been
+                        moved.
+                    </p>
+                    <a
+                        onClick={() => {
+                            navigate(-1);
+                        }}
+                        className="relative z-50 px-6 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out bg-gray-200 border-2 border-gray-300 rounded-full shadow-lg cursor-pointer shadow-gray-400 hover:bg-gray-300"
+                    >
+                        Go Back
+                    </a>
+                </div>
+            </div>
+        </div>
     );
-}
+};
 
 export default NotFound;
