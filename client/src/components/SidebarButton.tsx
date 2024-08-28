@@ -9,15 +9,17 @@ interface SidebarButtonProps {
     additionalStyle?: string;
     isMinimized: boolean;
     destination: string;
+    logout?: () => {};
 }
 
 const SidebarButton: React.FC<SidebarButtonProps> = memo(
-    ({ icon, labelText, additionalStyle = "", isMinimized, destination }) => (
+    ({ icon, labelText, additionalStyle = "", isMinimized, destination, logout }) => (
         <Link
             to={destination}
             className={`${additionalStyle} relative overflow-hidden flex ${
                 isMinimized ? "justify-center" : "justify-self-end"
             } items-center w-11/12 gap-5 p-3 border-2 border-black rounded-md shadow-2xl cursor-pointer hover:scale-95 transition-transform`}
+            onClick={logout}
         >
             <FontAwesomeIcon icon={icon} className="justify-self-start" />
             <h3
