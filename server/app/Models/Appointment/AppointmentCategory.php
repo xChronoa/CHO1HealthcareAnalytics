@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Appointment;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +9,10 @@ class AppointmentCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['appointment_category_name'];
+    protected $primaryKey = 'appointment_category_id';
+    protected $fillable = [
+        'appointment_category_name',
+    ];
 
     /**
      * Get all appointments associated with this category.
