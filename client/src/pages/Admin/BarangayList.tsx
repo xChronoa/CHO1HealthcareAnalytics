@@ -1,25 +1,17 @@
 import BarangayView from "../../components/BarangayView";
-import logos from '../../assets/logoImports'; // Adjust path as needed
-
-interface Barangay {
-    name: string;
-    logoPath: string;
-}
+import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useBarangay } from "../../hooks/useBarangay";
+import Loading from "../../components/Loading";
 
 const BarangayList: React.FC = () => {
-    const barangays: Barangay[] = [
-        { name: "bigaa", logoPath: logos.bigaa },
-        { name: "butong", logoPath: logos.butong },
-        { name: "gulod", logoPath: logos.gulod },
-        { name: "marinig", logoPath: logos.marinig },
-        { name: "niugan", logoPath: logos.niugan },
-        { name: "poblacion uno", logoPath: logos["poblacion uno"] },
-        { name: "poblacion dos", logoPath: logos["poblacion dos"] },
-        { name: "poblacion tres", logoPath: logos["poblacion tres"] },
-        { name: "sala", logoPath: logos.sala },
-    ];
+    const { fetchBarangays, barangays, barangayLoading } = useBarangay();
+
+    useEffectAfterMount(() => {
+        fetchBarangays();
+    });
 
     return (
+    <>
         <div className="w-11/12 py-16">
             <header className="mb-4 ">
                 <h1 className="mb-2 text-2xl font-bold">List of Barangays</h1>
@@ -27,10 +19,12 @@ const BarangayList: React.FC = () => {
             </header>
             <section className="grid items-center justify-center grid-cols-3 gap-5 md:gap-12">
                 {barangays.map(barangay => (
-                    <BarangayView logoPath={barangay.logoPath}/>
+                    <BarangayView key={barangay.barangay_id} logoPath={barangay.logoPath || ""}/>
                 ))}
             </section>
         </div>
+        {barangayLoading && <Loading />}
+    </>
     );
 };
 
