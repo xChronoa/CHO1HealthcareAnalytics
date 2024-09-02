@@ -1,7 +1,13 @@
 import {
-    faClockRotateLeft,
+    faCalendarCheck,
+    faChartColumn,
     faClose,
+    faFileContract,
+    faFileLines,
+    faNewspaper,
     faRightFromBracket,
+    faTent,
+    faUserPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, useRef } from "react";
@@ -62,13 +68,13 @@ const Sidebar: React.FC<SidebarProps> = memo(
                         {type === "barangay" ? (
                             <>
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faFileLines}
                                     labelText="Reports"
                                     isMinimized={isMinimized}
                                     destination="report"
                                 />
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faNewspaper}
                                     labelText="Submittal History"
                                     isMinimized={isMinimized}
                                     destination="history"
@@ -88,31 +94,31 @@ const Sidebar: React.FC<SidebarProps> = memo(
                         (
                             <>
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faChartColumn}
                                     labelText="Dashboard"
                                     isMinimized={isMinimized}
                                     destination=""
                                 />
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faFileContract}
                                     labelText="Transaction"
                                     isMinimized={isMinimized}
                                     destination="transactions"
                                 />
                                 <SidebarButton
-                                    icon={faRightFromBracket}
+                                    icon={faTent}
                                     labelText="Barangay"
                                     isMinimized={isMinimized}
                                     destination="barangays"
                                 />
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faCalendarCheck}
                                     labelText="Appointments"
                                     isMinimized={isMinimized}
                                     destination="appointments"
                                 />
                                 <SidebarButton
-                                    icon={faClockRotateLeft}
+                                    icon={faUserPen}
                                     labelText="Manage Account"
                                     isMinimized={isMinimized}
                                     destination="manage"
