@@ -5,7 +5,6 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
-import Loading from "../components/Loading";
 
 // For specifying the logo to be displayed based on inputted department.
 type LoginProp = {
@@ -66,7 +65,6 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                 />
                                 <span className="sr-only">Info</span>
                                 <div>
-                                    <span className="font-medium">Error.</span>{" "}
                                     {error}
                                 </div>
                             </div>
