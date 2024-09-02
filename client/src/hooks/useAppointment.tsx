@@ -270,8 +270,6 @@ export const useAppointment = () => {
 
                 const data: Appointment[] = await response.json();
                 setAppointments(data);
-
-                console.log(data);
             } catch (err: any) {
                 setError(err.message);
             } finally {
