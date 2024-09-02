@@ -107,8 +107,6 @@ const Appointment: React.FC = () => {
                 }
             );
 
-            console.log(formData);
-
             if (!response.ok) {
                 const data = await response.json();
                 if (data.errors) {
@@ -425,7 +423,7 @@ const Appointment: React.FC = () => {
                         ></div>
                     </div>
 
-                    <div className="flex flex-col mb-3 input-group">
+                    {/* <div className="flex flex-col mb-3 input-group">
                         <button
                             type="button"
                             onClick={sendOTP}
@@ -451,7 +449,7 @@ const Appointment: React.FC = () => {
                         {errors.otp && (
                             <span className="text-red-600">{errors.otp}</span>
                         )}
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="patient_note">Additional Notes:</label>
