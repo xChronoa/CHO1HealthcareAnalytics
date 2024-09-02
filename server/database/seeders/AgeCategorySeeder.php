@@ -19,6 +19,8 @@ class AgeCategorySeeder extends Seeder
             ['age_category' => '29d-11mos', 'created_at' => now()],
             ['age_category' => '1-4', 'created_at' => now()],
             ['age_category' => '5-9', 'created_at' => now()],
+            ['age_category' => '10-14', 'created_at' => now()],
+            ['age_category' => '15-19', 'created_at' => now()],
             ['age_category' => '20-24', 'created_at' => now()],
             ['age_category' => '25-29', 'created_at' => now()],
             ['age_category' => '30-34', 'created_at' => now()],
@@ -32,8 +34,6 @@ class AgeCategorySeeder extends Seeder
             ['age_category' => '70+', 'created_at' => now()],
             
             // Service Data & M2
-            ['age_category' => '10-14', 'created_at' => now()],
-            ['age_category' => '15-19', 'created_at' => now()],
             ['age_category' => '20-49', 'created_at' => now()],
 
             // Teenage Pregnancy
