@@ -91,6 +91,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                     setError("The provided credentials are incorrect");
                 } else if(response.status === 422) {
                     setError("The email field must be a valid email address.");
+                } else if (response.status === 403) {
+                    setError("You are not authorized to access the previously visited page.");
                 } else {
                     setError("An unexpected error occurred. Please try again later.");
                 }
@@ -108,23 +110,26 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
      * @param password - The password of the user.
      */
     const login = async (email: string, password: string) => {
-        const data = await handleFetch("http://localhost:8000/api/login", "POST", { email, password });
+        const previousPath = window.location.pathname;
+
+        const data = await handleFetch("http://localhost:8000/api/login", "POST", { email, password, previousPath });
         if (data) {
+
             localStorage.setItem("authenticated", "true");
             setAuthenticated(true);
             setRole(data.user.role);
         }
     };
-
+    
     /**
      * Logs out the user by making a request to the server.
-     */
-    const logout = async () => {
-        const result = await handleFetch("http://localhost:8000/api/logout", "POST");
-        if (result !== null) {
-            localStorage.removeItem("authenticated");
-            setAuthenticated(false);
-            setRole(null);
+    */
+   const logout = async () => {
+       const result = await handleFetch("http://localhost:8000/api/logout", "POST");
+       if (result !== null) {
+           localStorage.clear();
+           setAuthenticated(false);
+           setRole(null);
         }
     };
 
