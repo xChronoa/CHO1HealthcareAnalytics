@@ -26,7 +26,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'barangay_name' => $user->barangay ? $user->barangay->barangay_name : null,
-                'status' => $user->status,
+                'status' => ucfirst($user->status),
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ];
@@ -69,7 +69,7 @@ class UserController extends Controller
 
             // Default status to 'active' if not provided
             if (!isset($data['status'])) {
-                $data['status'] = 'active';
+                $data['status'] = ucfirst('active');
             }
 
             // Create user
@@ -115,7 +115,7 @@ class UserController extends Controller
             'password' => 'sometimes|required|string|min:8',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id . ',user_id',
             'barangay_name' => 'required|string|exists:barangays,barangay_name',
-            'status' => 'sometimes|required|string',
+            'status' => 'sometimes|required|string|in:active,disabled',
         ]);
 
         if ($validator->fails()) {
@@ -124,7 +124,11 @@ class UserController extends Controller
 
         // Sanitize input
         $data = $validator->validated();
-        $data['password'] = Hash::make($data['password']); // Encrypt the password
+
+        // Hash the password if it is present in the data
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
 
         try {
             // Convert barangay name to barangay_id
@@ -142,11 +146,11 @@ class UserController extends Controller
 
             // Default status to 'active' if not provided
             if (!isset($data['status'])) {
-                $data['status'] = 'active';
+                $data['status'] = ucfirst('active');
             }
 
-            // $user = User::findOrFail($id);
-            // $user->update($data);
+            $user = User::findOrFail($id);
+            $user->update($data);
 
             return response()->json($data, 200);
         } catch (ModelNotFoundException $e) {
@@ -164,7 +168,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
 
             // Update the user's status to 'disabled'
-            $user->status = 'disabled';
+            $user->status = ucfirst('disabled');
             $user->save();
 
             return response()->json(['message' => 'User status updated to disabled successfully']);
@@ -188,6 +192,7 @@ class UserController extends Controller
         $rules = [
             'email' => 'required|string|email',
             'password' => 'required|string',
+            'previousPath' => 'nullable|string',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -198,6 +203,10 @@ class UserController extends Controller
 
         // Attempt to authenticate the user
         $credentials = $validator->validated(); // Use validated data directly
+        $previousPath = $credentials['previousPath'] ?? '/';
+
+        // Remove previousPath from credentials
+        unset($credentials['previousPath']);
 
         if (Auth::attempt($credentials)) {
             // Retrieve the authenticated user's ID
@@ -205,6 +214,18 @@ class UserController extends Controller
 
             // Retrieve the user using the ID
             $user = User::findOrFail($userId);
+
+            // Define the path based on role
+            $validPaths = [
+                'admin' => '/admin/login',
+                'encoder' => '/barangay/login',
+            ];
+
+            // Check if previousPath matches the user's role
+        $previousPath = $request->input('previousPath', '/');
+            if (array_key_exists($user->role, $validPaths) && $previousPath !== $validPaths[$user->role]) {
+                return response()->json(['message' => 'Unauthorized access to the previous path.', 'role' => $user->role, 'path' => $previousPath], 403);
+            }
 
             // Create a token for the authenticated user
             $token = $user->createToken('auth_token', [], now()->addHours(6))->plainTextToken;
@@ -243,23 +264,23 @@ class UserController extends Controller
         return response()->json(['message' => 'User successfully logged out.'], 200)->cookie($cookie);
     }
 
-    public function checkAuth(Request $request)
-    {
-        if (Auth::check()) {
-            $user = Auth::user();
+    // public function checkAuth(Request $request)
+    // {
+    //     if (Auth::check()) {
+    //         $user = Auth::user();
 
-            return response()->json([
-                'authenticated' => true,
-                'role' => $user->role,
-            ]);
-        }
+    //         return response()->json([
+    //             'authenticated' => true,
+    //             'role' => $user->role,
+    //         ]);
+    //     }
 
-        // Either not authenticated or user IDs don't match
-        return response()->json([
-            'authenticated' => false,
-            'role' => null,
-        ]);
-    }
+    //     // Either not authenticated or user IDs don't match
+    //     return response()->json([
+    //         'authenticated' => false,
+    //         'role' => null,
+    //     ]);
+    // }
 
     // Get the authenticated user's details
     public function user(Request $request)
