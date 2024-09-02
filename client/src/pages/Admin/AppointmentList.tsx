@@ -19,40 +19,44 @@ const AppointmentList: React.FC = () => {
         minDate,
         maxDate,
     } = useAppointment(); // Use the appointments hook
-    
+
     const [selectedAppointmentType, setSelectedAppointmentType] =
         useState<string>("");
     const [selectedDate, setSelectedDate] = useState<string>(maxDate || "");
-    
+
     // Fetch appointment categories on component mount
     useEffectAfterMount(() => {
         fetchAppointmentCategories();
     }, [fetchAppointmentCategories]);
-    
+
     // Fetch appointments when selectedAppointmentType or selectedDate changes
     useEffectAfterMount(() => {
         if (selectedAppointmentType && selectedAppointmentType !== "All") {
             fetchAppointmentsByCategory(selectedAppointmentType, selectedDate);
-
         } else {
             fetchPatientsAppointments();
-            console.log(appointments);
-            
+
             // Update the date range if maxDate is available
             if (maxDate) {
                 setSelectedDate(maxDate);
             }
         }
-    }, [selectedAppointmentType, selectedDate, fetchAppointmentsByCategory, fetchPatientsAppointments, maxDate]);
-    
+    }, [
+        selectedAppointmentType,
+        selectedDate,
+        fetchAppointmentsByCategory,
+        fetchPatientsAppointments,
+        maxDate,
+    ]);
+
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedAppointmentType(event.target.value);
     };
-    
+
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(event.target.value);
     };
-    
+
     return (
         <>
             <div className="w-11/12 py-16">
@@ -85,7 +89,13 @@ const AppointmentList: React.FC = () => {
                             />
                         </div>
 
-                        <div className="flex flex-row items-center justify-center gap-5">
+                        <div className="relative flex flex-row items-center justify-center gap-5">
+                            <label
+                                htmlFor="appointment-type"
+                                className="absolute left-0 top-[-1.5rem] font-medium w-full text-nowrap"
+                            >
+                                Appointment Type
+                            </label>
                             <select
                                 className="w-full px-2 py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg md:w-54 border-1"
                                 name="appointment-type"
@@ -157,9 +167,12 @@ const AppointmentList: React.FC = () => {
                                     </tr>
                                 ) : (
                                     appointments.map((appointment) => (
-                                        <tr key={appointment.patient.patient_id}>
+                                        <tr
+                                            key={appointment.patient.patient_id}
+                                        >
                                             <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.first_name} {appointment.patient.last_name}
+                                                {appointment.patient.first_name}{" "}
+                                                {appointment.patient.last_name}
                                             </td>
                                             <td className="px-4 py-2 font-semibold">
                                                 {appointment.patient.sex}
@@ -187,7 +200,7 @@ const AppointmentList: React.FC = () => {
                     </div>
                 </section>
             </div>
-            {appointmentLoading && appointmentCategoryLoading && <Loading />}
+            {(appointmentLoading || appointmentCategoryLoading) && <Loading />}
         </>
     );
 };
