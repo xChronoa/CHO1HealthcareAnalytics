@@ -49,7 +49,7 @@ const UpdateAccount: React.FC = () => {
         const updateSuccess = await updateUser(user);
 
         if (updateSuccess) {
-            setTimeout(() => {
+            if (!loading) {
                 setRedirecting(true);
                 setUser({
                     username: "",
@@ -59,7 +59,7 @@ const UpdateAccount: React.FC = () => {
                     status: "",
                 });
                 navigate("/admin/manage/accounts");
-            }, 1500);
+            }
         }
     };
 
@@ -93,7 +93,7 @@ const UpdateAccount: React.FC = () => {
                             >
                                 <FontAwesomeIcon
                                     icon={faCircleInfo}
-                                    className="color   -[#d66666]"
+                                    className="color-[#d66666]"
                                 />
                                 <span className="sr-only">Info</span>
                                 <div>
@@ -195,7 +195,7 @@ const UpdateAccount: React.FC = () => {
                                     name="barangay_name"
                                     id="barangay_name"
                                     required
-                                    value={user.barangay_name}
+                                    value={user.barangay_name || ""}
                                     onChange={handleChange}
                                 >
                                     {/* Can be replaced with the barangay values from the database */}
@@ -222,7 +222,8 @@ const UpdateAccount: React.FC = () => {
                                 className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
                                 name="status"
                                 id="status"
-                                defaultValue={user.status}
+                                value={user.status}
+                                onChange={handleChange}
                                 required
                             >
                                 <option hidden>Select Status</option>
@@ -245,7 +246,7 @@ const UpdateAccount: React.FC = () => {
                     </form>
                 </div>
             </div>
-            {loading && barangayLoading && <Loading />}
+            {(loading || barangayLoading) && <Loading />}
         </>
     );
 };
