@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\M1_Report\IndicatorController;
+use App\Http\Controllers\ReportStatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -12,7 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BarangayController;
 use App\Http\Controllers\Appointment\PatientController;
 use App\Http\Controllers\Appointment\AppointmentController;
-
+use App\Http\Controllers\M1_Report\FamilyPlanningMethodsController;
 
 /**
  * Public Routes
@@ -33,7 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/', [UserController::class, 'store']);             // Create a new user
         Route::get('/{id}', [UserController::class, 'show']);          // Get a specific user by ID
         Route::put('/{id}', [UserController::class, 'update']);        // Update a specific user by ID
-        Route::delete('/{id}', [UserController::class, 'disable']);    // Disable a specific user by ID
+        Route::put('/disable/{id}', [UserController::class, 'disable']);    // Disable a specific user by ID
     });
     Route::get('/user', [UserController::class, 'user']);               // Get the authenticated user's details
 
@@ -68,11 +70,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/category/{category_name}', [AppointmentController::class, 'patientsForCategory']);
     });
 
+    Route::post("/submit/report", [ReportStatusController::class, 'submitReport']);
+
 
     // Route for logging out an authenticated user
     Route::post('logout', [UserController::class, 'logout']);
 });
+Route::get('/indicator', [IndicatorController::class, 'index']);
+Route::get('/indicator/{name}', [IndicatorController::class, 'getIndicatorFromServiceName']);
 
+Route::get('/fp-method', [FamilyPlanningMethodsController::class, 'index']);
 
 /**
  * Public route to check if user is authenticated
