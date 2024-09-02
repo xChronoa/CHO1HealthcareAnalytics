@@ -69,7 +69,7 @@ class IndicatorSeeder extends Seeder
             ['indicator_name' => 'c. Unknown Birth Weight', 'parent_indicator_id' => 19, 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Number of Deliveries attended by Skilled Health Professional)
-            ['indicator_name' => '20. Number of Deliveries attended by Skilled Health Professional', 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => '20. Number of deliveries attended by Skilled Health Professional', 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 3 indicators (Sub-indicators for Skilled Health Professional)
             ['indicator_name' => 'a. Attended by Doctor', 'parent_indicator_id' => 20, 'service_id' => $serviceId, 'created_at' => now()],
@@ -84,7 +84,7 @@ class IndicatorSeeder extends Seeder
             ['indicator_name' => 'b. Private health facility', 'parent_indicator_id' => 21, 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Number of non-facility based deliveries)
-            ['indicator_name' => '22. Number of non-facility based deliveries', 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => '22. Number of non-facility based deliveries', 'parent_indicator_id' => 21, 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Type of Delivery)
             ['indicator_name' => '23. Type of Delivery', 'service_id' => $serviceId, 'created_at' => now()],
@@ -195,11 +195,19 @@ class IndicatorSeeder extends Seeder
         /* #region Nutritional Assessment of Children 0-59 mos. Old */
         // Fetch the service_id for 'Nutritional Assessment of Children 0-59 mos. Old'
         $serviceId = DB::table('services')->where('service_name', 'Nutritional Assessment of Children 0-59 mos. Old')->value('service_id');
-
-        // Insert indicators with prefixes and hierarchy
+        
         $indicators = [
             ['indicator_name' => '33. Stunted', 'service_id' => $serviceId, 'created_at' => now()],
             ['indicator_name' => '34. Wasted', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
+
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        // Insert indicators with prefixes and hierarchy
+        $indicators = [
             ['indicator_name' => 'a.1 MAM-identified in SFP', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '34. Wasted')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'a.2 MAM-admitted in SFP', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '34. Wasted')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'a.3 MAM-cured in SFP', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '34. Wasted')->value('indicator_id'), 'created_at' => now()],
@@ -222,11 +230,19 @@ class IndicatorSeeder extends Seeder
 
         /* #region Deworming Services for Infants, Children and Adolescents (Community Based) */
         $serviceId = DB::table('services')->where('service_name', 'Deworming Services for Infants, Children and Adolescents (Community Based)')->value('service_id');
-
         // Insert indicators with prefixes and hierarchy
         $indicators = [
             ['indicator_name' => '37. 1-19 y/o given 2 doses of deworming drug', 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'a. PSAC, 1-4 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
+
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        // Insert indicators with prefixes and hierarchy
+        $indicators = [
+            ['indicator_name' => 'a. PSAC, 1-4 y/o dewormed (2 doses)', 'service_id' => $serviceId,'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '37. 1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'b. SAC, 5-9 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '37. 1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'c. Adolescents, 10-19 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '37. 1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
         ];
@@ -240,11 +256,19 @@ class IndicatorSeeder extends Seeder
 
         /* #region School-Based Deworming Services (Annual Reporting) */
         $serviceId = DB::table('services')->where('service_name', 'School-Based Deworming Services (Annual Reporting)')->value('service_id');
-
+        
         // Insert indicators with prefixes and hierarchy
         $indicators = [
             ['indicator_name' => '1-19 y/o given 2 doses of deworming drug', 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'a. PSAC, 1-4 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        // Insert indicators with prefixes and hierarchy
+        $indicators = [
+            ['indicator_name' => 'a. PSAC, 1-4 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'b. SAC, 5-9 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
             ['indicator_name' => 'c. Adolescents, 10-19 y/o dewormed (2 doses)', 'service_id' => $serviceId, 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '1-19 y/o given 2 doses of deworming drug')->value('indicator_id'), 'created_at' => now()],
         ];
