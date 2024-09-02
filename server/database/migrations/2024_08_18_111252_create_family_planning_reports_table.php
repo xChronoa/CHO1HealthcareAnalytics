@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('current_users_beginning_month');
             $table->integer('new_acceptors_prev_month');
             $table->integer('other_acceptors_present_month');
+            $table->integer('drop_outs_present_month');
             $table->integer('current_users_end_month');
             $table->integer('new_acceptors_present_month');
             $table->foreignId('report_status_id')->constrained('report_statuses', 'report_status_id');
