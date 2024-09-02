@@ -7,10 +7,11 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
 import { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/Loading";
+import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 
 const CreateAccount: React.FC = () => {
     const { createUser, loading, success, errorMessage } = useUser();
-    const { barangays, barangayLoading } = useBarangay();
+    const { barangays, fetchBarangays, barangayLoading } = useBarangay();
     const [user, setUser] = useState<User>({
         username: "",
         password: "",
@@ -19,8 +20,10 @@ const CreateAccount: React.FC = () => {
         barangay_name: "",
     });
     const [redirecting, setRedirecting] = useState(false);
-    
-    const hasErrors = errorMessage && Object.values(errorMessage).some(value => value !== '');
+
+    const hasErrors =
+        errorMessage &&
+        Object.values(errorMessage).some((value) => value !== "");
 
     const navigate = useNavigate();
 
@@ -34,13 +37,13 @@ const CreateAccount: React.FC = () => {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        
+
         if (user === null) return;
-        
+
         const createSuccess = await createUser(user);
 
         if (createSuccess) {
-            setTimeout(() => {
+            if (!loading) {
                 setRedirecting(true);
                 setUser({
                     username: "",
@@ -50,17 +53,23 @@ const CreateAccount: React.FC = () => {
                     barangay_name: "",
                 });
                 navigate("/admin/manage/accounts");
-            }, 1500);
+            }
         }
     };
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
         const { name, value } = event.target;
         setUser((prevUser) => ({
             ...prevUser,
             [name]: value,
         }));
     };
+
+    useEffectAfterMount(() => {
+        fetchBarangays();
+    }, []);
 
     return (
         <div className="flex flex-col w-11/12 min-h-screen py-16">
@@ -85,10 +94,18 @@ const CreateAccount: React.FC = () => {
                             />
                             <span className="sr-only">Info</span>
                             <div>
-                                {errorMessage.email && <p>{errorMessage.email}</p>}
-                                {errorMessage.username && <p>{errorMessage.username}</p>}
-                                {errorMessage.password && <p>{errorMessage.password}</p>}
-                                {errorMessage.barangay_name && <p>{errorMessage.barangay_name}</p>}
+                                {errorMessage.email && (
+                                    <p>{errorMessage.email}</p>
+                                )}
+                                {errorMessage.username && (
+                                    <p>{errorMessage.username}</p>
+                                )}
+                                {errorMessage.password && (
+                                    <p>{errorMessage.password}</p>
+                                )}
+                                {errorMessage.barangay_name && (
+                                    <p>{errorMessage.barangay_name}</p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -183,13 +200,14 @@ const CreateAccount: React.FC = () => {
                                 <option disabled>Loading...</option>
                             ) : (
                                 barangays.map((barangay) => (
-                                <option
-                                    key={barangay.barangay_id}
-                                    value={barangay.barangay_name}
-                                >
-                                    {barangay.barangay_name}
-                                </option>
-                            )))}
+                                    <option
+                                        key={barangay.barangay_id}
+                                        value={barangay.barangay_name}
+                                    >
+                                        {barangay.barangay_name}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
 
@@ -199,7 +217,11 @@ const CreateAccount: React.FC = () => {
                         onClick={handleSubmit}
                         disabled={redirecting}
                     >
-                        {redirecting ? "Redirecting..." : loading ? "Creating..." : "Create"}
+                        {redirecting
+                            ? "Redirecting..."
+                            : loading
+                            ? "Creating..."
+                            : "Create"}
                     </button>
                 </form>
             </div>
