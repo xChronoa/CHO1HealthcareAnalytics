@@ -7,6 +7,7 @@ interface UseUser {
     getUser: (user_id: number) => Promise<User>;
     createUser: (user: User) => Promise<boolean>;
     updateUser: (user: User) => Promise<boolean>;
+    disableUser: (user: User) => Promise<boolean>;
 
     // Variables
     users: User[] | null;
@@ -33,6 +34,8 @@ export const useUser = (): UseUser => {
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
+            setError(null); // Reset error before request
+            
             const response = await fetch("http://localhost:8000/api/users", {
                 method: "GET",
                 headers: {
@@ -65,6 +68,8 @@ export const useUser = (): UseUser => {
     const getUser = useCallback(async (user_id: number): Promise<User> => {
         try {
             setLoading(true);
+            setError(null); // Reset error before request
+            
             const response = await fetch(`http://localhost:8000/api/users/${user_id}`, {
                 method: "GET",
                 headers: {
@@ -160,11 +165,45 @@ export const useUser = (): UseUser => {
         }
     }, []);
 
+    const disableUser = useCallback(async (user: User): Promise<boolean> => {
+        try {
+            setLoading(true);
+            setError(null);
+            setErrorMessage({});
+            setSuccess(false);
+
+            const response = await fetch (`http://localhost:8000/api/users/disable/${user.user_id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify(user),
+                credentials: "include",
+            });
+
+            if(!response.ok) {
+                const data = await response.json();
+                setErrorMessage(data.errors);
+                throw new Error("An error occured while disabling the user account.");
+            }
+            
+            setSuccess(true);
+            return true;
+        } catch (error: any) {
+            setError(error.message);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         fetchUsers,
         getUser,
         createUser,
         updateUser,
+        disableUser,
         users,
         loading,
         success,
