@@ -12,7 +12,7 @@ type LoginProp = {
 };
 
 const Login: React.FC<LoginProp> = ({ image }) => {
-    const { role, authenticated, login, error, loading } = useAuth();
+    const { user, authenticated, login, error, loading } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -30,8 +30,8 @@ const Login: React.FC<LoginProp> = ({ image }) => {
     };
 
     // Redirect if the user is already authenticated
-    if (authenticated && !loading) {
-        const redirectPath = role === "admin" ? "/admin" : "/barangay";
+    if (user && authenticated && !loading) {
+        const redirectPath = user.role === "admin" ? "/admin" : "/barangay";
         return <Navigate to={redirectPath} />;
     }
 
