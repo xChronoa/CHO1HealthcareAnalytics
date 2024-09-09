@@ -6,137 +6,123 @@ import {
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
+import { Disease, useDisease } from "../../hooks/useDisease";
+import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { AgeCategory, useAgeCategory } from "../../hooks/useAgeCategory";
+import Loading from "../../components/Loading";
+import { IncompleteUpdate } from "../../types/IncompleteForm";
+import { InputValues, M2FormData } from "../../types/M2FormData";
 
-interface Disease {
-    name: string;
-    code: string;
+interface M2ReportProps {
+    setReportDatas: (type: 'm1' | 'm2', data: any) => void;
+    onCheckIncomplete: IncompleteUpdate;
+    diseases: Disease[];
 }
 
-interface AgeGroup {
-    [key: string]: { M: number | string; F: number | string };
-}
-
-interface InputValues {
-    [key: string]: AgeGroup;
-}
-
-export const MorbidityForm: React.FC = () => {
+export const MorbidityForm: React.FC<M2ReportProps> = ({
+    setReportDatas,
+    onCheckIncomplete,
+}) => {
     const [openSections, setOpenSections] = useState<string[]>([]);
-    const [inputValues, setInputValues] = useState<InputValues>({});
+    const [incompleteDiseases, setIncompleteDiseases] = useState<string[]>([]);
+    
+    const [formData, setFormData] = useState<InputValues>(initializeFormData());
+    const { loading: diseaseLoading, error: diseaseError, diseases, fetchDiseases } = useDisease();
+    const { loading: ageCategoryLoading, error: ageCategoryError, ageCategories, fetchAgeCategories } = useAgeCategory();
 
-    // Static list of diseases with their corresponding ICD codes
-    const diseases: Disease[] = [
-        { name: "ABSCESS", code: "L02.9" },
-        { name: "ACUTE RHINITIS (COLDS)", code: "J00" },
-        { name: "AGE", code: "A09" },
-        { name: "ANIMAL BITE", code: "" },
-        // { name: "ARTHRITIS", code: "M13.99" },
-        // { name: "ASTHMA", code: "J45.9" },
-        // { name: "CONJUNCTIVITIS", code: "H10" },
-        // { name: "COSTOCHONDRITIS", code: "M94.08" },
-        // { name: "DISLIPIDEMIA", code: "E78.9" },
-        // { name: "EAR INFECTION", code: "H66.9" },
-        // { name: "FOOD ALLERGY", code: "T78.1" },
-        // { name: "GASTRITIS", code: "K29.7" },
-        // { name: "HEADACHE", code: "R51" },
-        // { name: "HERPES ZOSTER", code: "B02.9" },
-        // { name: "HYPERTENSION", code: "I10.9" },
-        // { name: "INFLUENZA-LIKE ILLNESS", code: "A49.2" },
-        // { name: "UTI (Urinary Tract Infection)", code: "N39.0" },
-        // { name: "FEVER", code: "R50" },
-        // { name: "SVI (Systematic Viral Infection)", code: "B34.9" },
-        // { name: "PTB (Pulmonary TB)", code: "A15.3" },
-        // { name: "SCABIES", code: "B86" },
-        // { name: "SKIN ALLERGY", code: "L23.9" },
-        // { name: "URTI", code: "J06.9" },
-        // { name: "ALLERGY", code: "T78.4" },
-        // { name: "ATP (Acute Tonsillo Pharyngitis)", code: "J06.8" },
-        // { name: "WOUND", code: "T01.9" },
-        // { name: "VERTIGO (DIZZINESS)", code: "R42" },
-        // { name: "DIARRHEA", code: "K52.9" },
-    ];
+    // Initialize form data from local storage or default to an empty object
+    function initializeFormData(): InputValues {
+        const storedData = localStorage.getItem("m2formData");
+        return storedData ? JSON.parse(storedData) : {};
+    }
 
-    // List of age groups for which data is collected
-    const ageGroups: string[] = [
-        "0-6 days",
-        "7-28 days",
-        "29d-11mos",
-        // "1-4",
-        // "5-9",
-        // "10-14",
-        // "15-19",
-        // "20-24",
-        // "25-29",
-        // "30-34",
-        // "35-39",
-        // "40-44",
-        // "45-49",
-        // "50-54",
-        // "55-59",
-        // "60-64",
-        // "65-69",
-        // "70+",
-    ];
-
+    // Toggle visibility of sections based on disease
     const toggleSection = (disease: string) => {
-        setOpenSections((prevSections) =>
+        setOpenSections(prevSections =>
             prevSections.includes(disease)
-                ? prevSections.filter((section) => section !== disease)
+                ? prevSections.filter(section => section !== disease)
                 : [...prevSections, disease]
         );
     };
 
+    // Update form data based on user input
     const handleInputChange = (
         disease: string,
-        ageGroup: string,
+        ageCategory: string,
         gender: "M" | "F",
         value: number | string
     ) => {
-        setInputValues((prevValues) => ({
+        setFormData(prevValues => ({
             ...prevValues,
             [disease]: {
                 ...prevValues[disease],
-                [ageGroup]: {
-                    ...prevValues[disease]?.[ageGroup],
+                [ageCategory]: {
+                    ...prevValues[disease]?.[ageCategory],
                     [gender]: value === "" ? "" : Number(value),
                 },
             },
         }));
     };
 
+    // Check if all required fields for a disease are complete
     const isComplete = (disease: string): boolean => {
-        const values = inputValues[disease];
+        const values = formData[disease];
         if (!values) return false;
 
-        return ageGroups.every(
-            (group) =>
-                values[group]?.M !== undefined && values[group]?.F !== undefined
-        );
+        return ageCategories.every(group => {
+            const maleValue = values[group.age_category]?.M;
+            const femaleValue = values[group.age_category]?.F;
+
+            // Helper function to determine if a value is valid
+            const isValid = (value: string | number | undefined | null): boolean => {
+                if (typeof value === "string") {
+                    return value.trim() !== "";
+                }
+                if (typeof value === "number") {
+                    return !isNaN(value);
+                }
+                return false;
+            };
+
+            return isValid(maleValue) && isValid(femaleValue);
+        });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
 
-        const allComplete = diseases.every((disease) =>
-            isComplete(disease.name)
-        );
+    // Fetch initial data on component mount
+    useEffectAfterMount(() => {
+        fetchAgeCategories();
+        fetchDiseases();
+    }, [fetchAgeCategories, fetchDiseases]);
 
-        if (!allComplete) {
-            alert("Please complete all sections before submitting.");
-            return;
-        }
+    // Update local storage and data on formData change
+    useEffectAfterMount(() => {
+        setReportDatas('m2', formData);
+        localStorage.setItem("m2formData", JSON.stringify(formData));
+    }, [formData]);
 
-        // Handle form submission, e.g., send inputValues to backend
-        console.log("Form data:", inputValues);
-    };
+    // Update incomplete diseases state
+    useEffectAfterMount(() => {
+        const newIncompleteDiseases = diseases
+            .filter(disease => !isComplete(disease.disease_name))
+            .map(disease => disease.disease_name);
+
+        setIncompleteDiseases(newIncompleteDiseases);
+    }, [diseases, formData]);
+
+    // Notify external system of incomplete diseases
+    useEffectAfterMount(() => {
+        onCheckIncomplete("M2", incompleteDiseases);
+    }, [incompleteDiseases]);
 
     return (
-        <>
-            <h2 className="font-bold uppercase text-[1.2rem] md:text-[1.5rem] my-4 mt-10 transition-all">
-                Morbidity Disease Report
-            </h2>
+        <div className="flex flex-col items-center justify-center w-11/12 pt-16">
+            <header className="w-full mb-4">
+                    <h1 className="mb-2 text-2xl font-bold">M2 Report <span className="italic font-light">(Morbidity Diseases)</span></h1>
+                    <div className="dividing-line w-full h-[2px] bg-black"></div>
+                </header>
 
-            <form className="w-full p-4 pb-16 md:w-4/5" onSubmit={handleSubmit}>
+            <div className="w-full p-4 md:w-4/5">
                 <div className="flex flex-row w-full text-center border-white bg-green text-white italic [&>*]:px-4 [&>*]:py-2 rounded-tl-xl rounded-tr-xl font-medium uppercase text-sm md:text-[1.1rem]">
                     <h3 className="flex-[2_2_0] border-r-2 flex justify-left items-center">
                         Disease
@@ -151,21 +137,21 @@ export const MorbidityForm: React.FC = () => {
                     </h3>
                 </div>
                 {diseases.map((disease) => (
-                    <div key={disease.code} className="mb-4 disease">
+                    <div key={disease.disease_code} className="mb-4 disease">
                         <button
                             type="button"
-                            onClick={() => toggleSection(disease.name)}
+                            onClick={() => toggleSection(disease.disease_name)}
                             className="relative flex flex-col items-center w-full gap-2 py-3 text-left transition-all bg-white group"
                         >
                             <div className="flex flex-row items-center w-full gap-2 px-4 text-left transition-all bg-white group">
                                 <span className="flex-[2_2_0%] disease-name">
-                                    {disease.name}
+                                    {disease.disease_name}
                                 </span>
                                 &nbsp;
                                 <span className="flex-[1_1_0%] disease-code">
-                                    {disease.code}
+                                    {disease.disease_code}
                                 </span>
-                                {isComplete(disease.name) ? (
+                                {isComplete(disease.disease_name) ? (
                                     <FontAwesomeIcon
                                         icon={faCheckCircle}
                                         style={{ color: "#39ca12" }}
@@ -181,7 +167,9 @@ export const MorbidityForm: React.FC = () => {
                             <div className="bg-white items-center justify-center h-0 bottom-[-1.2rem] left-[50%] group-focus-within:h-4 group-hover:h-4 group-focus-visible:h-4 transition-all">
                                 <FontAwesomeIcon
                                     icon={
-                                        openSections.includes(disease.name)
+                                        openSections.includes(
+                                            disease.disease_name
+                                        )
                                             ? faCaretUp
                                             : faCaretDown
                                     }
@@ -190,34 +178,35 @@ export const MorbidityForm: React.FC = () => {
                             </div>
                         </button>
 
-                        {openSections.includes(disease.name) && (
+                        {openSections.includes(disease.disease_name) && (
                             <div className="p-4 bg-gray-100">
                                 <div className="flex flex-row mb-2 text-center">
                                     <div className="w-full md:w-1/3"></div>
                                     <h3 className="w-full md:w-1/6">Male</h3>
                                     <h3 className="w-full md:w-1/6">Female</h3>
                                 </div>
-                                {ageGroups.map((group) => (
+                                {ageCategories.map((category) => (
                                     <div
-                                        key={group}
+                                        key={category.age_category_id}
                                         className="flex flex-row mb-2"
                                     >
                                         <label className="w-full md:w-1/3">
-                                            {group}:
+                                            {category.age_category}:
                                         </label>
                                         <input
                                             type="number"
-                                            name={`${disease.name}_${group}_M`}
+                                            name={`${disease.disease_name}_${category.age_category}_M`}
                                             className="w-full px-2 py-1 mx-1 my-1 md:w-1/6"
                                             value={
-                                                inputValues[disease.name]?.[
-                                                    group
-                                                ]?.M ?? ""
+                                                formData[
+                                                    disease.disease_name
+                                                ]?.[category.age_category]?.M ??
+                                                ""
                                             }
                                             onChange={(e) =>
                                                 handleInputChange(
-                                                    disease.name,
-                                                    group,
+                                                    disease.disease_name,
+                                                    category.age_category,
                                                     "M",
                                                     e.target.value
                                                 )
@@ -228,17 +217,18 @@ export const MorbidityForm: React.FC = () => {
                                         />
                                         <input
                                             type="number"
-                                            name={`${disease.name}_${group}_F`}
+                                            name={`${disease.disease_name}_${category.age_category}_F`}
                                             className="w-full px-2 py-1 mx-1 my-1 md:w-1/6"
                                             value={
-                                                inputValues[disease.name]?.[
-                                                    group
-                                                ]?.F ?? ""
+                                                formData[
+                                                    disease.disease_name
+                                                ]?.[category.age_category]?.F ??
+                                                ""
                                             }
                                             onChange={(e) =>
                                                 handleInputChange(
-                                                    disease.name,
-                                                    group,
+                                                    disease.disease_name,
+                                                    category.age_category,
                                                     "F",
                                                     e.target.value
                                                 )
@@ -253,14 +243,8 @@ export const MorbidityForm: React.FC = () => {
                         )}
                     </div>
                 ))}
-
-                <button
-                    type="submit"
-                    className="w-full px-4 py-2 mt-4 text-white transition-all rounded bg-green hover:opacity-85 active:scale-[98%]"
-                >
-                    Submit
-                </button>
-            </form>
-        </>
+            </div>
+            {(ageCategoryLoading || diseaseLoading) && <Loading />}
+        </div>
     );
 };

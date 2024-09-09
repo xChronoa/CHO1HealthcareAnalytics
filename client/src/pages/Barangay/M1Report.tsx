@@ -23,24 +23,38 @@ import {
     WRA,
 } from "../../types/M1FormData";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useServices } from "../../hooks/useServices";
+import { TeenagePregnancy } from "../../components/M1/TeenagePregnancy";
+import {
+    updateWRAData,
+    updateFamilyPlanningData,
+    updateServiceData,
+} from "../../utils/m1FormDataUtils";
+import { IncompleteUpdate } from "../../types/IncompleteForm";
+import Loading from "../../components/Loading";
 
-import "../../styles/m1form.css";
+interface M1ReportProps {
+    setReportDatas: (type: "m1" | "m2", data: any) => void;
+    onCheckIncomplete: IncompleteUpdate;
+}
 
-export const M1Report: React.FC = () => {
+export const M1Report: React.FC<M1ReportProps> = ({
+    setReportDatas,
+    onCheckIncomplete,
+}) => {
     const storedData = localStorage.getItem("m1formData");
+    const { loading: serviceLoading, services, fetchServices } = useServices();
+
     const initialFormData: FormData = storedData
         ? JSON.parse(storedData)
         : {
-              wra: [
-                  { age_category: "10-14", unmet_need_modern_fp: 0 },
-                  { age_category: "15-19", unmet_need_modern_fp: 0 },
-                  { age_category: "20-49", unmet_need_modern_fp: 0 },
-              ],
+              wra: [],
               familyplanning: [],
               servicedata: [],
-              teenagepregnancy: [],
           };
+
     const [formData, setFormData] = useState<FormData>(initialFormData);
+    const [incompleteSections, setIncompleteSections] = useState<string[]>([]);
 
     const [step, setStep] = useState<number>(() => {
         const savedStep = localStorage.getItem("step");
@@ -68,146 +82,114 @@ export const M1Report: React.FC = () => {
         }); // Start from step 1
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log(formData);
+    // Expected counts for each service ID
+    const serviceExpectedCounts: Record<number, number> = {
+        1: 57, // Prenatal
+        2: 21, // Intrapartum
+        3: 9, // Post-partum
+        4: 50, // Immunization
+        5: 18, // Nutrition Services
+        6: 24, // Nutritional Assessment
+        7: 6, // Deworming
+        8: 6, // School-based Deworming
+        9: 1, // Soil
+        10: 4, // Rabies
+        11: 4, // Natality
+        12: 18, // Management
+        13: 24, // Non-communicable Diseases
+        14: 9, // Teenage Pregnancy
     };
 
-    useEffectAfterMount(() => {
-        localStorage.setItem("m1formData", JSON.stringify(formData));
-    }, [formData]);
-
-    const updateWRAData = (
-        index: number,
-        field: keyof FormData["wra"][number],
-        value: any
-    ) => {
-        setFormData((prevData) => {
-            const updatedWRA = prevData.wra.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
+    // Validate WRA section
+    const isWRAComplete = (wra: WRA[]): boolean => {
+        return wra.every((entry) => {
+            return (
+                entry.unmet_need_modern_fp !== undefined &&
+                entry.unmet_need_modern_fp >= 0 // Non-negative number
             );
-            return { ...prevData, wra: updatedWRA };
         });
     };
 
-    const updateFamilyPlanningData = (
-        ageCategory: string,
-        fpMethodId: number,
-        fpMethodName: string,
-        field: keyof FamilyPlanningEntry,
-        value: any
-    ) => {
-        setFormData((prevData) => {
-            const existingIndex = prevData.familyplanning.findIndex(
-                (item) =>
-                    item.age_category === ageCategory &&
-                    item.fp_method_id === fpMethodId
+    // Validate Family Planning section
+    const isFamilyPlanningComplete = (
+        familyplanning: FamilyPlanningEntry[]
+    ): boolean => {
+        return familyplanning.every((entry) => {
+            return (
+                (entry.fp_method_id !== undefined &&
+                    entry.fp_method_name?.trim() !== "" &&
+                    entry.current_users_beginning_month !== undefined &&
+                    entry.current_users_beginning_month >= 0) ||
+                (entry.new_acceptors_prev_month !== undefined &&
+                    entry.new_acceptors_prev_month >= 0) ||
+                (entry.other_acceptors_present_month !== undefined &&
+                    entry.other_acceptors_present_month >= 0) ||
+                (entry.drop_outs_present_month !== undefined &&
+                    entry.drop_outs_present_month >= 0) ||
+                (entry.current_users_end_month !== undefined &&
+                    entry.current_users_end_month >= 0) ||
+                (entry.new_acceptors_present_month !== undefined &&
+                    entry.new_acceptors_present_month >= 0)
             );
-
-            let updatedFamilyPlanning: FamilyPlanningEntry[];
-
-            if (existingIndex > -1) {
-                // Update existing entry
-                updatedFamilyPlanning = prevData.familyplanning.map((item, i) =>
-                    i === existingIndex ? { ...item, [field]: value } : item
-                );
-            } else {
-                // Add new entry
-                updatedFamilyPlanning = [
-                    ...prevData.familyplanning,
-                    {
-                        age_category: ageCategory,
-                        fp_method_id: fpMethodId,
-                        fp_method_name: fpMethodName, // Provide a default or empty value
-                        current_users_beginning_month: 0,
-                        new_acceptors_prev_month: 0,
-                        other_acceptors_present_month: 0,
-                        drop_outs_present_month: 0,
-                        current_users_end_month: 0,
-                        new_acceptors_present_month: 0,
-                        [field]: value,
-                    },
-                ];
-            }
-
-            return { ...prevData, familyplanning: updatedFamilyPlanning };
         });
     };
 
-    const updateServiceData = (
-        serviceId: number,
-        indicatorId: number | undefined,
-        ageCategory: string | undefined,
-        valueType: string | undefined,
-        field: keyof ServiceData,
-        value: any
-    ) => {
-        setFormData((prevData) => {
-            // Find the existing index with optional parameters
-            const existingIndex = prevData.servicedata.findIndex(
-                (item) =>
-                    item.service_id === serviceId &&
-                    (indicatorId === undefined ||
-                        item.indicator_id === indicatorId) &&
-                    (ageCategory === undefined ||
-                        item.age_category === ageCategory) &&
-                    (valueType === undefined || item.value_type === valueType)
-            );
-
-            let updatedServices: ServiceData[];
-
-            if (existingIndex > -1) {
-                // Update existing entry
-                updatedServices = prevData.servicedata.map((item, i) =>
-                    i === existingIndex ? { ...item, [field]: value } : item
-                );
-            } else {
-                // Add new entry with default values if optional fields are missing
-                updatedServices = [
-                    ...prevData.servicedata,
-                    {
-                        service_id: serviceId,
-                        indicator_id: indicatorId,
-                        age_category: ageCategory ?? "",
-                        value_type: valueType ?? "",
-                        value: field === "value" ? value : 0, // Initialize `value` to 0 if it's not being updated
-                        remarks: field === "remarks" ? value : "", // Initialize `remarks` to an empty string if it's not being updated
-                    } as ServiceData, // Ensure the new entry conforms to the `ServiceData` type
-                ];
-            }
-
-            return { ...prevData, servicedata: updatedServices };
+    // Validate Service Data section including Teenage Pregnancy
+    const isServiceDataComplete = (servicedata: ServiceData[]): boolean => {
+        return servicedata.every((entry) => {
+            return entry.value !== undefined && entry.value >= 0; // Non-negative number
         });
     };
 
-    const handleClick = async () => {
-        // console.log(JSON.stringify(formData));
-        console.log(JSON.stringify(sortFormData(formData)));
-        // localStorage.removeItem("formData");
-        try {
-            const response = await fetch(
-                "http://localhost:8000/api/submit/report",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify(sortFormData(formData)),
-                    credentials: "include",
-                }
-            );
+    // Check for incomplete sections
+    const checkIncompleteSections = (formData: FormData) => {
+        const incompleteSections: string[] = [];
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error);
-            }
-
-            const data = await response.json();
-            console.log(data);
-        } catch (error: any) {
-            console.log(error);
+        // Check WRA section
+        if (formData.wra.length !== 3 || !isWRAComplete(formData.wra)) {
+            incompleteSections.push("WRA");
         }
+
+        // Check Family Planning section
+        if (
+            formData.familyplanning.length !== 42 ||
+            !isFamilyPlanningComplete(formData.familyplanning)
+        ) {
+            incompleteSections.push("Family Planning");
+        }
+
+        // Check Service Data sections
+        const incompleteServiceSections = Object.keys(
+            serviceExpectedCounts
+        ).filter((serviceId) => {
+            const serviceData = formData.servicedata.filter(
+                (data) => data.service_id === Number(serviceId)
+            );
+
+            // Check if the number of entries matches the expected count
+            const expectedCount = serviceExpectedCounts[Number(serviceId)];
+
+            // Ensure that the count matches and the data is complete
+            return (
+                serviceData.length !== expectedCount ||
+                !isServiceDataComplete(serviceData)
+            );
+        });
+
+        if (incompleteServiceSections.length > 0) {
+            incompleteSections.push(
+                ...incompleteServiceSections.map((serviceId) => {
+                    const service = services.find(
+                        (s) => s.service_id === Number(serviceId)
+                    );
+                    return service
+                        ? service.service_name
+                        : `Service ID ${serviceId}`;
+                })
+            );
+        }
+
+        return incompleteSections;
     };
 
     /**
@@ -243,36 +225,30 @@ export const M1Report: React.FC = () => {
             return a.age_category.localeCompare(b.age_category);
         }
 
-        // Helper function to compare TeenagePregnancy items
-        function compareTeenagePregnancy(
-            a: { service_id: number; age_category: string },
-            b: { service_id: number; age_category: string }
-        ): number {
-            if (a.service_id !== b.service_id) {
-                return a.service_id - b.service_id;
-            }
-            return a.age_category.localeCompare(b.age_category);
-        }
-
-        console.log({
-            wra: data.wra.sort(compareWRA).length,
-            familyplanning: data.familyplanning.sort(compareFamilyPlanning).length,
-            servicedata: data.servicedata.sort(compareServiceData).length,
-            teenagepregnancy: data.teenagepregnancy.sort(
-                compareTeenagePregnancy
-            ).length,
-        })
-
         // Sort the arrays in place
         return {
             wra: data.wra.sort(compareWRA),
             familyplanning: data.familyplanning.sort(compareFamilyPlanning),
             servicedata: data.servicedata.sort(compareServiceData),
-            teenagepregnancy: data.teenagepregnancy.sort(
-                compareTeenagePregnancy
-            ),
         };
     }
+
+    useEffectAfterMount(() => {
+        fetchServices();
+    }, [fetchServices]);
+
+    useEffectAfterMount(() => {
+        setReportDatas("m1", sortFormData(formData));
+        localStorage.setItem("m1formData", JSON.stringify(formData));
+    }, [formData]); // Ensure formData is included in the dependencies
+
+    useEffectAfterMount(() => {
+        setIncompleteSections(checkIncompleteSections(formData));
+    }, [services, formData]); // Ensure formData is included in the dependencies
+
+    useEffectAfterMount(() => {
+        onCheckIncomplete("M1", incompleteSections);
+    }, [incompleteSections]); // Ensure incompleteSections and onCheckIncomplete are included
 
     return (
         <>
@@ -284,7 +260,7 @@ export const M1Report: React.FC = () => {
 
                 {/* Progress Bar */}
                 <div className="relative mb-6">
-                    <div className="flex items-center mb-2">
+                    <div className="flex items-center w-full">
                         {[...Array(totalSteps)].map((_, index) => (
                             <div
                                 key={index}
@@ -292,12 +268,17 @@ export const M1Report: React.FC = () => {
                             >
                                 {/* Circle */}
                                 <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center absolute -left-3 ${
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center absolute ${
                                         step > index
                                             ? "bg-green"
                                             : "bg-gray-300"
                                     } transition-colors duration-300`}
-                                    style={{ zIndex: 1 }}
+                                    style={{
+                                        zIndex: 1,
+                                        left: `calc(${
+                                            (100 / totalSteps) * index
+                                        }% - .60rem)`,
+                                    }}
                                 >
                                     <span className="text-white">
                                         {index + 1}
@@ -305,28 +286,381 @@ export const M1Report: React.FC = () => {
                                 </div>
 
                                 {/* Progress Bar */}
-                                <div
-                                    className={`flex-1 h-1 ${
-                                        index < totalSteps - 1
-                                            ? "bg-gray-300"
-                                            : ""
-                                    } ${
-                                        step > index ? "bg-green" : ""
-                                    } transition-colors duration-300`}
-                                />
+                                {index < totalSteps && (
+                                    <div
+                                        className={`flex-1 h-1 ${
+                                            step > index
+                                                ? "bg-green"
+                                                : "bg-gray-300"
+                                        } transition-colors duration-300`}
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
-                    {/* Filled Progress Bar */}
-                    <div
-                        className="absolute top-0 left-0 h-1 bg-green"
-                        style={{
-                            width: `${(step / totalSteps) * 100}%`,
-                            zIndex: 0,
-                        }}
-                    />
                 </div>
 
+                {/* Input Fields */}
+                <section className="flex flex-col items-center justify-center gap-5">
+                    {(step || 0) === 1 && (
+                        <ModernWRA
+                            data={formData.wra}
+                            updateData={(ageCategory, field, value) =>
+                                updateWRAData(
+                                    setFormData,
+                                    ageCategory,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 2 && (
+                        <FamilyPlanning
+                            data={formData}
+                            updateFamilyPlanningData={(
+                                ageCategory,
+                                fpMethodId,
+                                fpMethodName,
+                                field,
+                                value
+                            ) =>
+                                updateFamilyPlanningData(
+                                    setFormData,
+                                    ageCategory,
+                                    fpMethodId,
+                                    fpMethodName,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 3 && (
+                        <PrenatalCare
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 4 && (
+                        <IntrapartumCare
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 5 && (
+                        <PostpartumCare
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 6 && (
+                        <ImmunizationServices
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 7 && (
+                        <NutritionServices
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 8 && (
+                        <NutritionalAssessment
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 9 && (
+                        <DewormingServices
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 10 && (
+                        <SchoolBasedDeworming
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 11 && (
+                        <SoilTransmitted
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 12 && (
+                        <Rabies
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 13 && (
+                        <Natality
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 14 && (
+                        <ManagementOfSickChild
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 15 && (
+                        <NonCommunicableDisease
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                    {step === 16 && (
+                        <TeenagePregnancy
+                            formData={formData}
+                            updateServiceData={(
+                                serviceId,
+                                indicatorId,
+                                ageCategory,
+                                valueType,
+                                field,
+                                value
+                            ) =>
+                                updateServiceData(
+                                    setFormData,
+                                    serviceId,
+                                    indicatorId,
+                                    ageCategory,
+                                    valueType,
+                                    field,
+                                    value
+                                )
+                            }
+                        />
+                    )}
+                </section>
+
+                {/* Navigation Buttons */}
                 <div
                     className={`w-full navigation-buttons flex ${
                         step !== 1 ? "justify-between" : "justify-end"
@@ -334,7 +668,8 @@ export const M1Report: React.FC = () => {
                 >
                     {step !== 1 ? (
                         <button
-                            className="px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
+                            type="button"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
                             onClick={handlePreviousStep}
                             disabled={step === 1}
                         >
@@ -343,137 +678,17 @@ export const M1Report: React.FC = () => {
                     ) : null}
                     {step !== totalSteps ? (
                         <button
-                            className="px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
+                            type="button"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
                             onClick={handleNextStep}
                             disabled={step === totalSteps} // Adjust based on the max step
                         >
                             Next
                         </button>
-                    ) : (
-                        <button
-                            className="px-5 py-2 text-white transition-all bg-blue-500 rounded cursor-pointer hover:opacity-75"
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </button>
-                    )}
+                    ) : null}
                 </div>
-
-                <button
-                    className="w-full px-4 py-2 m-5 ml-0 font-bold text-white transition-all bg-red-500 rounded-lg shadow-md active:scale-[98%] hover:bg-red-600 shadow-gray-500"
-                    onClick={handleClick}
-                >
-                    CONSOLE
-                </button>
-
-                <section>
-                    <form
-                        onSubmit={handleClick}
-                        className="flex flex-col items-center justify-center gap-5"
-                    >
-                        {(step || 0) === 1 && (
-                            <ModernWRA
-                                data={formData.wra}
-                                updateData={(index, field, value) =>
-                                    updateWRAData(index, field, value)
-                                }
-                            />
-                        )}
-                        {step === 2 && (
-                            <FamilyPlanning
-                                data={formData}
-                                updateFamilyPlanningData={
-                                    updateFamilyPlanningData
-                                }
-                            />
-                        )}
-                        {step === 3 && (
-                            <PrenatalCare
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 4 && (
-                            <IntrapartumCare
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 5 && (
-                            <PostpartumCare
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 6 && (
-                            <ImmunizationServices
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 7 && (
-                            <NutritionServices
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 8 && (
-                            <NutritionalAssessment
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 9 && (
-                            <DewormingServices
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 10 && (
-                            <SchoolBasedDeworming
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 11 && (
-                            <SoilTransmitted
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 12 && (
-                            <Rabies
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 13 && (
-                            <Natality
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 14 && (
-                            <ManagementOfSickChild
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        {step === 15 && (
-                            <NonCommunicableDisease
-                                formData={formData}
-                                updateServiceData={updateServiceData}
-                            />
-                        )}
-                        <button className="w-full px-4 py-2 m-5 ml-0 font-bold text-white transition-all bg-red-500 rounded-lg shadow-md active:scale-[98%] hover:bg-red-600 shadow-gray-500">
-                            SUBMIT
-                        </button>
-                    </form>
-                </section>
-
-                {/* Previous position of nav buttons */}
-                {/* Navigation Buttons */}
             </div>
+            {serviceLoading && <Loading />}
         </>
     );
 };
