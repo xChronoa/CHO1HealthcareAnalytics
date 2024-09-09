@@ -17,7 +17,7 @@ import { useAuth } from "../context/AuthContext";
 interface SidebarProps {
     type: string;
     logoPath: string;
-    barangay?: string;
+    barangay?: string | undefined;
     isCollapsed: boolean;
     isMinimized: boolean;
     toggleSidebar: () => void;
@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                 className="origin-center scale-95"
                             />
                             <h3 className="text-center text-nowrap">
-                                Barangay {barangay}
+                                {barangay ? `Barangay ${barangay}` : "Cabuyao Health Office 1"}
                             </h3>
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
                         </div>
