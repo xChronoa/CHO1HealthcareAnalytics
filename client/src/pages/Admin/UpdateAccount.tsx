@@ -23,13 +23,16 @@ const UpdateAccount: React.FC = () => {
     const navigate = useNavigate();
 
     useEffectAfterMount(async () => {
-        fetchBarangays();
         if (!user || user.user_id === undefined) return;
 
         const userData = await getUser(user.user_id);
 
         if (userData || userData !== undefined) {
             setUser(userData);
+        }
+
+        if(user.role === "encoder") {
+            fetchBarangays();
         }
     }, []);
 
