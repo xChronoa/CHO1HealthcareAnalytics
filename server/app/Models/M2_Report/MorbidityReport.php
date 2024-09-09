@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\M2_Report;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AgeCategory;
+use App\Models\ReportStatus;
 
 class MorbidityReport extends Model
 {

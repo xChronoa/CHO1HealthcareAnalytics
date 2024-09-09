@@ -4,10 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\M1_Report\WomenOfReproductiveAge;
+use App\Models\M1_Report\FamilyPlanningReport;
+use App\Models\M2_Report\MorbidityReport;
+use App\Models\M1_Report\ServiceData;
 
 class AgeCategory extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = "age_category_id";
 
     protected $fillable = [
         'age_category'
