@@ -70,7 +70,7 @@ const AppointmentList: React.FC = () => {
                 <section className="flex flex-col items-start">
                     <div className="flex flex-row items-center justify-end w-full gap-10 mt-6 mb-5 sm:mb-0 filter">
                         {/* Filter by month and year */}
-                        <div className="relative flex flex-row items-center justify-center gap-2">
+                        <div className="relative flex flex-row items-center justify-center w-fit md:w-[17%] gap-2">
                             <label
                                 htmlFor="date"
                                 className="absolute left-0 top-[-1.5rem] font-medium w-full text-nowrap"
@@ -89,7 +89,7 @@ const AppointmentList: React.FC = () => {
                             />
                         </div>
 
-                        <div className="relative flex flex-row items-center justify-center gap-5">
+                        <div className="relative flex flex-row items-center justify-center gap-5 min-w-40 md:w-fit">
                             <label
                                 htmlFor="appointment-type"
                                 className="absolute left-0 top-[-1.5rem] font-medium w-full text-nowrap"
@@ -120,7 +120,7 @@ const AppointmentList: React.FC = () => {
                     </div>
 
                     <div className="w-full p-4 overflow-x-auto rounded-lg shadow-md sm:py-4 table-container outline outline-1 shadow-black sm:outline-0 sm:shadow-transparent">
-                        <table className="w-full text-center">
+                        <table className="hidden w-full text-center md:table md:w-full">
                             {/* Table Header */}
                             <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
                                 <tr>
@@ -197,6 +197,55 @@ const AppointmentList: React.FC = () => {
                                 )}
                             </tbody>
                         </table>
+
+                        <div className="md:hidden">
+                            {appointmentLoading ? (
+                                <p className="text-center text-gray-500">
+                                    Loading appointments...
+                                </p>
+                            ) : error ? (
+                                <p className="text-center text-red-500">
+                                    Error loading appointments: {error}
+                                </p>
+                            ) : appointments.length === 0 ? (
+                                <p className="text-center text-gray-600">
+                                    No appointments found for the selected
+                                    category.
+                                </p>
+                            ) : (
+                                appointments.map((appointment) => (
+                                    <div
+                                        key={appointment.patient.patient_id}
+                                        className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-md"
+                                    >
+                                        <h2 className="mb-2 text-lg font-semibold text-gray-800">
+                                            {appointment.patient.first_name}{" "}
+                                            {appointment.patient.last_name}
+                                        </h2>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Sex:</strong>{" "}
+                                            {appointment.patient.sex}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Birthdate:</strong>{" "}
+                                            {appointment.patient.birthdate}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Address:</strong>{" "}
+                                            {appointment.patient.address}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Email:</strong>{" "}
+                                            {appointment.patient.email}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Phone#:</strong>{" "}
+                                            {appointment.patient.phone_number}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </section>
             </div>
