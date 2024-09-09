@@ -3,13 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDgRnC_qwW-covjgIqarCC_rnLNQY0lnKE",
-  authDomain: "cho-healthcare-analytics.firebaseapp.com",
-  projectId: "cho-healthcare-analytics",
-  storageBucket: "cho-healthcare-analytics.appspot.com",
-  messagingSenderId: "652642627834",
-  appId: "1:652642627834:web:feb40a3391ca01084b9943",
-  measurementId: "G-TDJ15V38EC"
+  apiKey: "AIzaSyBmhqdzmOdyMqtAs8UYVALshlSRvvNMQtQ",
+  authDomain: "cho-healthcare-analytics-e9b41.firebaseapp.com",
+  projectId: "cho-healthcare-analytics-e9b41",
+  storageBucket: "cho-healthcare-analytics-e9b41.appspot.com",
+  messagingSenderId: "858682343494",
+  appId: "1:858682343494:web:3b667f99e72015bc894a47",
+  measurementId: "G-48SZ7WSDW7"
 };
 
 // Initialize Firebase
