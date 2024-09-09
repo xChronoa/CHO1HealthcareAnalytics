@@ -31,32 +31,6 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
         ? parentIndicator.indicator_id
         : null;
 
-    // const getInputValue = (
-    //     serviceId: number,
-    //     indicatorId: number | undefined,
-    //     ageCategory: string | undefined,
-    //     fieldKey: keyof ServiceData
-    // ): string | number => {
-    //     const entry = formData.servicedata.find(
-    //         (entry) =>
-    //             entry.service_id === serviceId &&
-    //             entry.indicator_id === indicatorId &&
-    //             entry.age_category === ageCategory
-    //     );
-    //     return entry ? entry[fieldKey] || 0 : 0;
-    // };
-
-    // const handleInputChange = (
-    //     e: React.ChangeEvent<HTMLInputElement>,
-    //     serviceId: number,
-    //     indicatorId: number | undefined,
-    //     ageCategory: string | undefined,
-    //     fieldKey: keyof ServiceData
-    // ) => {
-    //     const { value } = e.target;
-    //     updateServiceData(serviceId, indicatorId, ageCategory, undefined, fieldKey, Number(value));
-    // }
-
     return (
         <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-fit">
             <legend className="text-lg font-semibold">
@@ -170,7 +144,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                         </span>
                                         <input
                                             type="number"
-                                        placeholder="0"
+                                            placeholder="0"
                                             min="0"
                                             className="block w-full p-2 mt-1 border rounded-md sm:w-24"
                                             required
