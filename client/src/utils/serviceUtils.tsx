@@ -8,7 +8,7 @@ export const getInputValue = (
     valueType: string | undefined,
     fieldKey: keyof ServiceData
 ): string | number => {
-    if(ageCategory === undefined) {
+    if (ageCategory === undefined) {
         const entry = servicedata.find(
             (entry) =>
                 entry.service_id === serviceId &&
@@ -18,7 +18,6 @@ export const getInputValue = (
 
         return entry ? entry[fieldKey] || 0 : 0;
     } else {
-        
         const entry = servicedata.find(
             (entry) =>
                 entry.service_id === serviceId &&
@@ -28,7 +27,6 @@ export const getInputValue = (
         return entry ? entry[fieldKey] || 0 : 0;
     }
 };
-
 
 export const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -47,19 +45,24 @@ export const handleInputChange = (
     ) => void
 ) => {
     const { value } = e.target;
-    const parsedValue = fieldKey === "remarks" ? value : Number(value);
+    const parsedValue =
+        fieldKey === "remarks"
+            ? value // Keep the value as-is for remarks
+            : value === ""
+            ? undefined // Handle empty string case
+            : value; // Convert to number if not empty
 
     // If the fieldKey is "remarks", repeat for each valueType
     if (fieldKey === "remarks") {
-        if(ageCategory === undefined) {
+        if (ageCategory === undefined) {
             let valueTypes: string[] = [];
-            
-            if(valueType === "male" || valueType === "female") {
+
+            if (valueType === "male" || valueType === "female") {
                 valueTypes = ["male", "female"];
             } else {
                 valueTypes = ["total"];
             }
-            
+
             valueTypes.forEach((type) => {
                 updateServiceData(
                     serviceId,
@@ -82,7 +85,7 @@ export const handleInputChange = (
                     parsedValue
                 );
             });
-        } 
+        }
     } else {
         // Otherwise, just update for the specific valueType
         updateServiceData(
