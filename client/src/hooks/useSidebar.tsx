@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 function useSidebar() {
     // Determines sidebar state
     const [isMinimized, setIsMinimized] = useState(window.innerWidth < 1024);
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
     const [prevMinimizedState, setPrevMinimizedState] = useState(window.innerWidth < 1024);
+    const location = useLocation();
 
     // Minimizes or maximizes sidebar
     const toggleSidebar = useCallback(() => {
@@ -33,6 +35,11 @@ function useSidebar() {
             setIsCollapsed(false);
         }
     }, [isCollapsed, prevMinimizedState]);
+
+    // Collapse the sidebar whenever the page changes
+    useEffect(() => {
+        setIsCollapsed(true); // Collapse sidebar on route change
+    }, [location]); // Triggers when the route changes
 
     useEffect(() => {
         window.addEventListener("resize", handleResize);
