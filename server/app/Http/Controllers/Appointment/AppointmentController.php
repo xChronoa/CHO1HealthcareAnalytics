@@ -44,8 +44,6 @@ class AppointmentController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // return response()->json($request->all(), 200);
-
         // Start a transaction
         DB::beginTransaction();
 
@@ -65,21 +63,30 @@ class AppointmentController extends Controller
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
             $appointmentCategoryId = $appointmentCategory->appointment_category_id;
 
-            // Create the appointment
+            // Check for the highest queue_number for the given appointment_date
+            $maxQueueNumber = Appointment::whereDate('appointment_date', $request->appointment_date)
+                ->max('queue_number');
+
+            // If no appointments exist for the date, start at 1, otherwise increment
+            $queueNumber = $maxQueueNumber ? $maxQueueNumber + 1 : 1;
+
+            // Create the appointment with the generated queue number
             $appointment = Appointment::create([
                 'patient_id' => $patient->patient_id,
                 'appointment_date' => $request->appointment_date,
                 'appointment_category_id' => $appointmentCategoryId,
                 'patient_note' => $request->patient_note,
+                'queue_number' => $queueNumber,
             ]);
 
             // Commit the transaction
             DB::commit();
 
-            // Return a response
+            // Return a response with the generated queue number
             return response()->json([
                 'message' => 'Patient and Appointment created successfully',
-                'appointment' => $appointment
+                'appointment' => $appointment,
+                'queue_number' => $queueNumber
             ]);
         } catch (\Exception $e) {
             // Rollback the transaction if anything goes wrong
@@ -161,7 +168,7 @@ class AppointmentController extends Controller
         $data = $appointments->map(function ($appointment) {
             return [
                 'patient' => [
-                    'id' => $appointment->patient->patient_id,
+                    'patient_id' => $appointment->patient->patient_id,
                     'first_name' => $appointment->patient->first_name,
                     'last_name' => $appointment->patient->last_name,
                     'sex' => $appointment->patient->sex,
@@ -172,8 +179,8 @@ class AppointmentController extends Controller
                 ],
                 'appointment_date' => $appointment->appointment_date,
                 'appointment_category' => [
-                    'id' => $appointment->category->appointment_category_id,
-                    'name' => $appointment->category->appointment_category_name,
+                    'appointment_category_id' => $appointment->category->appointment_category_id,
+                    'appointment_category_name' => $appointment->category->appointment_category_name,
                 ],
             ];
         });
@@ -216,8 +223,9 @@ class AppointmentController extends Controller
         $data = $appointments->map(function ($appointment) {
             return [
                 'patient' => [
-                    'id' => $appointment->patient->patient_id,
-                    'name' => $appointment->patient->name,
+                    'patient_id' => $appointment->patient->patient_id,
+                    'first_name' => $appointment->patient->first_name,
+                    'last_name' => $appointment->patient->last_name,
                     'sex' => $appointment->patient->sex,
                     'birthdate' => $appointment->patient->birthdate,
                     'address' => $appointment->patient->address,
@@ -226,8 +234,8 @@ class AppointmentController extends Controller
                 ],
                 'appointment_date' => $appointment->appointment_date,
                 'appointment_category' => [
-                    'id' => $appointment->category->appointment_category_id,
-                    'name' => $appointment->category->appointment_category_name,
+                    'appointment_category_id' => $appointment->category->appointment_category_id,
+                    'appointment_category_name' => $appointment->category->appointment_category_name,
                 ],
             ];
         });
