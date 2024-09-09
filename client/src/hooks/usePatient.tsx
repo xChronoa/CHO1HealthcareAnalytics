@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Patient } from "../types/Patient";
+import { baseAPIUrl } from "../config/apiConfig";
 
 interface UsePatient {
     // Functions
@@ -36,7 +37,7 @@ export const usePatient = (): UsePatient => {
     const fetchPatients = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:8000/api/patients", {
+            const response = await fetch(`${baseAPIUrl}/patients`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -66,7 +67,7 @@ export const usePatient = (): UsePatient => {
     const getPatient = useCallback(async (patient_id: number): Promise<Patient> => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:8000/api/patients/${patient_id}`, {
+            const response = await fetch(`${baseAPIUrl}/patients/${patient_id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -102,7 +103,7 @@ export const usePatient = (): UsePatient => {
             setErrorMessage({});
             setSuccess(false);
 
-            const response = await fetch("http://localhost:8000/api/patients", {
+            const response = await fetch(`${baseAPIUrl}/patients`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -135,7 +136,7 @@ export const usePatient = (): UsePatient => {
             setErrorMessage({});
             setSuccess(false);
 
-            const response = await fetch(`http://localhost:8000/api/patients/${patient.patient_id}`, {
+            const response = await fetch(`${baseAPIUrl}/patients/${patient.patient_id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

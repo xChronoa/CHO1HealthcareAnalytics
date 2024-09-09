@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Indicator } from "../types/Indicator";
+import { baseAPIUrl } from "../config/apiConfig";
 
 // Define the custom hook
 export const useIndicator = () => {
@@ -13,7 +14,7 @@ export const useIndicator = () => {
 
         try {
             const response = await fetch(
-                `http://localhost:8000/api/indicator/${encodeURIComponent(encodeURIComponent(service_name))}`,
+                `${baseAPIUrl}/indicator/${encodeURIComponent(encodeURIComponent(service_name))}`,
                 {
                     method: "GET",
                     headers: {

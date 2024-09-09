@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { baseAPIUrl } from "../config/apiConfig";
 
 // Define types for the data models
 interface Patient {
@@ -39,7 +40,7 @@ export const useAppointment = () => {
     const [maxDate, setMaxDate] = useState("");
 
     // Base URL for the API
-    const API_URL = "http://localhost:8000/api/appointments";
+    const API_URL = `${baseAPIUrl}/appointments`;
 
     /**
      * Fetch all appointments from the API.

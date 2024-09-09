@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { baseAPIUrl } from "../config/apiConfig";
 
 interface AppointmentCategory {
     appointment_category_id: number;
@@ -22,7 +23,7 @@ export const useAppointmentCategory = (): UseAppointmentCategory => {
             setAppointmentCategoryLoading(true);
 
             const response = await fetch(
-                "http://localhost:8000/api/appointment-categories"
+                `${baseAPIUrl}/appointment-categories`
             );
             if (!response.ok) {
                 throw new Error("Network response was not ok");

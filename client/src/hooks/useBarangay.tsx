@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import logos from '../assets/logoImports';
+import { baseAPIUrl } from '../config/apiConfig';
 
 interface Barangay {
     barangay_id: number;
@@ -15,7 +16,7 @@ export const useBarangay = () => {
     const fetchBarangays = async () => {
         try {
             setBarangayLoading(true);
-            const response = await fetch('http://localhost:8000/api/barangays', {
+            const response = await fetch(`${baseAPIUrl}/barangays`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
