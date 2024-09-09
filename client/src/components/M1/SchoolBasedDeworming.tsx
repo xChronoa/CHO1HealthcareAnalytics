@@ -15,7 +15,7 @@ export const SchoolBasedDeworming: React.FC<ServiceProps> = ({
     } = useIndicator();
 
     const headCategories = [
-        "37. 1-19 y/o given 2 doses of deworming drug"
+        "1-19 y/o given 2 doses of deworming drug"
     ];
 
     // Extract the ID if the indicator is found
