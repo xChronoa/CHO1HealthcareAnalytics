@@ -4,6 +4,7 @@ import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { usePatient } from "../../hooks/usePatient";
 import { useAppointment } from "../../hooks/useAppointment";
 import Loading from "../../components/Loading";
+import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 
 interface DashboardProp {
     barangayLogo?: string;
@@ -11,8 +12,9 @@ interface DashboardProp {
 
 const Dashboard: React.FC<DashboardProp> = () => {
     const [section, setSection] = useState<string>("m1");
-    const { fetchPatients, patients } = usePatient();
+    const { fetchPatients, patients, loading: patientLoading } = usePatient();
     const { fetchPatientsAppointments, appointments, appointmentLoading } = useAppointment();
+    const { fetchPendingReportCount, pendingReportCount, loading: reportSubmissionLoading } = useReportSubmissions();
 
     const handleToggle = (selectedSection: string) => {
         setSection(selectedSection);
@@ -28,7 +30,8 @@ const Dashboard: React.FC<DashboardProp> = () => {
     useEffectAfterMount(() => {
         fetchPatients();
         fetchPatientsAppointments();
-    }, [fetchPatients]);
+        fetchPendingReportCount();
+    }, [fetchPatients, fetchPatientsAppointments, fetchPendingReportCount]);
 
     return (
         <>
@@ -59,7 +62,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             Pending Barangay Report
                         </label>
                         <span className="text-2xl font-bold text-center text-black bg-transparent pending-report-amount">
-                            3
+                            {pendingReportCount}
                         </span>
                     </div>
                 </div>
@@ -95,7 +98,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     </div>
                 </div>
             </div>
-            {appointmentLoading && <Loading />}
+            {(appointmentLoading || reportSubmissionLoading || patientLoading) && <Loading />}
         </>
     );
 };
