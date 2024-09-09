@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { User } from "../types/User";
+import { baseAPIUrl } from "../config/apiConfig";
 
 interface UseUser {
     // Functions
@@ -36,7 +37,7 @@ export const useUser = (): UseUser => {
             setLoading(true);
             setError(null); // Reset error before request
             
-            const response = await fetch("http://localhost:8000/api/users", {
+            const response = await fetch(`${baseAPIUrl}/users`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -70,7 +71,7 @@ export const useUser = (): UseUser => {
             setLoading(true);
             setError(null); // Reset error before request
             
-            const response = await fetch(`http://localhost:8000/api/users/${user_id}`, {
+            const response = await fetch(`${baseAPIUrl}/users/${user_id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -106,7 +107,7 @@ export const useUser = (): UseUser => {
             setErrorMessage({});
             setSuccess(false);
 
-            const response = await fetch("http://localhost:8000/api/users", {
+            const response = await fetch(`${baseAPIUrl}/users`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -139,7 +140,7 @@ export const useUser = (): UseUser => {
             setErrorMessage({});
             setSuccess(false);
 
-            const response = await fetch(`http://localhost:8000/api/users/${user.user_id}`, {
+            const response = await fetch(`${baseAPIUrl}/users/${user.user_id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -172,7 +173,7 @@ export const useUser = (): UseUser => {
             setErrorMessage({});
             setSuccess(false);
 
-            const response = await fetch (`http://localhost:8000/api/users/disable/${user.user_id}`, {
+            const response = await fetch (`${baseAPIUrl}/users/disable/${user.user_id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
