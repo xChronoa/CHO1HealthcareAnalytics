@@ -1,11 +1,12 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from "react";
 import Loading from "../components/Loading";
+import { baseAPIUrl } from "../config/apiConfig";
 
 /**
  * Interface defining the authentication context.
  */
 interface AuthContextType {
-    role: string | null;
+    user: User | null;
     authenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -13,6 +14,15 @@ interface AuthContextType {
     loading: boolean;
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
+}
+
+interface User {
+    user_id?: number;
+    username?: string;
+    email?: string;
+    barangay_id?: number;
+    barangay_name: string;
+    role:string;
 }
 
 /**
@@ -26,7 +36,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * @returns {JSX.Element} The AuthProvider component.
  */
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [role, setRole] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [authenticated, setAuthenticated] = useState<boolean>(localStorage.getItem("authenticated") === "true");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -38,7 +48,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await fetch("http://localhost:8000/api/auth/check", {
+                const response = await fetch(`${baseAPIUrl}/auth/check`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json", Accept: "application/json" },
                     credentials: "include",
@@ -47,13 +57,17 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 if (response.ok) {
                     const data = await response.json();
                     setAuthenticated(data.authenticated);
-                    setRole(data.authenticated ? data.role : null);
+                    setUser({
+                        role: data.role,
+                        barangay_name: data.barangay_name,
+                    });
                     localStorage.setItem("authenticated", String(data.authenticated));
                 } else {
                     const { message } = await response.json();
                     setError(message || "Failed to fetch authentication.");
                     setAuthenticated(false);
                 }
+
             } catch {
                 setError("An error occurred while checking authentication.");
                 setAuthenticated(false);
@@ -91,8 +105,14 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                     setError("The provided credentials are incorrect");
                 } else if(response.status === 422) {
                     setError("The email field must be a valid email address.");
-                } else if (response.status === 403) {
-                    setError("You are not authorized to access the previously visited page.");
+                } else if (response.status === 403 ) {
+                    const message = await response.json();
+
+                    if(message.error.code === "UNAUTHORIZED_ROLE") {
+                        setError("You are not authorized to access the previously visited page.");
+                    } else {
+                        setError(message.error.message);
+                    }
                 } else {
                     setError("An unexpected error occurred. Please try again later.");
                 }
@@ -112,12 +132,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const login = async (email: string, password: string) => {
         const previousPath = window.location.pathname;
 
-        const data = await handleFetch("http://localhost:8000/api/login", "POST", { email, password, previousPath });
+        const data = await handleFetch(`${baseAPIUrl}/login`, "POST", { email, password, previousPath });
         if (data) {
 
             localStorage.setItem("authenticated", "true");
             setAuthenticated(true);
-            setRole(data.user.role);
+            setUser(data.user);
         }
     };
     
@@ -125,16 +145,16 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
      * Logs out the user by making a request to the server.
     */
    const logout = async () => {
-       const result = await handleFetch("http://localhost:8000/api/logout", "POST");
+       const result = await handleFetch(`${baseAPIUrl}/logout`, "POST");
        if (result !== null) {
            localStorage.clear();
            setAuthenticated(false);
-           setRole(null);
+           setUser(null);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ role, authenticated, login, logout, error, loading, setLoading, setError }}>
+        <AuthContext.Provider value={{ user, authenticated, login, logout, error, loading, setLoading, setError }}>
             {!loading ? children : <Loading />}
         </AuthContext.Provider>
     );

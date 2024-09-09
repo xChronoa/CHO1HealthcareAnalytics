@@ -5,25 +5,27 @@ import Loading from "../components/Loading";
 export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
     allowedRoles,
 }) => {
-    const { role, authenticated, loading } = useAuth();
-
+    const { user, authenticated, loading } = useAuth();
+    
     if (loading) {
         // Show a loading spinner or placeholder while checking authentication
         return <Loading />;
     }
-
+    
     if (!authenticated && !loading) {
         // If the user is not authenticated, redirect to the appropriate login page
         const loginPath = location.pathname.startsWith("/admin")
-            ? "/admin/login"
-            : "/barangay/login";
+        ? "/admin/login"
+        : "/barangay/login";
         return <Navigate to={loginPath} />;
     }
-
-    if (authenticated && role) {
-        if (!allowedRoles.includes(role)) {
-            // If the user is authenticated but doesn't have the required role, redirect them to a not authorized page
-            return <Navigate to="/not-found" />;
+    
+    if(user) {
+        if (authenticated && user.role) {
+            if (!allowedRoles.includes(user.role)) {
+                // If the user is authenticated but doesn't have the required role, redirect them to a not authorized page
+                return <Navigate to="/not-found" />;
+            }
         }
     }
 
