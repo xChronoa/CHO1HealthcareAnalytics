@@ -6,12 +6,13 @@ import Footer from "./Footer";
 import useSidebar from "../hooks/useSidebar";
 
 import cabuyao_logo from "../assets/images/cabuyao_logo.png";
+import { useAuth } from "../context/AuthContext";
+import logos from "../assets/logoImports";
 
 // Interface for Sidebar Configuration
 interface SidebarConfig {
-    logo: string;  // Path to the logo image
+    // logo: string;  // Path to the logo image
     type: 'admin' | 'barangay';  // Type of sidebar layout
-    barangay?: string;
 }
 
 // Props for MainLayout Component
@@ -28,17 +29,19 @@ interface MainLayoutProps {
  */
 const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
     const { isMinimized, isCollapsed, toggleSidebar, collapseSidebar } = useSidebar();
+    const { user } = useAuth();
+    const logoPath = user?.barangay_name ? logos[user.barangay_name.toLowerCase()] : cabuyao_logo;
 
     return (
         <>
             <Sidebar
-                logoPath={sidebarConfig.logo}
+                logoPath={logoPath}
                 isMinimized={isMinimized}
                 isCollapsed={isCollapsed}
                 toggleSidebar={toggleSidebar}
                 collapseSidebar={collapseSidebar}
                 type={sidebarConfig.type}
-                barangay={sidebarConfig.barangay}
+                barangay={user?.barangay_name}
             />
             <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
             <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && isCollapsed ? "lg:pl-64" : "lg:pl-28"} bg-almond min-h-screen`}>
