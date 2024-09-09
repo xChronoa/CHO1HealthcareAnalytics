@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AgeCategoryController;
 use App\Http\Controllers\M1_Report\IndicatorController;
+use App\Http\Controllers\M2_Report\DiseaseController;
 use App\Http\Controllers\ReportStatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +17,8 @@ use App\Http\Controllers\BarangayController;
 use App\Http\Controllers\Appointment\PatientController;
 use App\Http\Controllers\Appointment\AppointmentController;
 use App\Http\Controllers\M1_Report\FamilyPlanningMethodsController;
+use App\Http\Controllers\M1_Report\ServiceController;
+use App\Http\Controllers\ReportSubmissionController;
 
 /**
  * Public Routes
@@ -28,9 +32,9 @@ Route::post('appointments', [AppointmentController::class, 'store']);
  * Protected routes for authenticated users
  */
 Route::middleware(['auth:sanctum'])->group(function () {
-    
+
     // User controller
-    Route::prefix('users')->group(function() { 
+    Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);              // Get all users
         Route::post('/', [UserController::class, 'store']);             // Create a new user
         Route::get('/{id}', [UserController::class, 'show']);          // Get a specific user by ID
@@ -62,7 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Appointment controller
     Route::prefix('appointments')->group(function () {
         Route::get('/', [AppointmentController::class, 'index']);
-        
+
         // Route::get('/{id}', [AppointmentController::class, 'show']);
         Route::put('/{id}', [AppointmentController::class, 'update']);
         Route::delete('/{id}', [AppointmentController::class, 'destroy']);
@@ -70,16 +74,45 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/category/{category_name}', [AppointmentController::class, 'patientsForCategory']);
     });
 
-    Route::post("/submit/report", [ReportStatusController::class, 'submitReport']);
+    Route::prefix("submissions")->group(function () {
+        Route::post("/", [ReportSubmissionController::class, 'createReportSubmissions']);
+        Route::post("/month-year", [ReportSubmissionController::class, 'fetchReportSubmissionsByFilter']);
+        Route::get("/min-max", [ReportSubmissionController::class, 'fetchEarliestAndLatestReportSubmissionDates']);
+        Route::get("/pending", [ReportSubmissionController::class, 'fetchCountOfPendingBarangayReports']);
+        Route::get("/barangay-reports", [ReportSubmissionController::class, 'fetchReportSubmissionsForBarangay']);
+    });
 
+    Route::prefix("statuses")->group(function () {
+        Route::post("/submit/report", [ReportStatusController::class, 'submitReport']);
+        Route::post("/report-status/", [ReportStatusController::class, 'filterReportStatuses']);
+        Route::get("/min-max/", [ReportStatusController::class, 'fetchEarliestAndLatestReportStatusesDates']);
+    });
 
+    Route::prefix("diseases")->group(function() {
+        Route::get("/", [DiseaseController::class, 'index']);
+    });
+
+    Route::prefix("age-categories")->group(function() {
+        Route::get("/", [AgeCategoryController::class, "index"]);
+    });
+
+    Route::prefix("indicator")->group(function() {
+        Route::get('/', [IndicatorController::class, 'index']);
+        Route::get('/{name}', [IndicatorController::class, 'getIndicatorFromServiceName']);
+    });
+    
+    Route::get('/fp-method', [FamilyPlanningMethodsController::class, 'index']);
+
+    Route::prefix("services")->group(function () {
+        Route::get("/", [ServiceController::class, 'index']);
+        Route::get("/{service_name}", [ServiceController::class, "show"]);
+    });
+    
     // Route for logging out an authenticated user
     Route::post('logout', [UserController::class, 'logout']);
 });
-Route::get('/indicator', [IndicatorController::class, 'index']);
-Route::get('/indicator/{name}', [IndicatorController::class, 'getIndicatorFromServiceName']);
 
-Route::get('/fp-method', [FamilyPlanningMethodsController::class, 'index']);
+
 
 /**
  * Public route to check if user is authenticated
@@ -97,10 +130,20 @@ Route::get('/auth/check', function (Request $request) {
             // Token exists, retrieve the user associated with the token
             $user = $tokenRecord->tokenable;
 
-            return response()->json([
+            // Build the user response array
+            $response = [
                 'authenticated' => true,
                 'role' => $user->role,
-            ]);
+            ];
+
+            // Include barangay information if it exists
+            if ($user->barangay) {
+                $response['barangay_name'] = $user->barangay->barangay_name;
+            }
+
+            return response()->json(
+                $response
+            );
         }
     } else {
         return response()->json(['authenticated' => false], 200);
