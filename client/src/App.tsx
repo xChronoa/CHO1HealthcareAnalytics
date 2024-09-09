@@ -32,6 +32,7 @@ import MainLayout from "./components/MainLayout";
 import GuestLayout from "./components/GuestLayout";
 import ManageAccountLayout from "./components/ManageAccountLayout";
 import { AuthProvider } from "./context/AuthContext";
+import AppointmentConfirmation from "./pages/AppointmentConfirmation";
 
 function App() {
     return (
@@ -43,13 +44,14 @@ function App() {
                         {/* <Route index element={<Overview />} /> */}
                         <Route index element={<Login image={cho_logo} />} />
                         <Route element={<Appointment />} path="/appointment" />
+                        <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
                         <Route element={<Login image={cabuyao_logo} />} path="/barangay/login" />
                         <Route element={<Login image={cho_logo} />} path="/admin/login" />
                     </Route>
 
                     {/* Admin Routes */}
                     <Route element={<PrivateRoute allowedRoles={['admin']}/>}>
-                        <Route path="admin" element={<MainLayout sidebarConfig={{ logo: cho_logo, type: 'admin' }}/>}>
+                        <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }}/>}>
                             <Route index element={<Dashboard />} />
                             <Route element={<Transaction />} path="transactions" />
                             <Route element={<BarangayList />} path="barangays" />
@@ -66,7 +68,7 @@ function App() {
 
                     {/* Barangay Routes */}
                     <Route element={<PrivateRoute allowedRoles={['encoder']}/>}>
-                        <Route path="barangay" element={<MainLayout sidebarConfig={{ logo: cabuyao_logo, type: 'barangay', barangay: "Marinig" }}/>}>
+                        <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay'}}/>}>
                             <Route index element={<History />} />
                             <Route element={<History />} path="history" />
                             <Route element={<Report />} path="report" />
