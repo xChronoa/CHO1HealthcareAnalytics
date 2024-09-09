@@ -1,5 +1,6 @@
 import React from "react";
 import { FamilyPlanningEntry } from "../../types/M1FormData";
+import { baseAPIUrl } from "../../config/apiConfig";
 
 interface FPMethod {
     method_id: number;
@@ -34,7 +35,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
 
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/fp-method",
+                    `${baseAPIUrl}/fp-method`,
                     {
                         method: "GET",
                         headers: {
@@ -117,7 +118,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
             methodId,
             methodName,
             fieldKey,
-            Number(value)
+            value
         );
     };
 
