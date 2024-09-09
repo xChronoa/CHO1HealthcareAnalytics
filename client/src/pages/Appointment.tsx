@@ -10,11 +10,29 @@ import {
 import { auth } from "../config/firebaseConfig";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import { baseAPIUrl } from "../config/apiConfig";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+interface FormData {
+    first_name: string;
+    last_name: string;
+    sex: string;
+    birthdate: string;
+    address: string;
+    appointment_date: string;
+    appointment_category_name: string;
+    email: string;
+    phone_number: string;
+    otp: string;
+    patient_note: string;
+    terms: boolean;
+}
 
 const Appointment: React.FC = () => {
     const { fetchAppointmentCategories, appointmentCategories } =
         useAppointmentCategory();
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         first_name: "",
         last_name: "",
         sex: "",
@@ -28,12 +46,47 @@ const Appointment: React.FC = () => {
         patient_note: "",
         terms: false,
     });
-    const [loading, setLoading] = useState(false);
-    const [confirm, setConfirm] = useState<ConfirmationResult | null>(null);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [generalError, setGeneralError] = useState<string | null>(null);
     const [otpTimer, setOtpTimer] = useState<number>(60);
     const [otpTimerActive, setOtpTimerActive] = useState<boolean>(false);
+    const [confirm, setConfirm] = useState<ConfirmationResult | null>(null);
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [validationErrors, setValidationErrors] = useState<
+        Record<string, string>
+    >({});
+    const [generalError, setGeneralError] = useState<string | null>(null);
+
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+        const requiredFields: Array<keyof FormData> = [
+            "first_name",
+            "last_name",
+            "sex",
+            "birthdate",
+            "address",
+            "appointment_date",
+            "appointment_category_name",
+            "email",
+            "phone_number",
+            "terms",
+        ];
+
+        requiredFields.forEach((field) => {
+            const value = formData[field];
+            if (field === "terms" && !value) {
+                errors[field] = "You must accept the terms and conditions.";
+            } else if (
+                !value ||
+                (typeof value === "string" && value.trim() === "")
+            ) {
+                errors[field] =
+                    "This field cannot be empty or just whitespace.";
+            }
+        });
+
+        return errors;
+    };
 
     useEffect(() => {
         fetchAppointmentCategories();
@@ -83,46 +136,125 @@ const Appointment: React.FC = () => {
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-        setLoading(true);
-
-        // Clear previous errors
         setErrors({});
+        setValidationErrors({});
         setGeneralError(null);
 
-        // if (!verifyOTP()) {
+        // Validate form
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setValidationErrors(validationErrors);
+
+            // Convert validation errors to a readable format with HTML
+            const fieldLabels: { [key: string]: string } = {
+                first_name: "First Name",
+                last_name: "Last Name",
+                sex: "Sex",
+                birthdate: "Birthdate",
+                address: "Address",
+                appointment_date: "Appointment Date",
+                appointment_category_name: "Appointment Category",
+                email: "Email",
+                phone_number: "Phone Number",
+                otp: "OTP",
+                patient_note: "Patient Note",
+                terms: "Terms",
+            };
+
+            const errorMessages = Object.entries(validationErrors)
+                .map(([field, errors]) => {
+                    const fieldName = fieldLabels[field] || field;
+                    return `<p><strong>${fieldName}:</strong> ${errors}</p>`;
+                })
+                .join("");
+
+            Swal.fire({
+                title: "Validation Errors",
+                html: `
+                    <div style="
+                        font-size: 16px;
+                        line-height: 1.5;
+                        max-height: 300px;
+                        overflow-y: auto;
+                        padding: 10px;
+                    ">
+                        Please fix the following errors:<br>${errorMessages}
+                    </div>
+            `,
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+
+            return;
+        }
+
+        // if (!(await verifyOTP())) {
         //     setGeneralError("Invalid OTP. Please try again.");
         //     return;
         // }
 
         try {
-            const response = await fetch(
-                "http://localhost:8000/api/appointments",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify(formData),
-                }
-            );
+            setLoading(true);
+            const response = await fetch(`${baseAPIUrl}/appointments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
 
             if (!response.ok) {
                 const data = await response.json();
                 if (data.errors) {
-                    // If errors are related to specific fields
                     setErrors(data.errors);
+                    Swal.fire({
+                        title: "Error",
+                        text: "There was an issue with your submission. Please check the errors and try again.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
                 } else {
-                    // General error
                     setGeneralError("An unexpected error occurred.");
+                    Swal.fire({
+                        title: "Error",
+                        text: "An unexpected error occurred. Please try again later.",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
                 }
             } else {
-                // Handle successful submission
-                setGeneralError(null);
-                setErrors({});
+                const result = await response.json();
+                const patientDetails = {
+                    ...formData,
+                    queue_number: result.queue_number,
+                };
+
+                // Store appointment details in sessionStorage
+                sessionStorage.setItem(
+                    "appointmentDetails",
+                    JSON.stringify(patientDetails)
+                );
+
+                // Show SweetAlert notification
+                Swal.fire({
+                    title: "Appointment Confirmed!",
+                    text: "Your appointment has been successfully booked.",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                }).then(() => {
+                    // Redirect to confirmation page
+                    navigate("/appointment/confirmation");
+                });
             }
         } catch (error) {
             setGeneralError("An error occurred while submitting the form.");
+            Swal.fire({
+                title: "Error",
+                text: "An error occurred while submitting the form. Please try again later.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
             console.error("An error occurred:", error);
         } finally {
             setLoading(false);
@@ -215,12 +347,6 @@ const Appointment: React.FC = () => {
                 <h2 className="self-center my-5 text-lg font-bold uppercase md:self-start">
                     Personal Information
                 </h2>
-
-                {generalError && (
-                    <div className="w-full p-2 mb-4 text-red-600 border border-red-600 rounded">
-                        {generalError}
-                    </div>
-                )}
 
                 <form
                     id="appointment"
@@ -423,7 +549,7 @@ const Appointment: React.FC = () => {
                         ></div>
                     </div>
 
-                    {/* <div className="flex flex-col mb-3 input-group">
+                    <div className="flex flex-col mb-3 input-group">
                         <button
                             type="button"
                             onClick={sendOTP}
@@ -449,7 +575,7 @@ const Appointment: React.FC = () => {
                         {errors.otp && (
                             <span className="text-red-600">{errors.otp}</span>
                         )}
-                    </div> */}
+                    </div>
 
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="patient_note">Additional Notes:</label>
@@ -461,9 +587,12 @@ const Appointment: React.FC = () => {
                             placeholder="Additional information or special requests"
                             value={formData.patient_note}
                             onChange={handleChange}
+                            className="p-2"
                         />
                         {errors.patient_note && (
-                            <span className="text-red-600">{errors.patient_note}</span>
+                            <span className="text-red-600">
+                                {errors.patient_note}
+                            </span>
                         )}
                     </div>
 
