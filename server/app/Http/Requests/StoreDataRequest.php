@@ -22,30 +22,36 @@ class StoreDataRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'wra.*.wra_id' => 'sometimes|integer|exists:women_of_reproductive_ages,wra_id',
-            'wra.*.age_category' => 'required|string|exists:age_categories,age_category',
-            'wra.*.unmet_need_modern_fp' => 'required|integer',
-            // 'wra.*.report_status_id' => 'required|integer|exists:report_statuses,report_status_id',
-
-            // 'familyplanning.*.report_id' => 'sometimes|integer|exists:family_planning_reports,report_id',
-            'familyplanning.*.age_category' => 'required|string|exists:age_categories,age_category',
-            'familyplanning.*.fp_method_id' => 'required|integer|exists:family_planning_methods,method_id',
-            'familyplanning.*.current_users_beginning_month' => 'required|integer',
-            'familyplanning.*.new_acceptors_prev_month' => 'required|integer',
-            'familyplanning.*.other_acceptors_present_month' => 'required|integer',
-            'familyplanning.*.drop_outs_present_month' => 'required|integer',
-            'familyplanning.*.current_users_end_month' => 'required|integer',
-            'familyplanning.*.new_acceptors_present_month' => 'required|integer',
-            // 'familyplanning.*.report_status_id' => 'required|integer|exists:report_statuses,report_status_id',
-
-            // 'servicedata.*.service_data_id' => 'sometimes|integer|exists:service_data,service_data_id',
-            'servicedata.*.service_id' => 'required|integer|exists:services,service_id',
-            'servicedata.*.indicator_id' => 'nullable|integer|exists:indicators,indicator_id',
-            'servicedata.*.age_category' => 'nullable|string|exists:age_categories,age_category',
-            'servicedata.*.value_type' => 'nullable|in:male,female,total',
-            'servicedata.*.value' => 'required|numeric',
-            'servicedata.*.remarks' => 'nullable|string',
-            // 'servicedata.*.report_status_id' => 'required|integer|exists:report_statuses,report_status_id',
+            // Validation rules for m1Report
+            'm1Report.familyplanning.*.age_category' => 'required|string|exists:age_categories,age_category',
+            'm1Report.familyplanning.*.fp_method_id' => 'required|integer|exists:family_planning_methods,method_id',
+            'm1Report.familyplanning.*.current_users_beginning_month' => 'required|integer',
+            'm1Report.familyplanning.*.new_acceptors_prev_month' => 'required|integer',
+            'm1Report.familyplanning.*.other_acceptors_present_month' => 'required|integer',
+            'm1Report.familyplanning.*.drop_outs_present_month' => 'required|integer',
+            'm1Report.familyplanning.*.current_users_end_month' => 'required|integer',
+            'm1Report.familyplanning.*.new_acceptors_present_month' => 'required|integer',
+            
+            'm1Report.servicedata.*.service_id' => 'required|integer|exists:services,service_id',
+            'm1Report.servicedata.*.indicator_id' => 'nullable|integer|exists:indicators,indicator_id',
+            'm1Report.servicedata.*.age_category' => 'nullable|string|exists:age_categories,age_category',
+            'm1Report.servicedata.*.value_type' => 'nullable|in:male,female,total',
+            'm1Report.servicedata.*.value' => 'required|numeric',
+            'm1Report.servicedata.*.remarks' => 'nullable|string',
+            
+            'm1Report.wra.*.age_category' => 'required|string|exists:age_categories,age_category',
+            'm1Report.wra.*.unmet_need_modern_fp' => 'required|integer',
+    
+            // Validation rules for m2Report
+            'm2Report.*.disease_id' => 'required|integer|exists:diseases,disease_id',
+            'm2Report.*.disease_name' => 'required|string', // This field is just for validation but may not exist in the database
+            'm2Report.*.age_category_id' => 'required|integer|exists:age_categories,age_category_id',
+            'm2Report.*.male' => 'required|integer|min:0',
+            'm2Report.*.female' => 'required|integer|min:0',
+    
+            // Validation rules for report IDs
+            'm1ReportId' => 'required|integer|exists:report_submissions,report_submission_id',
+            'm2ReportId' => 'required|integer|exists:report_submissions,report_submission_id',
         ];
     }
 }
