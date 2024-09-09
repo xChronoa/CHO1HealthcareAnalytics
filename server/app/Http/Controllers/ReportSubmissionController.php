@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ReportSubmission;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ReportSubmissionController extends Controller
 {
+    // CRUD for the Table
     /*
     * Display a listing of the report submissions.
     *
@@ -105,5 +108,243 @@ class ReportSubmissionController extends Controller
 
         // Return a success message
         return response(['message' => 'Report submission deleted successfully.']);
+    }
+
+    // Custom Functions
+    public function createReportSubmissions(Request $request)
+    {
+        // Validate incoming request
+        $validator = Validator::make($request->all(), [
+            'report_year' => 'required|integer|digits:4',
+            'report_month' => 'required|integer|between:1,12',
+            'due_date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $reportYear = $request->input('report_year');
+        $reportMonth = $request->input('report_month');
+        $dueDate = $request->input('due_date');
+
+        // Begin database transaction
+        DB::beginTransaction();
+
+        try {
+            // Ensure uniqueness of report_year and report_month combination
+            $existingTemplates = DB::table('report_submission_templates')
+                ->where('report_year', $reportYear)
+                ->where('report_month', $reportMonth)
+                ->count();
+
+            if ($existingTemplates > 0) {
+                DB::rollBack();
+                return response()->json(['error' => 'Report template for this year and month already exists.'], 422);
+            }
+
+            // Create templates for report types "m1" and "m2"
+            $types = ['m1', 'm2'];
+            $templateIds = [];
+
+            foreach ($types as $type) {
+                $templateId = DB::table('report_submission_templates')->insertGetId([
+                    'admin_id' => Auth::id(), // Assuming authenticated admin
+                    'report_type' => $type,
+                    'report_month' => $reportMonth,
+                    'report_year' => $reportYear,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $templateIds[] = $templateId;
+            }
+
+            // Get all barangays
+            $barangays = DB::table('barangays')->pluck('barangay_id');
+
+            // Create report submissions for each barangay
+            foreach ($templateIds as $templateId) {
+                foreach ($barangays as $barangayId) {
+                    DB::table('report_submissions')->insert([
+                        'report_submission_template_id' => $templateId,
+                        'barangay_id' => $barangayId,
+                        'status' => 'pending',
+                        'due_at' => $dueDate,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            // Commit transaction
+            DB::commit();
+
+            return response()->json(['success' => 'Report templates and submissions created successfully.']);
+        } catch (\Exception $e) {
+            // Rollback transaction if any error occurs
+            DB::rollBack();
+            // return response()->json(['error' => 'Failed to create report templates and submissions.'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Fetch the earliest and latest report submission dates.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fetchEarliestAndLatestReportSubmissionDates()
+    {
+        try {
+            // Fetch the earliest and latest report submission dates
+            $dates = DB::table('report_submission_templates')
+                ->selectRaw('MIN(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as earliest_date, 
+                                     MAX(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as latest_date')
+                ->first();
+
+            if (!$dates) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No report submissions found.',
+                ], 404);
+            }
+
+            // Return the results
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'earliest_date' => $dates->earliest_date,
+                    'latest_date' => $dates->latest_date,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching report submission dates.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Fetch report submissions based on year, month, and optional barangay_id and status.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function fetchReportSubmissionsByFilter(Request $request)
+    {
+        // Validate incoming request
+        $validator = Validator::make($request->all(), [
+            'report_year' => 'required|integer|digits:4',
+            'report_month' => 'required|integer|between:1,12',
+            'barangay_id' => 'nullable|integer|exists:barangays,barangay_id',
+            'status' => 'nullable|string|in:all,pending,submitted,submitted_late',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 422);
+        }
+
+        $reportYear = $request->input('report_year');
+        $reportMonth = $request->input('report_month');
+        $status = $request->input('status', 'all'); // Default to 'all' if not provided
+
+        try {
+            $query = DB::table('report_submissions')
+                ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
+                ->leftJoin('barangays', 'report_submissions.barangay_id', '=', 'barangays.barangay_id')
+                ->leftJoin('report_statuses', 'report_submissions.report_submission_id', '=', 'report_statuses.report_submission_id') // Left join with report_statuses
+                ->where('report_submission_templates.report_year', $reportYear)
+                ->where('report_submission_templates.report_month', $reportMonth)
+                ->select(
+                    'barangays.barangay_id',
+                    'barangays.barangay_name',
+                    'report_submissions.status',
+                    'report_statuses.submitted_at'
+                )
+                ->distinct();
+
+            // Apply status filtering
+            if ($status !== 'all') {
+                if ($status === 'submitted') {
+                    $query->whereIn('report_submissions.status', ['submitted', 'submitted_late']);
+                } else {
+                    $query->where('report_submissions.status', $status);
+                }
+            }
+
+            // Fetch the results
+            $submissions = $query->get();
+
+            // Return the results   
+            return response()->json([
+                'success' => true,
+                'data' => $submissions,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function fetchCountOfPendingBarangayReports()
+    {
+        try {
+            $count = DB::table('report_submissions AS a')
+                ->join('report_submission_templates AS b', 'a.report_submission_template_id', '=', 'b.report_submission_template_id')
+                ->where('a.status', 'pending')
+                ->distinct()
+                ->count(DB::raw('CONCAT(a.barangay_id, "-", b.report_year, "-", b.report_month)'));
+
+            return response()->json([
+                'success' => true,
+                'count' => $count,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Fetch report submissions for the authenticated user's barangay.
+     */
+    public function fetchReportSubmissionsForBarangay()
+    {
+        // Step 1: Retrieve the barangay_id of the authenticated user
+        $barangayId = DB::table('users')
+            ->where('user_id', Auth::id())
+            ->value('barangay_id');
+
+        if (!$barangayId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barangay not found for the user.',
+            ], 404);
+        }
+
+        // Step 2: Fetch report submissions filtered by barangay_id
+        $reportSubmissions = DB::table('report_submissions as rs')
+            ->join('report_submission_templates as rst', 'rs.report_submission_template_id', '=', 'rst.report_submission_template_id')
+            ->where('rs.barangay_id', $barangayId) // Filter by barangay_id
+            ->where('rs.status', 'pending') // Filter by pending status
+            ->select(
+                'rs.report_submission_id',
+                'rst.report_type',
+                DB::raw("CONCAT(rst.report_month, '-', rst.report_year) as report_month_year")
+            )
+            ->orderBy('rst.report_year', 'desc')
+            ->orderBy('rst.report_month', 'desc')
+            ->get()
+            ->groupBy('report_type'); // Separate into m1 and m2 groups
+
+        return response()->json([
+            'success' => true,
+            'data' => $reportSubmissions,
+        ]);
     }
 }
