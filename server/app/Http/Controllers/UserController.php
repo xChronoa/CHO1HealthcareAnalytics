@@ -114,7 +114,7 @@ class UserController extends Controller
             'username' => 'sometimes|required|string|max:255|unique:users,username,' . $id . ',user_id',
             'password' => 'sometimes|required|string|min:8',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id . ',user_id',
-            'barangay_name' => 'required|string|exists:barangays,barangay_name',
+            'barangay_name' => 'sometimes|nullable|string|exists:barangays,barangay_name',
             'status' => 'sometimes|required|string|in:active,disabled',
         ]);
 
@@ -131,22 +131,22 @@ class UserController extends Controller
         }
 
         try {
-            // Convert barangay name to barangay_id
-            $barangay = Barangay::where('barangay_name', $data['barangay_name'])->first();
+            // Convert barangay name to barangay_id if provided
+            if (isset($data['barangay_name'])) {
+                $barangay = Barangay::where('barangay_name', $data['barangay_name'])->first();
 
-            // Check if the barangay exists
-            if (!$barangay) {
-                return response()->json(['error' => 'Barangay not found!'], 404);
+                // Check if the barangay exists
+                if (!$barangay) {
+                    return response()->json(['error' => 'Barangay not found!'], 404);
+                }
+
+                $data['barangay_id'] = $barangay->barangay_id; // Assign barangay_id to data array
+                unset($data['barangay_name']); // Remove barangay name from data array
             }
-
-            $data['barangay_id'] = $barangay->barangay_id; // Assign barangay_id to data array
-
-            // Remove barangay name from data array
-            unset($data['barangay_name']);
 
             // Default status to 'active' if not provided
             if (!isset($data['status'])) {
-                $data['status'] = ucfirst('active');
+                $data['status'] = 'active';
             }
 
             $user = User::findOrFail($id);
@@ -217,14 +217,30 @@ class UserController extends Controller
 
             // Define the path based on role
             $validPaths = [
-                'admin' => '/admin/login',
-                'encoder' => '/barangay/login',
+                'admin' => ['/admin/login', '/'],
+                'encoder' => ['/barangay/login'],
             ];
 
             // Check if previousPath matches the user's role
-        $previousPath = $request->input('previousPath', '/');
-            if (array_key_exists($user->role, $validPaths) && $previousPath !== $validPaths[$user->role]) {
-                return response()->json(['message' => 'Unauthorized access to the previous path.', 'role' => $user->role, 'path' => $previousPath], 403);
+            $previousPath = $request->input('previousPath', '/');
+            if (array_key_exists($user->role, $validPaths) && !in_array($previousPath, $validPaths[$user->role])) {
+                return response()->json([
+                    'error' => [
+                        'code' => "UNAUTHORIZED_ROLE",
+                        'message' => 'Unauthorized access to the previous path.',
+                        'role' => $user->role,
+                        'path' => $previousPath
+                    ],
+                ], 403);
+            }
+
+            if ($user->status === "disabled") {
+                return response()->json([
+                    "error" => [
+                        'code' => 'ACCOUNT_DISABLED',
+                        'message' => "The account has been disabled. Please contact the administrator to resolve this issue.",
+                    ],
+                ], 403);
             }
 
             // Create a token for the authenticated user
@@ -232,15 +248,24 @@ class UserController extends Controller
 
             $cookie = cookie('auth_token', $token, 60 * 5, '/', 'localhost', false, true, true, 'lax');
 
+            // Build the user response array
+            $userResponse = [
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $user->role,
+            ];
+
+            // Include barangay information if it exists
+            if ($user->barangay) {
+                $userResponse['barangay_id'] = $user->barangay->barangay_id;
+                $userResponse['barangay_name'] = $user->barangay->barangay_name;
+            }
+
             return response()->json([
                 'message' => 'Login successful',
-                'user' => [
-                    'user_id' => $user->user_id,
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'role' => $user->role
-                ],
-                "auth_token" => $token
+                'user' => $userResponse,
+                'auth_token' => $token
             ], 200)->cookie($cookie);
         }
 
