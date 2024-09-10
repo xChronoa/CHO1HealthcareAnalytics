@@ -12,6 +12,8 @@ class WomenOfReproductiveAge extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "wra_id";
+
     protected $fillable = [
         'age_category_id',
         'unmet_need_modern_fp',

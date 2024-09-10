@@ -12,6 +12,8 @@ class FamilyPlanningReport extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "report_id";
+
     protected $fillable = [
         'age_category_id',
         'fp_method_id',
