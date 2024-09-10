@@ -238,7 +238,7 @@ class ReportSubmissionController extends Controller
             'report_year' => 'required|integer|digits:4',
             'report_month' => 'required|integer|between:1,12',
             'barangay_id' => 'nullable|integer|exists:barangays,barangay_id',
-            'status' => 'nullable|string|in:all,pending,submitted,submitted_late',
+            'status' => 'nullable|string|in:all,pending,submitted',
         ]);
 
         if ($validator->fails()) {
@@ -267,7 +267,7 @@ class ReportSubmissionController extends Controller
             // Apply status filtering
             if ($status !== 'all') {
                 if ($status === 'submitted') {
-                    $query->whereIn('report_submissions.status', ['submitted', 'submitted_late']);
+                    $query->whereIn('report_submissions.status', ['submitted', 'submitted late']);
                 } else {
                     $query->where('report_submissions.status', $status);
                 }
