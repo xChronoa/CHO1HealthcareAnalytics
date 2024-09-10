@@ -199,25 +199,37 @@ class AppointmentController extends Controller
     {
         $date = $request->query('date');
 
-        // Fetch the category ID for the given category name
-        $category = AppointmentCategory::where('appointment_category_name', $categoryName)->first();
+        // If the category is "All" or "all", fetch appointments for all categories on the given date
+        if (strtolower($categoryName) === 'all') {
+            // Fetch appointments across all categories filtered by date
+            $appointmentsQuery = Appointment::with('patient', 'category');
 
-        if (!$category) {
-            return response()->json(['error' => 'Category not found'], 404);
+            if ($date) {
+                $appointmentsQuery->whereDate('appointment_date', $date);
+            }
+
+            $appointments = $appointmentsQuery->get();
+        } else {
+            // Fetch the category ID for the given category name
+            $category = AppointmentCategory::where('appointment_category_name', $categoryName)->first();
+
+            if (!$category) {
+                return response()->json(['error' => 'Category not found'], 404);
+            }
+
+            $categoryId = $category->appointment_category_id;
+
+            // Fetch appointments for the given category ID and date
+            $appointmentsQuery = Appointment::where('appointment_category_id', $categoryId)
+                ->with('patient', 'category');  // Eager load relationships
+
+            // Filter by date if provided
+            if ($date) {
+                $appointmentsQuery->whereDate('appointment_date', $date);
+            }
+
+            $appointments = $appointmentsQuery->get();
         }
-
-        $categoryId = $category->appointment_category_id;
-
-        // Fetch appointments for the given category ID and date
-        $appointmentsQuery = Appointment::where('appointment_category_id', $categoryId)
-            ->with('patient', 'category');  // Eager load relationships
-
-        // Filter by date if provided
-        if ($date) {
-            $appointmentsQuery->whereDate('appointment_date', $date);
-        }
-
-        $appointments = $appointmentsQuery->get();
 
         // Format the data to include patient details and appointment details
         $data = $appointments->map(function ($appointment) {
