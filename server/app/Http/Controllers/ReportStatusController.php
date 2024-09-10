@@ -101,11 +101,12 @@ class ReportStatusController extends Controller
                 if ($m1ReportStatusId !== null) {
                     WomenOfReproductiveAge::updateOrCreate(
                         [
-                            'age_category_id' => $ageCategoryId,
+                            'age_category_id' => $ageCategoryId,  // Ensure this is the unique column for finding records
                         ],
                         [
                             'unmet_need_modern_fp' => $wra['unmet_need_modern_fp'],
-                            'report_status_id' => $m1ReportStatusId,
+                            'report_status_id' => $m1ReportStatusId,  // This is the value to update
+                            'updated_at' => now(),  // Ensure timestamps are being updated correctly
                         ]
                     );
                 }
