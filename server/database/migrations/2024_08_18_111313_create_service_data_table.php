@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('service_data', function (Blueprint $table) {
             $table->id('service_data_id');
             $table->foreignId('service_id')->constrained('services', 'service_id');
-            $table->foreignId('indicator_id')->constrained('indicators', 'indicator_id')->nullable();
-            $table->foreignId('age_category_id')->constrained('age_categories', 'age_category_id')->nullable();
+            $table->foreignId('indicator_id')->nullable()->constrained('indicators', 'indicator_id');
+            $table->foreignId('age_category_id')->nullable()->constrained('age_categories', 'age_category_id');
             $table->enum('value_type', ['male', 'female', 'total'])->nullable();
             $table->float('value');
             $table->text('remarks')->nullable();
