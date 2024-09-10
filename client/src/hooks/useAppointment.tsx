@@ -39,9 +39,6 @@ export const useAppointment = () => {
     const [minDate, setMinDate] = useState("");
     const [maxDate, setMaxDate] = useState("");
 
-    // Base URL for the API
-    const API_URL = `${baseAPIUrl}/appointments`;
-
     /**
      * Fetch all appointments from the API.
      */
@@ -50,7 +47,7 @@ export const useAppointment = () => {
         setError(null);
 
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(`${baseAPIUrl}/appointments/`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -82,7 +79,7 @@ export const useAppointment = () => {
         setError(null);
 
         try {
-            const response = await fetch(`${API_URL}/patients`, {
+            const response = await fetch(`${baseAPIUrl}/appointments/patients`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -128,7 +125,7 @@ export const useAppointment = () => {
         setError(null);
 
         try {
-            const response = await fetch(`${API_URL}/${id}`, {
+            const response = await fetch(`${baseAPIUrl}/appointments/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -163,7 +160,7 @@ export const useAppointment = () => {
             setError(null);
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${baseAPIUrl}/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -202,7 +199,7 @@ export const useAppointment = () => {
             setError(null);
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${baseAPIUrl}/appointments/${id}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -252,7 +249,7 @@ export const useAppointment = () => {
 
             try {
                 const response = await fetch(
-                    `${API_URL}/category/${categoryName}?${queryParams.toString()}`,
+                    `${baseAPIUrl}/appointments/category/${categoryName}?${queryParams.toString()}`,
                     {
                         method: "GET",
                         headers: {
