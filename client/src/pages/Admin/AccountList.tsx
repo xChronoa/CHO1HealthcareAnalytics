@@ -23,10 +23,10 @@ const AccountList: React.FC = () => {
     const handleDisable = async (user: User) => {
         const result = await alert.fire({
             title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            text: "This will disable the account unless updated.",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
+            confirmButtonText: "Yes, disable it!",
             cancelButtonText: "No, cancel!",
             customClass: {
                 confirmButton:
@@ -47,6 +47,8 @@ const AccountList: React.FC = () => {
                 "Successfully disabled the user account.",
                 "success"
             );
+
+            fetchUsers();
         } else {
             alert.fire(
                 "Error",
@@ -65,7 +67,7 @@ const AccountList: React.FC = () => {
                 </header>
                 <section className="flex flex-col items-start">
                     <div className="w-full p-4 overflow-x-auto rounded-lg shadow-md sm:py-4 table-container outline outline-1 shadow-black sm:outline-0 sm:shadow-transparent">
-                        <table className="min-w-full text-center table-fixed hidden sm:table">
+                        <table className="hidden min-w-full text-center table-fixed sm:table">
                             {/* Table Header */}
                             <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
                                 <tr>
