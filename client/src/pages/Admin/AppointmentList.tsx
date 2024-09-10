@@ -21,7 +21,7 @@ const AppointmentList: React.FC = () => {
     } = useAppointment(); // Use the appointments hook
 
     const [selectedAppointmentType, setSelectedAppointmentType] =
-        useState<string>("");
+        useState<string>("all");
     const [selectedDate, setSelectedDate] = useState<string>(maxDate || "");
 
     // Fetch appointment categories on component mount
@@ -29,25 +29,29 @@ const AppointmentList: React.FC = () => {
         fetchAppointmentCategories();
     }, [fetchAppointmentCategories]);
 
-    // Fetch appointments when selectedAppointmentType or selectedDate changes
+    // Fetch the initial data (date and/or other side effects) when the component mounts
     useEffectAfterMount(() => {
-        if (selectedAppointmentType && selectedAppointmentType !== "All") {
-            fetchAppointmentsByCategory(selectedAppointmentType, selectedDate);
-        } else {
-            fetchPatientsAppointments();
+        if(!maxDate) {
+            fetchPatientsAppointments(); // Assume this handles side effects like setting state
+        }
 
-            // Update the date range if maxDate is available
-            if (maxDate) {
-                setSelectedDate(maxDate);
-            }
+        // Trigger fetching appointments by category if conditions are met
+        if (selectedDate && selectedAppointmentType) {
+            fetchAppointmentsByCategory(selectedAppointmentType, selectedDate);
         }
     }, [
-        selectedAppointmentType,
         selectedDate,
+        selectedAppointmentType,
         fetchAppointmentsByCategory,
         fetchPatientsAppointments,
-        maxDate,
     ]);
+
+    // Update the selectedDate when maxDate changes (if needed)
+    useEffectAfterMount(() => {
+        if (maxDate) {
+            setSelectedDate(maxDate);
+        }
+    }, [maxDate]);
 
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedAppointmentType(event.target.value);
