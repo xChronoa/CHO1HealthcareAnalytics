@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'encoder',
             'password' => Hash::make('encoder'),
             'email' => 'encoder@email.com',
+            'barangay_id' => 1,
             'role' => 'Encoder',
             'status' => 'active'
         ]);
