@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+        $this->call(BarangaySeeder::class);
 
         User::create([
             'username' => 'admin',
@@ -39,7 +40,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(AppointmentCategorySeeder::class);
-        $this->call(BarangaySeeder::class);
         $this->call(AgeCategorySeeder::class);
         $this->call(DiseaseSeeder::class);
         $this->call(FamilyPlanningMethodSeeder::class);
