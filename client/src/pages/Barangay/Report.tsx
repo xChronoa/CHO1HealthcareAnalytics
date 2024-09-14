@@ -418,7 +418,7 @@ const Report: React.FC = () => {
                             {section === "m1" && <M1Report setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} />}
                             {section === "m2" && <MorbidityForm setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} diseases={diseases}/>}
                             
-                            <button type='submit' className="uppercase w-full py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500">
+                            <button type='submit' disabled={reportLoading} className="uppercase w-full py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500">
                                 {reportLoading ? "Submitting..." : "submit"}
                             </button>
                         </form>
