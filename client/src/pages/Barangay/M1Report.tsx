@@ -116,20 +116,12 @@ export const M1Report: React.FC<M1ReportProps> = ({
     ): boolean => {
         return familyplanning.every((entry) => {
             return (
-                (entry.fp_method_id !== undefined &&
-                    entry.fp_method_name?.trim() !== "" &&
-                    entry.current_users_beginning_month !== undefined &&
-                    entry.current_users_beginning_month >= 0) ||
-                (entry.new_acceptors_prev_month !== undefined &&
-                    entry.new_acceptors_prev_month >= 0) ||
-                (entry.other_acceptors_present_month !== undefined &&
-                    entry.other_acceptors_present_month >= 0) ||
-                (entry.drop_outs_present_month !== undefined &&
-                    entry.drop_outs_present_month >= 0) ||
-                (entry.current_users_end_month !== undefined &&
-                    entry.current_users_end_month >= 0) ||
-                (entry.new_acceptors_present_month !== undefined &&
-                    entry.new_acceptors_present_month >= 0)
+                    (entry.current_users_beginning_month !== undefined && entry.current_users_beginning_month >= 0) &&
+                    (entry.new_acceptors_prev_month !== undefined && entry.new_acceptors_prev_month >= 0) &&
+                    (entry.other_acceptors_present_month !== undefined && entry.other_acceptors_present_month >= 0) &&
+                    (entry.drop_outs_present_month !== undefined && entry.drop_outs_present_month >= 0) &&
+                    (entry.current_users_end_month !== undefined && entry.current_users_end_month >= 0) &&
+                    (entry.new_acceptors_present_month !== undefined && entry.new_acceptors_present_month >= 0)
             );
         });
     };
@@ -244,7 +236,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
     useEffectAfterMount(() => {
         setIncompleteSections(checkIncompleteSections(formData));
-    }, [services, formData]); // Ensure formData is included in the dependencies
+    }, [formData]); // Ensure formData is included in the dependencies
 
     useEffectAfterMount(() => {
         onCheckIncomplete("M1", incompleteSections);
