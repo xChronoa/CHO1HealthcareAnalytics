@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AgeCategoryController;
 use App\Http\Controllers\M1_Report\IndicatorController;
+use App\Http\Controllers\M1_Report\ServiceDataController;
 use App\Http\Controllers\M2_Report\DiseaseController;
 use App\Http\Controllers\ReportStatusController;
 use Illuminate\Http\Request;
@@ -17,7 +18,10 @@ use App\Http\Controllers\BarangayController;
 use App\Http\Controllers\Appointment\PatientController;
 use App\Http\Controllers\Appointment\AppointmentController;
 use App\Http\Controllers\M1_Report\FamilyPlanningMethodsController;
+use App\Http\Controllers\M1_Report\FamilyPlanningReportController;
 use App\Http\Controllers\M1_Report\ServiceController;
+use App\Http\Controllers\M1_Report\WomenOfReproductiveAgeController;
+use App\Http\Controllers\M2_Report\MorbidityReportController;
 use App\Http\Controllers\ReportSubmissionController;
 
 /**
@@ -107,6 +111,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get("/", [ServiceController::class, 'index']);
         Route::get("/{service_name}", [ServiceController::class, "show"]);
     });
+
+    Route::get("/wra-reports/", [WomenOfReproductiveAgeController::class, "getWomenOfReproductiveAges"]);
+    Route::get("/family-planning-reports", [FamilyPlanningReportController::class, "getFamilyPlanningReports"]);
+    Route::get("/service-data-reports/{service_name}", [ServiceDataController::class, "getServiceDataReports"]);
+    Route::get("/morbidity-reports/", [MorbidityReportController::class, "getMorbidityReports"]);
     
     // Route for logging out an authenticated user
     Route::post('logout', [UserController::class, 'logout']);
