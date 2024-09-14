@@ -9,6 +9,8 @@ class ReportSubmissionTemplate extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'report_submission_template_id';
+
     protected $fillable = ['admin_id', 'report_type', 'report_month', 'report_year'];
 
     /**
@@ -24,6 +26,6 @@ class ReportSubmissionTemplate extends Model
      */
     public function reportSubmissions()
     {
-        return $this->hasMany(ReportSubmission::class);
+        return $this->hasMany(ReportSubmission::class, 'report_submission_id');
     }
 }

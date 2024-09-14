@@ -25,7 +25,7 @@ class WomenOfReproductiveAge extends Model
      */
     public function ageCategory()
     {
-        return $this->belongsTo(AgeCategory::class);
+        return $this->belongsTo(AgeCategory::class, 'age_category_id',);
     }
 
     /**
@@ -33,6 +33,6 @@ class WomenOfReproductiveAge extends Model
      */
     public function reportStatus()
     {
-        return $this->belongsTo(ReportStatus::class);
+        return $this->belongsTo(ReportStatus::class, 'report_status_id');
     }
 }

@@ -16,7 +16,7 @@ class FamilyPlanningReport extends Model
 
     protected $fillable = [
         'age_category_id',
-        'fp_method_id',
+        'method_id',
         'current_users_beginning_month',
         'new_acceptors_prev_month',
         'other_acceptors_present_month',
@@ -31,7 +31,7 @@ class FamilyPlanningReport extends Model
      */
     public function ageCategory()
     {
-        return $this->belongsTo(AgeCategory::class);
+        return $this->belongsTo(AgeCategory::class, 'age_category_id');
     }
 
     /**
@@ -47,6 +47,6 @@ class FamilyPlanningReport extends Model
      */
     public function reportStatus()
     {
-        return $this->belongsTo(ReportStatus::class);
+        return $this->belongsTo(ReportStatus::class, 'report_status_id');
     }
 }

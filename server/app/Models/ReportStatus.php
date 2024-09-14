@@ -9,6 +9,8 @@ class ReportStatus extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "report_status_id";
+
     protected $fillable = [
         'report_submission_id', 'user_id', 'status', 'submitted_at', 'admin_note'
     ];

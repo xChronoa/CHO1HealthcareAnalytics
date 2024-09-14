@@ -24,7 +24,7 @@ class AgeCategory extends Model
      */
     public function womenOfReproductiveAge()
     {
-        return $this->hasMany(WomenOfReproductiveAge::class);
+        return $this->hasMany(WomenOfReproductiveAge::class, 'wra_id');
     }
 
     /**
@@ -32,7 +32,7 @@ class AgeCategory extends Model
      */
     public function familyPlanningReports()
     {
-        return $this->hasMany(FamilyPlanningReport::class);
+        return $this->hasMany(FamilyPlanningReport::class, 'report_id');
     }
 
     /**
@@ -40,7 +40,7 @@ class AgeCategory extends Model
      */
     public function morbidityReports()
     {
-        return $this->hasMany(MorbidityReport::class);
+        return $this->hasMany(MorbidityReport::class, 'report_id');
     }
 
     /**
@@ -48,6 +48,6 @@ class AgeCategory extends Model
      */
     public function serviceData()
     {
-        return $this->hasMany(ServiceData::class);
+        return $this->hasMany(ServiceData::class, 'service_data_id');
     }
 }

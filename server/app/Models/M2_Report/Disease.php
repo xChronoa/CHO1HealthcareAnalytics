@@ -9,6 +9,8 @@ class Disease extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "disease_id";
+
     protected $fillable = [
         'disease_name',
         'disease_code'
@@ -19,6 +21,6 @@ class Disease extends Model
      */
     public function morbidityReports()
     {
-        return $this->hasMany(MorbidityReport::class);
+        return $this->hasMany(MorbidityReport::class, 'report_id');
     }
 }

@@ -9,6 +9,8 @@ class FamilyPlanningMethods extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = "method_id";
+
     protected $fillable = ['method_name', 'parent_method_id'];
 
     /**
