@@ -99,16 +99,13 @@ class ReportStatusController extends Controller
                 }
 
                 if ($m1ReportStatusId !== null) {
-                    WomenOfReproductiveAge::updateOrCreate(
-                        [
-                            'age_category_id' => $ageCategoryId,  // Ensure this is the unique column for finding records
-                        ],
-                        [
-                            'unmet_need_modern_fp' => $wra['unmet_need_modern_fp'],
-                            'report_status_id' => $m1ReportStatusId,  // This is the value to update
-                            'updated_at' => now(),  // Ensure timestamps are being updated correctly
-                        ]
-                    );
+                    WomenOfReproductiveAge::create([
+                        'age_category_id' => $ageCategoryId,
+                        'unmet_need_modern_fp' => $wra['unmet_need_modern_fp'],
+                        'report_status_id' => $m1ReportStatusId,
+                        'created_at' => now(),  // Ensure creation timestamp is set
+                        'updated_at' => now(),  // Ensure update timestamp is set
+                    ]);
                 }
             }
 
@@ -121,21 +118,19 @@ class ReportStatusController extends Controller
                 }
 
                 if ($m1ReportStatusId !== null) {
-                    FamilyPlanningReport::updateOrCreate(
-                        [
-                            'age_category_id' => $ageCategoryId,
-                            'fp_method_id' => $fp['fp_method_id'],
-                        ],
-                        [
-                            'current_users_beginning_month' => $fp['current_users_beginning_month'],
-                            'new_acceptors_prev_month' => $fp['new_acceptors_prev_month'],
-                            'other_acceptors_present_month' => $fp['other_acceptors_present_month'],
-                            'drop_outs_present_month' => $fp['drop_outs_present_month'] ?? 0,
-                            'current_users_end_month' => $fp['current_users_end_month'],
-                            'new_acceptors_present_month' => $fp['new_acceptors_present_month'],
-                            'report_status_id' => $m1ReportStatusId,
-                        ]
-                    );
+                    FamilyPlanningReport::create([
+                        'age_category_id' => $ageCategoryId,
+                        'fp_method_id' => $fp['fp_method_id'],
+                        'current_users_beginning_month' => $fp['current_users_beginning_month'],
+                        'new_acceptors_prev_month' => $fp['new_acceptors_prev_month'],
+                        'other_acceptors_present_month' => $fp['other_acceptors_present_month'],
+                        'drop_outs_present_month' => $fp['drop_outs_present_month'] ?? 0,
+                        'current_users_end_month' => $fp['current_users_end_month'],
+                        'new_acceptors_present_month' => $fp['new_acceptors_present_month'],
+                        'report_status_id' => $m1ReportStatusId,
+                        'created_at' => now(),  // Ensure creation timestamp is set
+                        'updated_at' => now(),  // Ensure update timestamp is set
+                    ]);
                 }
             }
 
@@ -148,36 +143,32 @@ class ReportStatusController extends Controller
                 }
 
                 if ($m1ReportStatusId !== null) {
-                    ServiceData::updateOrCreate(
-                        [
-                            'service_id' => $service['service_id'],
-                            'indicator_id' => $service['indicator_id'] ?? null,
-                            'age_category_id' => $ageCategoryId,
-                            'value_type' => $service['value_type'] ?? null,
-                        ],
-                        [
-                            'value' => $service['value'] ?? null,
-                            'remarks' => trim($service['remarks'] ?? '') === '' ? null : $service['remarks'],
-                            'report_status_id' => $m1ReportStatusId,
-                        ]
-                    );
+                    ServiceData::create([
+                        'service_id' => $service['service_id'],
+                        'indicator_id' => $service['indicator_id'] ?? null,
+                        'age_category_id' => $ageCategoryId,
+                        'value_type' => $service['value_type'] ?? null,
+                        'value' => $service['value'] ?? null,
+                        'remarks' => trim($service['remarks'] ?? '') === '' ? null : $service['remarks'],
+                        'report_status_id' => $m1ReportStatusId,
+                        'created_at' => now(),  // Ensure creation timestamp is set
+                        'updated_at' => now(),  // Ensure update timestamp is set
+                    ]);
                 }
             }
 
             // Process Morbidity Reports (m2Report)
             if ($m2ReportStatusId !== null) {
                 foreach ($m2Report as $m2) {
-                    MorbidityReport::updateOrCreate(
-                        [
-                            'disease_id' => $m2['disease_id'],
-                            'age_category_id' => $m2['age_category_id'],
-                            'report_status_id' => $m2ReportStatusId,
-                        ],
-                        [
-                            'male' => $m2['male'],
-                            'female' => $m2['female'],
-                        ]
-                    );
+                    MorbidityReport::create([
+                        'disease_id' => $m2['disease_id'],
+                        'age_category_id' => $m2['age_category_id'],
+                        'report_status_id' => $m2ReportStatusId,
+                        'male' => $m2['male'],
+                        'female' => $m2['female'],
+                        'created_at' => now(),  // Ensure creation timestamp is set
+                        'updated_at' => now(),  // Ensure update timestamp is set
+                    ]);
                 }
             }
 
