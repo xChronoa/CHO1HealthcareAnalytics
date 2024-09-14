@@ -25,9 +25,6 @@ const Transaction: React.FC = () => {
     }, [fetchEarliestAndLatestDates]);
 
     useEffect(() => {
-        if (latestDate) {
-            setSelectedDate(latestDate);
-        }
         // Fetch submissions when the selected date or tab changes
         if (selectedDate) {
             fetchReportSubmissions(
@@ -37,6 +34,12 @@ const Transaction: React.FC = () => {
             );
         }
     }, [selectedDate, latestDate, fetchReportSubmissions, tab]);
+
+    useEffect(() => {
+        if (latestDate) {
+            setSelectedDate(latestDate);
+        }
+    }, [latestDate])
 
     const toggleForm = () => {
         setIsOpen((prev) => !prev);
