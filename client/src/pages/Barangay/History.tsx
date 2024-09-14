@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useReportStatus } from "../../hooks/useReportStatus";
 import Loading from "../../components/Loading";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import PendingReportNotice from "../../components/PendingReportNotice";
 
 const History: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<string>("");
@@ -22,19 +23,28 @@ const History: React.FC = () => {
     }, [fetchEarliestAndLatestDates]);
 
     useEffectAfterMount(() => {
-        if (latestDate) {
-            setSelectedDate(latestDate);
-        }
-
         // Fetch report statuses whenever selectedDate changes
         if (selectedDate) {
             const [year, month] = selectedDate.split("-").map(Number);
             fetchReportStatuses(year, month);
         }
-    }, [selectedDate, latestDate, fetchReportStatuses]);
+    }, [selectedDate, fetchReportStatuses]);
+
+    useEffectAfterMount(() => {
+        if (latestDate) {
+            setSelectedDate(latestDate);
+        }
+    }, [latestDate])
 
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedDate(event.target.value);
+    };
+
+    const [isOpen, setIsOpen] = useState(latestDate !== null);
+
+    const toggleForm = () => {
+        setIsOpen((prev) => !prev);
+        document.body.style.overflow = isOpen ? "" : "hidden";
     };
 
     return (
@@ -133,6 +143,13 @@ const History: React.FC = () => {
                 </section>
             </div>
             {reportStatusLoading && <Loading />}
+            
+            {isOpen && (
+                <PendingReportNotice
+                    isOpen={isOpen}
+                    toggleForm={toggleForm}
+                />
+            )}
         </>
     );
 };
