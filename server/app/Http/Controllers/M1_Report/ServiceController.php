@@ -18,7 +18,7 @@ class ServiceController extends Controller
     public function show(Request $request, $service_name) {
         try {
             // Fetch the service by name from the database
-            $service = Service::where('service_name', $service_name)->firstOrFail();
+            $service = Service::where('service_name', urldecode($service_name))->firstOrFail();
     
             // Return the service data as JSON
             return response()->json($service);
