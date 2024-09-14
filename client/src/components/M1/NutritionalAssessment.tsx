@@ -63,19 +63,6 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                         </div>
                     ) : (
                         indicators.map((indicator) => {
-                            if (
-                                categoryIndicatorIds.has(indicator.indicator_id)
-                            ) {
-                                return (
-                                    <label
-                                        key={indicator.indicator_id}
-                                        className={`flex flex-col justify-center font-semibold text-gray-700 w-full`}
-                                    >
-                                        {indicator.indicator_name}
-                                    </label>
-                                );
-                            }
-
                             return (
                                 <div
                                     key={indicator.indicator_id}
@@ -85,7 +72,7 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                                         className={`flex flex-col justify-center text-gray-700 w-full sm:w-1/2 border-black border-b-2 ${
                                             indicator.parent_indicator_id
                                                 ? "indent-8"
-                                                : ""
+                                                : categoryIndicatorIds.has(indicator.indicator_id) ? "font-semibold" : ""
                                         }`}
                                     >
                                         {indicator.indicator_name}
