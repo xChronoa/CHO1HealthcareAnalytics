@@ -18,6 +18,8 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
         "19. No. of Livebirths",
         "20. Number of deliveries attended by Skilled Health Professional",
         "21. Number of facility-based deliveries",
+        "23. Type of Delivery",
+        "24. Pregnancy Outcome",
     ];
 
     // Extract the ID if the indicator is found
@@ -117,7 +119,7 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                     >
                                         {indicator.indicator_name}
                                     </label>
-                                    {!indicator.parent_indicator_id ? (
+                                    {!indicator.parent_indicator_id || indicator.parent_indicator_id === 34 || indicator.parent_indicator_id === 37 ? (
                                         <>
                                             <input
                                                 type="number"
