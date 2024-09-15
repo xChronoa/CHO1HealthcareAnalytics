@@ -189,39 +189,80 @@ class ReportSubmissionController extends Controller
     }
 
     /**
-     * Fetch the earliest and latest report submission dates.
+     * Fetch the earliest and latest report submission dates for the authenticated user's barangay,
+     * considering the user's role.
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function fetchEarliestAndLatestReportSubmissionDates()
     {
         try {
-            // Fetch the earliest and latest report submission dates
-            $dates = DB::table('report_submission_templates')
-                ->selectRaw('MIN(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as earliest_date, 
-                                     MAX(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as latest_date')
+            // Retrieve the authenticated user's ID
+            $userId = Auth::id();
+
+            // Ensure the user is authenticated
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated.',
+                ], 401); // Unauthorized status code
+            }
+
+            // Get the user's details from the 'users' table
+            $user = DB::table('users')->where('user_id', $userId)->first();
+            if (!$user || !$user->barangay_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User barangay not found.',
+                ], 404); // Not Found status code
+            }
+
+            // Determine if the user is an admin or encoder
+            $isAdmin = $user->role === 'admin';
+            $isEncoder = $user->role === 'encoder';
+
+            // Build the query to fetch the earliest and latest report submission dates
+            $query = DB::table('report_submissions')
+                ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
+                ->where('report_submissions.barangay_id', $user->barangay_id);
+
+            // Filter by submission status if the user is an encoder
+            if ($isEncoder) {
+                $query->whereIn('report_submissions.status', ['pending']);
+            }
+
+            // Select the earliest and latest dates
+            $dates = $query
+                ->selectRaw('
+                MIN(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as earliest_date,
+                MAX(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as latest_date
+            ')
                 ->first();
 
+            // If no dates are found, return a 404 response
             if (!$dates) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No report submissions found.',
-                ], 404);
+                    'message' => 'No report submissions found for the user\'s barangay.',
+                ], 404); // Not Found status code
             }
 
-            // Return the results
+            // Return the earliest and latest dates in the response
             return response()->json([
                 'success' => true,
                 'data' => [
                     'earliest_date' => $dates->earliest_date,
                     'latest_date' => $dates->latest_date,
                 ],
-            ], 200);
+            ], 200); // OK status code
+
         } catch (\Exception $e) {
+            // Handle any exceptions by returning a JSON error response
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while fetching report submission dates.',
-            ], 500);
+                'error' => $e->getMessage(), // Optionally include the exception message
+            ], 500); // Internal Server Error status code
         }
     }
 
