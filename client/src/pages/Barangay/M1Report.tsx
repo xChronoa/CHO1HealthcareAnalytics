@@ -85,11 +85,11 @@ export const M1Report: React.FC<M1ReportProps> = ({
     // Expected counts for each service ID
     const serviceExpectedCounts: Record<number, number> = {
         1: 57, // Prenatal
-        2: 21, // Intrapartum
+        2: 33, // Intrapartum
         3: 9, // Post-partum
         4: 50, // Immunization
         5: 18, // Nutrition Services
-        6: 24, // Nutritional Assessment
+        6: 26, // Nutritional Assessment
         7: 6, // Deworming
         8: 6, // School-based Deworming
         9: 1, // Soil
@@ -228,19 +228,25 @@ export const M1Report: React.FC<M1ReportProps> = ({
     useEffectAfterMount(() => {
         fetchServices();
     }, [fetchServices]);
-
+    
     useEffectAfterMount(() => {
-        setReportDatas("m1", sortFormData(formData));
-        localStorage.setItem("m1formData", JSON.stringify(formData));
-    }, [formData]); // Ensure formData is included in the dependencies
-
+        if (services.length > 0) {
+            setReportDatas("m1", sortFormData(formData));
+            localStorage.setItem("m1formData", JSON.stringify(formData));
+        }
+    }, [formData, services]); 
+    
     useEffectAfterMount(() => {
-        setIncompleteSections(checkIncompleteSections(formData));
-    }, [formData]); // Ensure formData is included in the dependencies
-
+        if (services.length > 0) {
+            setIncompleteSections(checkIncompleteSections(formData));
+        }
+    }, [formData, services]);
+    
     useEffectAfterMount(() => {
-        onCheckIncomplete("M1", incompleteSections);
-    }, [incompleteSections]); // Ensure incompleteSections and onCheckIncomplete are included
+        if (services.length > 0 && incompleteSections.length > 0) {
+            onCheckIncomplete("M1", incompleteSections);
+        }
+    }, [incompleteSections, services]); 
 
     return (
         <>
