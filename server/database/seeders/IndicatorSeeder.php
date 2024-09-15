@@ -22,11 +22,18 @@ class IndicatorSeeder extends Seeder
             // Level 1 indicators
             ['indicator_name' => '1. No. of pregnant women with at least 4 prenatal check-ups', 'service_id' => $serviceId, 'created_at' => now()],
             ['indicator_name' => '2. No. of pregnant women assessed of nutritional status during the 1st tri', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 3 indicators (Sub-indicators for nutritional status)
-            ['indicator_name' => 'a. No. of pregnant women seen in the first trimester who have normal BMI', 'parent_indicator_id' => 2, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. No. of pregnant women seen in the first trimester who have low BMI', 'parent_indicator_id' => 2, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'c. No. of pregnant women seen in the first trimester who have high BMI', 'parent_indicator_id' => 2, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. No. of pregnant women seen in the first trimester who have normal BMI', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '2. No. of pregnant women assessed of nutritional status during the 1st tri')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. No. of pregnant women seen in the first trimester who have low BMI', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '2. No. of pregnant women assessed of nutritional status during the 1st tri')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'c. No. of pregnant women seen in the first trimester who have high BMI', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '2. No. of pregnant women assessed of nutritional status during the 1st tri')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 1 indicators (Continued)
             ['indicator_name' => '3. No. of pregnant women for the 1st time given at least 2 doses of Td vaccination', 'service_id' => $serviceId, 'created_at' => now()],
@@ -62,45 +69,79 @@ class IndicatorSeeder extends Seeder
             // Level 1 indicators
             ['indicator_name' => '18. No. of Deliveries', 'service_id' => $serviceId, 'created_at' => now()],
             ['indicator_name' => '19. No. of Livebirths', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 2 indicators (Sub-indicators for Livebirths)
-            ['indicator_name' => 'a. Normal Birth Weight', 'parent_indicator_id' => 19, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. Low Birth Weight', 'parent_indicator_id' => 19, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'c. Unknown Birth Weight', 'parent_indicator_id' => 19, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. Normal Birth Weight', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '19. No. of Livebirths')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. Low Birth Weight', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '19. No. of Livebirths')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'c. Unknown Birth Weight', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '19. No. of Livebirths')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Number of Deliveries attended by Skilled Health Professional)
             ['indicator_name' => '20. Number of deliveries attended by Skilled Health Professional', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 3 indicators (Sub-indicators for Skilled Health Professional)
-            ['indicator_name' => 'a. Attended by Doctor', 'parent_indicator_id' => 20, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. Attended by Nurse', 'parent_indicator_id' => 20, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'c. Attended by Midwives', 'parent_indicator_id' => 20, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. Attended by Doctor', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '20. Number of deliveries attended by Skilled Health Professional')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. Attended by Nurse', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '20. Number of deliveries attended by Skilled Health Professional')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'c. Attended by Midwives', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '20. Number of deliveries attended by Skilled Health Professional')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Number of facility-based deliveries)
             ['indicator_name' => '21. Number of facility-based deliveries', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 3 indicators (Sub-indicators for facility-based deliveries)
-            ['indicator_name' => 'a. Public health facility', 'parent_indicator_id' => 21, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. Private health facility', 'parent_indicator_id' => 21, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. Public health facility', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '21. Number of facility-based deliveries')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. Private health facility', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '21. Number of facility-based deliveries')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Number of non-facility based deliveries)
-            ['indicator_name' => '22. Number of non-facility based deliveries', 'parent_indicator_id' => 21, 'service_id' => $serviceId, 'created_at' => now()],
-
+            ['indicator_name' => '22. Number of non-facility based deliveries', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '21. Number of facility-based deliveries')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
             // Level 2 indicators (Type of Delivery)
             ['indicator_name' => '23. Type of Delivery', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 3 indicators (Sub-indicators for Type of Delivery)
-            ['indicator_name' => 'a. No. of vaginal deliveries', 'parent_indicator_id' => 23, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. No. of deliveries by C-section', 'parent_indicator_id' => 23, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. No. of vaginal deliveries', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '23. Type of Delivery')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. No. of deliveries by C-section', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '23. Type of Delivery')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
 
             // Level 2 indicators (Pregnancy Outcome)
             ['indicator_name' => '24. Pregnancy Outcome', 'service_id' => $serviceId, 'created_at' => now()],
+        ];
 
+        // Insert data into the indicators table
+        foreach ($indicators as $indicator) {
+            DB::table('indicators')->insert($indicator);
+        }
+
+        $indicators = [
             // Level 3 indicators (Sub-indicators for Pregnancy Outcome)
-            ['indicator_name' => 'a. No. of full-term births', 'parent_indicator_id' => 24, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'b. No. of pre-term births', 'parent_indicator_id' => 24, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'c. No. of fetal deaths', 'parent_indicator_id' => 24, 'service_id' => $serviceId, 'created_at' => now()],
-            ['indicator_name' => 'd. No. of abortion/miscarriage', 'parent_indicator_id' => 24, 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'a. No. of full-term births', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '24. Pregnancy Outcome')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'b. No. of pre-term births', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '24. Pregnancy Outcome')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'c. No. of fetal deaths', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '24. Pregnancy Outcome')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
+            ['indicator_name' => 'd. No. of abortion/miscarriage', 'parent_indicator_id' => DB::table('indicators')->where('indicator_name', '24. Pregnancy Outcome')->value('indicator_id'), 'service_id' => $serviceId, 'created_at' => now()],
         ];
 
         // Insert data into the indicators table
