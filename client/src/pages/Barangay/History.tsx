@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useReportStatus } from "../../hooks/useReportStatus";
 import Loading from "../../components/Loading";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import PendingReportNotice from "../../components/PendingReportNotice";
+import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 
 const History: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<string>("");
@@ -14,13 +15,19 @@ const History: React.FC = () => {
         earliestDate,
         latestDate,
         fetchReportStatuses,
-        fetchEarliestAndLatestDates,
+        fetchEarliestAndLatestDates: fetchDatesFromStatus,
     } = useReportStatus();
+
+    const { latestDate: submissionLatestDate, fetchEarliestAndLatestDates: fetchDatesFromSubmissions } = useReportSubmissions();
 
     useEffectAfterMount(() => {
         // Fetch earliest and latest dates on component mount
-        fetchEarliestAndLatestDates();
-    }, [fetchEarliestAndLatestDates]);
+        fetchDatesFromStatus();
+    }, [fetchDatesFromStatus]);
+
+    useEffectAfterMount(() => {
+        fetchDatesFromSubmissions();
+    }, [fetchDatesFromSubmissions])
 
     useEffectAfterMount(() => {
         // Fetch report statuses whenever selectedDate changes
@@ -40,7 +47,13 @@ const History: React.FC = () => {
         setSelectedDate(event.target.value);
     };
 
-    const [isOpen, setIsOpen] = useState(latestDate !== null);
+    useEffectAfterMount(() => {
+        if(submissionLatestDate) {
+            setIsOpen(submissionLatestDate !== null);
+        }
+    }, [submissionLatestDate])
+
+    const [isOpen, setIsOpen] = useState(false);
 
     const toggleForm = () => {
         setIsOpen((prev) => !prev);
