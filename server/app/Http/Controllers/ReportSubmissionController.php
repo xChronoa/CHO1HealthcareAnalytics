@@ -210,10 +210,10 @@ class ReportSubmissionController extends Controller
 
             // Get the user's details from the 'users' table
             $user = DB::table('users')->where('user_id', $userId)->first();
-            if (!$user || !$user->barangay_id) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User barangay not found.',
+                    'message' => 'User not found.',
                 ], 404); // Not Found status code
             }
 
@@ -221,48 +221,60 @@ class ReportSubmissionController extends Controller
             $isAdmin = $user->role === 'admin';
             $isEncoder = $user->role === 'encoder';
 
-            // Build the query to fetch the earliest and latest report submission dates
-            $query = DB::table('report_submissions')
-                ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
-                ->where('report_submissions.barangay_id', $user->barangay_id);
-
-            // Filter by submission status if the user is an encoder
-            if ($isEncoder) {
-                $query->whereIn('report_submissions.status', ['pending']);
-            }
-
-            // Select the earliest and latest dates
-            $dates = $query
-                ->selectRaw('
-                MIN(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as earliest_date,
-                MAX(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as latest_date
-            ')
-                ->first();
-
-            // If no dates are found, return a 404 response
-            if (!$dates) {
+            if (!$isAdmin && !$isEncoder) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No report submissions found for the user\'s barangay.',
+                    'message' => 'User role is not authorized to fetch report dates.',
+                ], 403); // Forbidden status code
+            }
+
+            // Ensure the user has a barangay_id if they are an encoder or admin
+            if ($isEncoder && !$user->barangay_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User barangay not found.',
                 ], 404); // Not Found status code
             }
 
-            // Return the earliest and latest dates in the response
+            if ($isEncoder) {
+                // Build the query to fetch the earliest and latest report submission dates
+                $dates = DB::table('report_submissions')
+                    ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
+                    ->where('report_submissions.barangay_id', $user->barangay_id)
+                    ->where('report_submissions.status', 'pending')
+                    ->selectRaw('
+                   MIN(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as earliest_date,
+                   MAX(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as latest_date
+               ')
+                    ->first();
+            } else if ($isAdmin) {
+                // Fetch the earliest and latest report submission dates
+                $dates = DB::table('report_submission_templates')
+                    ->selectRaw('MIN(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as earliest_date, 
+                                                MAX(CONCAT(report_year, "-", LPAD(report_month, 2, "0"))) as latest_date')
+                    ->first();
+            }
+
+            if (!$dates) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No report submissions found.',
+                ], 404);
+            }
+
+            // Return the results
             return response()->json([
                 'success' => true,
                 'data' => [
                     'earliest_date' => $dates->earliest_date,
                     'latest_date' => $dates->latest_date,
                 ],
-            ], 200); // OK status code
-
+            ], 200);
         } catch (\Exception $e) {
-            // Handle any exceptions by returning a JSON error response
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while fetching report submission dates.',
-                'error' => $e->getMessage(), // Optionally include the exception message
-            ], 500); // Internal Server Error status code
+            ], 500);
         }
     }
 
