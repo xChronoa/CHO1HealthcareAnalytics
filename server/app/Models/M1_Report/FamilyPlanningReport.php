@@ -16,7 +16,7 @@ class FamilyPlanningReport extends Model
 
     protected $fillable = [
         'age_category_id',
-        'method_id',
+        'fp_method_id',
         'current_users_beginning_month',
         'new_acceptors_prev_month',
         'other_acceptors_present_month',
