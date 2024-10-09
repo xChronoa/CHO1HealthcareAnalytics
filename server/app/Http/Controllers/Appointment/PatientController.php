@@ -86,6 +86,12 @@ class PatientController extends Controller
         return response()->json($patient);
     }
 
+    public function getCount() {
+        $patientCount = Patient::all()->count();
+
+        return response()->json(data: [$patientCount], status: 200);
+    }
+
     /**
      * Remove the specified patient from storage.
      *

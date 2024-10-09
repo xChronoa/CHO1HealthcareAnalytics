@@ -297,6 +297,8 @@ class ReportStatusController extends Controller
                     'report_statuses.report_status_id',
                     'report_statuses.report_submission_id',
                     'report_submission_templates.report_type',
+                    'report_submission_templates.report_year',
+                    'report_submission_templates.report_month',
                     'barangays.barangay_id',
                     'barangays.barangay_name',
                     'report_statuses.submitted_at'
@@ -308,12 +310,22 @@ class ReportStatusController extends Controller
                 ->where('report_statuses.status', 'approved'); // Filter by approved status
 
             // Apply year and month filters if provided
+            // if ($reportYear) {
+            //     $query->whereYear('report_statuses.submitted_at', $reportYear);
+            // }
+
+            // if ($reportMonth) {
+            //     $query->whereMonth('report_statuses.submitted_at', $reportMonth);
+            // }
+
+
+            // Apply year and month filters based on report_submission_templates table
             if ($reportYear) {
-                $query->whereYear('report_statuses.submitted_at', $reportYear);
+                $query->where('report_submission_templates.report_year', $reportYear);
             }
 
             if ($reportMonth) {
-                $query->whereMonth('report_statuses.submitted_at', $reportMonth);
+                $query->where('report_submission_templates.report_month', $reportMonth);
             }
 
             // Execute the query and get the results
@@ -340,7 +352,7 @@ class ReportStatusController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function fetchEarliestAndLatestReportStatusesDates()
+    public function fetchEarliestAndLatestReportStatusesDates(Request $request)
     {
         try {
             // Retrieve the authenticated user's ID
@@ -354,30 +366,62 @@ class ReportStatusController extends Controller
                 ], 401); // Unauthorized status code
             }
 
-            // Get the user's barangay_id from the 'users' table
+            // Get the user's role and barangay_id from the 'users' table
             $user = DB::table('users')->where('user_id', $userId)->first();
-            if (!$user || !$user->barangay_id) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User barangay not found.',
+                    'message' => 'User not found.',
                 ], 404); // Not Found status code
             }
 
-            // Fetch the earliest and latest report submission dates based on the user's barangay_id
-            $dates = DB::table('report_submissions')
+            // Fetch the barangay_id from the request body for admin users
+            $barangayId = $request->input('barangay_id');
+
+            // If the user is an admin, require a barangay_id in the request body
+            if ($user->role === 'admin') {
+                if (!$barangayId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Barangay ID is required for admin users.',
+                    ], 400); // Bad Request status code
+                }
+            } else {
+                // If the user is an encoder, use their own barangay_id
+                if ($user->role === 'encoder') {
+                    if ($user->barangay_id) {
+                        $barangayId = $user->barangay_id;
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'User barangay not found.',
+                        ], 404); // Not Found status code
+                    }
+                }
+            }
+
+            // Prepare the query for fetching report submission dates
+            $query = DB::table('report_submissions')
                 ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
-                ->where('report_submissions.barangay_id', $user->barangay_id)
                 ->selectRaw('
                 MIN(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as earliest_date,
                 MAX(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as latest_date
             ')
-                ->first();
+                ->where('status', 'submitted');
+
+            // Apply the barangay_id filter
+            if ($barangayId) {
+                $query->where('report_submissions.barangay_id', $barangayId);
+            }
+
+            // Execute the query
+            $dates = $query->first();
 
             // If no dates are found, return a 404 response
             if (!$dates) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No report submissions found for the user\'s barangay.',
+                    'message' => 'No report submissions found for the specified barangay.',
                 ], 404); // Not Found status code
             }
 

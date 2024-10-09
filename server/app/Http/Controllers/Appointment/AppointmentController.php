@@ -154,6 +154,11 @@ class AppointmentController extends Controller
         return response()->json(null, 204);
     }
 
+    public function getCount() {
+        $appointmentCount = Appointment::all()->count();
+        return response()->json(data: [$appointmentCount], status: 200);
+    }
+
     /**
      * List all patients with their appointment details.
      *

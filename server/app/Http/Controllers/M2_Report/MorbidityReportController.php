@@ -9,6 +9,7 @@ use App\Models\M2_Report\MorbidityReport;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class MorbidityReportController extends Controller
 {
@@ -56,7 +57,6 @@ class MorbidityReportController extends Controller
                 'status' => 'success',
                 'data' => $formattedReports,
             ], Response::HTTP_OK);
-
         } catch (\Exception $e) {
             // Log the exception for debugging
             Log::error('Error fetching morbidity reports: ' . $e->getMessage());
@@ -64,6 +64,137 @@ class MorbidityReportController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Fetch and return filtered morbidity report data based on user role and report period.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFilteredMorbidityReports(Request $request)
+    {
+        try {
+            // Get the authenticated user and request parameters
+            $user = Auth::user();
+            $barangayId = $request->input('barangay_id');
+            $reportMonth = $request->input('report_month'); // Extracted month
+            $reportYear = $request->input('report_year');   // Extracted year
+
+            // Initialize the query with necessary relationships
+            $query = MorbidityReport::with([
+                'disease',         // Eager load disease details
+                'ageCategory',     // Eager load age category details
+                'reportStatus.reportSubmission.barangay', // Eager load barangay details
+            ]);
+
+            // Apply filtering based on the user's role
+            if ($user->role === 'admin') {
+                // Admin: use the provided barangay_id or return all if not provided
+                if ($barangayId) {
+                    $query->whereHas('reportStatus.reportSubmission', function ($q) use ($barangayId) {
+                        $q->where('barangay_id', $barangayId);
+                    });
+                }
+            } elseif ($user->role === 'encoder') {
+                // Encoder: restrict data to the user's affiliated barangay_id
+                $encoderBarangayId = $user->barangay_id;
+                if ($encoderBarangayId) {
+                    $query->whereHas('reportStatus.reportSubmission', function ($q) use ($encoderBarangayId) {
+                        $q->where('barangay_id', $encoderBarangayId);
+                    });
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Encoder does not have an affiliated barangay.',
+                    ], Response::HTTP_FORBIDDEN);
+                }
+            }
+
+            // Apply filtering for the report period if both month and year are provided
+            if ($reportMonth && $reportYear) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($reportMonth, $reportYear) {
+                    $q->where('report_month', $reportMonth)
+                        ->where('report_year', $reportYear);
+                });
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Report month and year must be provided.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Fetch the filtered morbidity reports
+            $morbidityReports = $query->get();
+
+            // Group data by disease name, age category, and gender
+            $groupedData = [];
+            $reportPeriod = null;
+            $reportStatus = null;
+            $reportId = null;
+
+            foreach ($morbidityReports as $report) {
+                // Ensure relationships exist to avoid null errors
+                if ($report->disease && $report->ageCategory && $report->reportStatus) {
+                    $diseaseName = $report->disease->disease_name;
+                    $ageCategory = $report->ageCategory->age_category;
+                    $maleCount = $report->male;
+                    $femaleCount = $report->female;
+                    $statusName = $report->reportStatus->status;
+    
+                    // Set report_id, status, and report_period for the response
+                    $reportId = $report->report_id;
+                    $reportStatus = $statusName;
+                    $reportPeriod = Carbon::create(
+                        $report->reportStatus->reportSubmission->reportTemplate->report_year,
+                        $report->reportStatus->reportSubmission->reportTemplate->report_month,
+                        1
+                    )->format('Y-m');
+    
+                    // Initialize disease if not present
+                    if (!isset($groupedData[$diseaseName])) {
+                        $groupedData[$diseaseName] = [
+                            'disease_code' => $report->disease->disease_code,
+                            'Total' => ['M' => 0, 'F' => 0],  // Initialize total male and female counts
+                        ];
+                    }
+    
+                    // Initialize age category if not present
+                    if (!isset($groupedData[$diseaseName][$ageCategory])) {
+                        $groupedData[$diseaseName][$ageCategory] = ['M' => 0, 'F' => 0];
+                    }
+    
+                    // Aggregate male and female counts for the age category
+                    $groupedData[$diseaseName][$ageCategory]['M'] += $maleCount;
+                    $groupedData[$diseaseName][$ageCategory]['F'] += $femaleCount;
+    
+                    // Increment total male and female counts for the disease
+                    $groupedData[$diseaseName]['Total']['M'] += $maleCount;
+                    $groupedData[$diseaseName]['Total']['F'] += $femaleCount;
+                }
+            }
+
+            // Prepare the final response structure
+            $response = [
+                'report_id' => $reportId,
+                'report_status' => $reportStatus,
+                'report_period' => $reportPeriod,
+                'data' => $groupedData
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $response,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Log the exception for debugging purposes
+            Log::error('Error fetching morbidity reports: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while fetching morbidity reports.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
