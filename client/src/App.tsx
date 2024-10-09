@@ -33,6 +33,7 @@ import GuestLayout from "./components/GuestLayout";
 import ManageAccountLayout from "./components/ManageAccountLayout";
 import { AuthProvider } from "./context/AuthContext";
 import AppointmentConfirmation from "./pages/AppointmentConfirmation";
+import SubmittedReports from "./pages/Barangay/SubmittedReports";
 
 function App() {
     return (
@@ -63,6 +64,8 @@ function App() {
                                 <Route element={<UpdateAccount />} path="update" />
                                 <Route element={<AccountList />} path="accounts" />
                             </Route>
+
+                            <Route element={<SubmittedReports />} path="report/submitted/:barangayName" />
                         </Route>
                     </Route>
 
@@ -72,6 +75,7 @@ function App() {
                             <Route index element={<History />} />
                             <Route element={<History />} path="history" />
                             <Route element={<Report />} path="report" />
+                            <Route element={<SubmittedReports />} path="report/submitted" />
                         </Route>
                     </Route>
                     
