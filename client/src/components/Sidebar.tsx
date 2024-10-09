@@ -79,6 +79,12 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     isMinimized={isMinimized}
                                     destination="history"
                                 />
+                                <SidebarButton
+                                    icon={faNewspaper}
+                                    labelText="Submitted Reports"
+                                    isMinimized={isMinimized}
+                                    destination="report/submitted"
+                                />
                                 <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
                                     <SidebarButton
                                         icon={faRightFromBracket}
