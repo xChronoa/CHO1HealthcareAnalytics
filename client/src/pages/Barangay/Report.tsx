@@ -107,6 +107,9 @@ const Report: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        // console.log(transformInputValues(reportData.m2Report, diseases, ageCategories).length)
+
+        // return; 
         if(m1ReportId === null && m2ReportId === null) {
             Swal.fire({
                 icon: "warning",

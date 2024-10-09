@@ -70,6 +70,7 @@ const Appointment: React.FC = () => {
             "email",
             "phone_number",
             "terms",
+            "otp"
         ];
 
         requiredFields.forEach((field) => {
