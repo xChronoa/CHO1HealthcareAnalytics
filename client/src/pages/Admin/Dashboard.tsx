@@ -13,8 +13,8 @@ interface DashboardProp {
 
 const Dashboard: React.FC<DashboardProp> = () => {
     const [section, setSection] = useState<string>("m1");
-    const { fetchPatients, patients, loading: patientLoading } = usePatient();
-    const { fetchPatientsAppointments, appointments, appointmentLoading } = useAppointment();
+    const { fetchCount: fetchPatientCount, patientCount, loading: patientLoading } = usePatient();
+    const { fetchCount: fetchAppointmentCount, appointmentCount, appointmentLoading } = useAppointment();
     const { fetchPendingReportCount, pendingReportCount, loading: reportSubmissionLoading } = useReportSubmissions();
 
     const handleToggle = (selectedSection: string) => {
@@ -29,10 +29,10 @@ const Dashboard: React.FC<DashboardProp> = () => {
         }`;
 
     useEffectAfterMount(() => {
-        fetchPatients();
-        fetchPatientsAppointments();
+        fetchPatientCount(),
+        fetchAppointmentCount();
         fetchPendingReportCount();
-    }, [fetchPatients, fetchPatientsAppointments, fetchPendingReportCount]);
+    }, [fetchPatientCount, fetchAppointmentCount, fetchPendingReportCount]);
 
     return (
         <>
@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-patients">
                         <label htmlFor="patient-amount">Total Patients</label>
                         <span className="text-2xl font-bold text-center text-black bg-transparent patient-amount">
-                            {patients?.length}
+                        {patientCount}
                         </span>
                     </div>
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-appointments">
@@ -55,7 +55,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             Total Appointments
                         </label>
                         <span className="text-2xl font-bold text-center text-black bg-transparent appointment-amount">
-                            {appointments?.length}
+                            {appointmentCount}
                         </span>
                     </div>
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-pending-barangay-report">
