@@ -118,9 +118,9 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
     return (
         <div className="flex flex-col items-center justify-center w-11/12 pt-16">
             <header className="w-full mb-4">
-                    <h1 className="mb-2 text-2xl font-bold">M2 Report <span className="italic font-light">(Morbidity Diseases)</span></h1>
-                    <div className="dividing-line w-full h-[2px] bg-black"></div>
-                </header>
+                <h1 className="mb-2 text-2xl font-bold">M2 Report <span className="italic font-light">(Morbidity Diseases)</span></h1>
+                <div className="dividing-line w-full h-[2px] bg-black"></div>
+            </header>
 
             <div className="w-full p-4 md:w-4/5">
                 <div className="flex flex-row w-full text-center border-white bg-green text-white italic [&>*]:px-4 [&>*]:py-2 rounded-tl-xl rounded-tr-xl font-medium uppercase text-sm md:text-[1.1rem]">
