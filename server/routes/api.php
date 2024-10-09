@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [PatientController::class, 'index']); // List all patients
         Route::post('/', [PatientController::class, 'store']); // Create a new patient
         Route::get('/{id}', [PatientController::class, 'show']); // Retrieve a specific patient
+        Route::get('/{id}', [PatientController::class, 'getCount']); // Retrieve a specific patient
         Route::put('/{id}', [PatientController::class, 'update']); // Update a specific patient
         Route::delete('/{id}', [PatientController::class, 'destroy']); // Delete a specific patient
     });
@@ -75,6 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{id}', [AppointmentController::class, 'update']);
         Route::delete('/{id}', [AppointmentController::class, 'destroy']);
         Route::get('/patients', [AppointmentController::class, 'allPatientsWithAppointments']);
+        Route::get('/count', [AppointmentController::class, 'getCount']);
         Route::get('/category/{category_name}', [AppointmentController::class, 'patientsForCategory']);
     });
 
@@ -89,7 +91,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix("statuses")->group(function () {
         Route::post("/submit/report", [ReportStatusController::class, 'submitReport']);
         Route::post("/report-status/", [ReportStatusController::class, 'filterReportStatuses']);
-        Route::get("/min-max/", [ReportStatusController::class, 'fetchEarliestAndLatestReportStatusesDates']);
+        Route::post("/min-max/", [ReportStatusController::class, 'fetchEarliestAndLatestReportStatusesDates']);
     });
 
     Route::prefix("diseases")->group(function() {
@@ -112,10 +114,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get("/{service_name}", [ServiceController::class, "show"]);
     });
 
+    // Dashboard
     Route::get("/wra-reports/", [WomenOfReproductiveAgeController::class, "getWomenOfReproductiveAges"]);
     Route::get("/family-planning-reports", [FamilyPlanningReportController::class, "getFamilyPlanningReports"]);
     Route::get("/service-data-reports/{service_name}", [ServiceDataController::class, "getServiceDataReports"]);
     Route::get("/morbidity-reports/", [MorbidityReportController::class, "getMorbidityReports"]);
+    
+
+    // Filtered Report by Month and Barangay
+    Route::get("/service-data-reports/", [ServiceDataController::class, "getFilteredServiceDataReports"]);
+    Route::post("/morbidity-reports/filtered", [MorbidityReportController::class, "getFilteredMorbidityReports"]);
+    
     
     // Route for logging out an authenticated user
     Route::post('logout', [UserController::class, 'logout']);
