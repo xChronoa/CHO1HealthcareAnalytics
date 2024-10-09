@@ -19,7 +19,7 @@ const BarangayList: React.FC = () => {
             </header>
             <section className="grid items-center justify-center grid-cols-3 gap-5 md:gap-12">
                 {barangays.map(barangay => (
-                    <BarangayView key={barangay.barangay_id} logoPath={barangay.logoPath || ""}/>
+                    <BarangayView key={barangay.barangay_id} barangayId={barangay.barangay_id} barangayName={barangay.barangay_name} logoPath={barangay.logoPath || ""}/>
                 ))}
             </section>
         </div>
