@@ -9,9 +9,9 @@ interface UseReportStatus {
     latestDate: string;
     fetchReportStatuses: (
         reportYear: number,
-        reportMonth: number,
+        reportMonth: number
     ) => Promise<void>;
-    fetchEarliestAndLatestDates: () => Promise<void>;
+    fetchEarliestAndLatestDates: (barangayId: number | null) => Promise<void>;
 }
 
 interface ReportStatus {
@@ -82,43 +82,58 @@ export const useReportStatus = (): UseReportStatus => {
         []
     );
 
-    const fetchEarliestAndLatestDates = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+    const fetchEarliestAndLatestDates = useCallback(
+        async (barangayId: number | null) => {
+            setLoading(true);
+            setError(null);
 
-        try {
-            const response = await fetch(
-                `${baseAPIUrl}/statuses/min-max`, // Backend should use Auth to filter by user
-                {
-                    method: "GET",
+            try {
+                const url = `${baseAPIUrl}/statuses/min-max`; // The URL remains the same
+
+                // Make the POST request
+                const response = await fetch(url, {
+                    method: "POST",
                     headers: {
+                        "Content-Type": "application/json", // Specify the content type
                         Accept: "application/json",
                     },
                     credentials: "include", // Ensure credentials are included for authentication
+                    body: JSON.stringify({ barangay_id: barangayId }), // Send barangayId in the body
+                });
+
+                // Check if the response is okay
+                if (!response.ok) {
+                    throw new Error(
+                        "An error occurred while fetching the earliest and latest dates."
+                    );
                 }
-            );
 
-            if (!response.ok) {
-                throw new Error(
-                    "An error occurred while fetching the earliest and latest dates."
-                );
+                // Parse the response JSON
+                const result = await response.json();
+                if (result.success) {
+                    setEarliestDate(result.data.earliest_date);
+                    setLatestDate(result.data.latest_date);
+                } else {
+                    throw new Error(result.message || "An error occurred.");
+                }
+            } catch (error: any) {
+                setError(error.message);
+                setEarliestDate("");
+                setLatestDate("");
+            } finally {
+                setLoading(false);
             }
+        },
+        [] // Dependency array for useCallback
+    );
 
-            const result = await response.json();
-            if (result.success) {
-                setEarliestDate(result.data.earliest_date);
-                setLatestDate(result.data.latest_date);
-            } else {
-                throw new Error(result.message || "An error occurred.");
-            }
-        } catch (error: any) {
-            setError(error.message);
-            setEarliestDate("");
-            setLatestDate("");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    return { statuses, loading, error, earliestDate, latestDate, fetchReportStatuses, fetchEarliestAndLatestDates };
+    return {
+        statuses,
+        loading,
+        error,
+        earliestDate,
+        latestDate,
+        fetchReportStatuses,
+        fetchEarliestAndLatestDates,
+    };
 };

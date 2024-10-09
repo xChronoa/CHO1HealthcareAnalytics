@@ -5,11 +5,13 @@ import { baseAPIUrl } from "../config/apiConfig";
 interface UsePatient {
     // Functions
     fetchPatients: () => Promise<void>;
+    fetchCount: () => Promise<void>;
     getPatient: (patient_id: number) => Promise<Patient>;
     createPatient: (patient: Patient) => Promise<boolean>;
     updatePatient: (patient: Patient) => Promise<boolean>;
 
     // Variables
+    patientCount: number;
     patients: Patient[] | null;
     loading: boolean;
     success: boolean;
@@ -28,11 +30,37 @@ interface Errors {
 }
 
 export const usePatient = (): UsePatient => {
+    const [patientCount, setPatientCount] = useState<number>(0);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<Errors>({});
+
+    const fetchCount = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${baseAPIUrl}/patients/count`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const data = await response.json();
+            setPatientCount(data);
+        } catch (error) {
+            setError("An unexpected error occurred. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const fetchPatients = useCallback(async () => {
         try {
@@ -164,9 +192,11 @@ export const usePatient = (): UsePatient => {
 
     return {
         fetchPatients,
+        fetchCount,
         getPatient,
         createPatient,
         updatePatient,
+        patientCount,
         patients,
         loading,
         success,

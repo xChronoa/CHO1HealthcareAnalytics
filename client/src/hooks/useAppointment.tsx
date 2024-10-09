@@ -38,6 +38,33 @@ export const useAppointment = () => {
 
     const [minDate, setMinDate] = useState("");
     const [maxDate, setMaxDate] = useState("");
+    
+    const [appointmentCount, setAppointmentCount] = useState<number>(0);
+
+    const fetchCount = useCallback(async () => {
+        try {
+            setAppointmentLoading(true);
+            const response = await fetch(`${baseAPIUrl}/appointments/count`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const data = await response.json();
+            setAppointmentCount(data);
+        } catch (error) {
+            setError("An unexpected error occurred. Please try again later.");
+        } finally {
+            setAppointmentLoading(false);
+        }
+    }, []);
 
     /**
      * Fetch all appointments from the API.
@@ -285,6 +312,8 @@ export const useAppointment = () => {
         error,
         minDate,
         maxDate,
+        appointmentCount,
+        fetchCount,
         fetchAppointments,
         fetchPatientsAppointments,
         fetchAppointmentById,
