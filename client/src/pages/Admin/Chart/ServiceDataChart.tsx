@@ -77,6 +77,8 @@ const ServiceDataChart: React.FC = () => {
         const fetchServiceData = async () => {
             if (!selectedService) return;
 
+            if (selectedService === "Modern FP Unmet Need" || selectedService === "Family Planning") return;
+
             setLoading(true);
             try {
                 const response = await fetch(
@@ -218,7 +220,7 @@ const ServiceDataChart: React.FC = () => {
                         renderedCategories.add(ageCategory);
                         return (
                             <div key={ageCategory}>
-                                <h3>{ageCategory || "Unknown Age Category"}</h3>
+                                <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                                 <Line
                                     data={{
                                         labels,
@@ -244,7 +246,7 @@ const ServiceDataChart: React.FC = () => {
                         renderedValueTypes.add(valueType);
                         return (
                             <div key={valueType}>
-                                <h3>{capitalize(valueType || "Unknown Value Type")}</h3>
+                                <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
                                 <Line
                                     data={{
                                         labels,
@@ -270,7 +272,7 @@ const ServiceDataChart: React.FC = () => {
                 renderedCategories.add(ageCategory);
                 return (
                     <div key={ageCategory}>
-                        <h3>{ageCategory || "Unknown Age Category"}</h3>
+                        <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                         <Line
                             data={{
                                 labels,
@@ -294,7 +296,7 @@ const ServiceDataChart: React.FC = () => {
                 renderedValueTypes.add(valueType);
                 return (
                     <div key={valueType}>
-                        <h3>{capitalize(valueType || "Unknown Value Type")}</h3>
+                        <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
                         <Line
                             data={{
                                 labels,
@@ -350,8 +352,24 @@ const ServiceDataChart: React.FC = () => {
             },
         },
     };
-    
 
+    const downloadChart = () => {
+        // Get all canvas elements within the #myChart div
+        const canvases = document.querySelectorAll("#myChart canvas");
+        
+        // Loop through each canvas and download its image
+        canvases.forEach((canvas, index) => {
+            if (canvas instanceof HTMLCanvasElement) {
+                const link = document.createElement("a");
+                link.href = canvas.toDataURL("image/png");
+                link.download = `chart_${index + 1}.png`; // Give each file a unique name
+                link.click();
+            } else {
+                alert("Unable to download chart. Please ensure the charts are visible.");
+            }
+        });
+    };
+    
     return (
         <>
             <div>
@@ -360,31 +378,38 @@ const ServiceDataChart: React.FC = () => {
                 ) : error ? (
                     <p>Error: {error}</p>
                 ) : (
-                    <div className="flex flex-col justify-center items-center">
-                        <select className="w-fit mb-8 mt-12 py-2 rounded-lg pl-2" onChange={handleServiceChange} value={selectedService}>
-                            <option hidden>Select a Service</option>
-                            <option value="Modern FP Unmet Need">
-                                Modern FP Unmet Need
-                            </option>
-                            <option value="Family Planning">
-                                Family Planning
-                            </option>
-                            {services.map((service, index) => (
-                                <option key={index} value={service}>
-                                    {service}
-                                </option>
-                            ))}
-                        </select>
-
-                        <div className="w-full flex flex-col justify-center gap-24">
+                    <div className="flex flex-col items-center justify-center">
+                        <div className="flex flex-row items-center justify-between w-9/12 gap-8 mb-8 options">
+                            <select
+                                className="flex-1 w-full py-2 pl-2 rounded-lg lg:w-fit"
+                                onChange={handleServiceChange}
+                                value={selectedService}
+                            >
+                                <option hidden>Select a Service</option>
+                                <option value="Modern FP Unmet Need">Modern FP Unmet Need</option>
+                                <option value="Family Planning">Family Planning</option>
+                                {services.map((service, index) => (
+                                    <option key={index} value={service}>
+                                        {service}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={downloadChart}
+                                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Download Charts
+                            </button>
+                        </div>
+                        <div className="flex flex-col justify-center w-9/12 gap-24" id="myChart">
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
-                                        renderCharts()
-                                    ) : (
-                                        <ModernWRAChart />
-                                    )
+                                    renderCharts()
                                 ) : (
-                                    <FamilyPlanningChart />
+                                    <ModernWRAChart />
+                                )
+                            ) : (
+                                <FamilyPlanningChart />
                             )}
                         </div>
                     </div>

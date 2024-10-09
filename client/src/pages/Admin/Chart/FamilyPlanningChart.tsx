@@ -219,7 +219,7 @@ const FamilyPlanningChart: React.FC = () => {
                             );
                             return (
                                 <div key={index}>
-                                    <h3 className="font-semibold mb-2">Age Category: {ageCategory}</h3>
+                                    <h3 className="mb-2 font-semibold">Age Range: {ageCategory}</h3>
                                     <Line
                                         data={chartData(filteredData)}
                                         options={{ ...options, plugins: { ...options.plugins, tooltip: { ...options.plugins.tooltip, callbacks: { ...options.plugins.tooltip.callbacks, afterLabel: (tooltipItem: any) => {
