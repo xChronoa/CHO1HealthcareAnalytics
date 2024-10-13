@@ -6,26 +6,6 @@ import cho_logo from "./assets/images/cho_logo.png";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./utils/PrivateRoute";
 
-// Import Pages
-// Guest Pages
-import Overview from "./pages/Overview";
-import Appointment from "./pages/Appointment";
-import Login from "./pages/Login";
-
-// Barangay Pages
-import History from "./pages/Barangay/History";
-import Report from "./pages/Barangay/Report";
-
-// Admin Pages
-import Dashboard from "./pages/Admin/Dashboard";
-import Transaction from "./pages/Admin/Transaction";
-import BarangayList from "./pages/Admin/BarangayList";
-import AppointmentList from "./pages/Admin/AppointmentList";
-import ManageAccount from "./pages/Admin/ManageAccount";
-import AccountList from "./pages/Admin/AccountList";
-import CreateAccount from "./pages/Admin/CreateAccount";
-import UpdateAccount from "./pages/Admin/UpdateAccount";
-
 // Import Components
 import NotFound from "./pages/NotFound";
 import MainLayout from "./components/MainLayout";
@@ -33,54 +13,73 @@ import GuestLayout from "./components/GuestLayout";
 import ManageAccountLayout from "./components/ManageAccountLayout";
 import { AuthProvider } from "./context/AuthContext";
 import AppointmentConfirmation from "./pages/AppointmentConfirmation";
-import SubmittedReports from "./pages/Barangay/SubmittedReports";
+import SubmittedReports from "./pages/Submitted_Reports/SubmittedReports";
+
+// Import the Loading component
+import Loading from "./components/Loading";
+import React from "react";
+
+// Lazy load pages
+const Overview = React.lazy(() => import("./pages/Overview"));
+const Appointment = React.lazy(() => import("./pages/Appointment"));
+const Login = React.lazy(() => import("./pages/Login"));
+const History = React.lazy(() => import("./pages/Barangay/History"));
+const Report = React.lazy(() => import("./pages/Barangay/Report"));
+const Dashboard = React.lazy(() => import("./pages/Admin/Dashboard"));
+const Transaction = React.lazy(() => import("./pages/Admin/Transaction"));
+const BarangayList = React.lazy(() => import("./pages/Admin/BarangayList"));
+const AppointmentList = React.lazy(() => import("./pages/Admin/AppointmentList"));
+const ManageAccount = React.lazy(() => import("./pages/Admin/ManageAccount"));
+const AccountList = React.lazy(() => import("./pages/Admin/AccountList"));
+const CreateAccount = React.lazy(() => import("./pages/Admin/CreateAccount"));
+const UpdateAccount = React.lazy(() => import("./pages/Admin/UpdateAccount"));
 
 function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Routes>
-                    {/* Guest Routes */}
-                    <Route element={<GuestLayout/>}>
-                        {/* <Route index element={<Overview />} /> */}
-                        <Route index element={<Login image={cho_logo} />} />
-                        <Route element={<Appointment />} path="/appointment" />
-                        <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
-                        <Route element={<Login image={cabuyao_logo} />} path="/barangay/login" />
-                        <Route element={<Login image={cho_logo} />} path="/admin/login" />
-                    </Route>
+                <React.Suspense fallback={<Loading />}>
+                    <Routes>
+                        {/* Guest Routes */}
+                        <Route element={<GuestLayout />}>
+                            {/* <Route index element={<Overview />} /> */}
+                            <Route index element={<Login image={cho_logo} />} />
+                            <Route path="/appointment" element={<Appointment />} />
+                            <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
+                            <Route path="/barangay/login" element={<Login image={cabuyao_logo} />} />
+                            <Route path="/admin/login" element={<Login image={cho_logo} />} />
+                        </Route>
 
-                    {/* Admin Routes */}
-                    <Route element={<PrivateRoute allowedRoles={['admin']}/>}>
-                        <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }}/>}>
-                            <Route index element={<Dashboard />} />
-                            <Route element={<Transaction />} path="transactions" />
-                            <Route element={<BarangayList />} path="barangays" />
-                            <Route element={<AppointmentList />} path="appointments" />
-
-                            <Route path="manage" element={<ManageAccountLayout />}>
-                                <Route index element={<ManageAccount />} />
-                                <Route element={<CreateAccount />} path="create" />
-                                <Route element={<UpdateAccount />} path="update" />
-                                <Route element={<AccountList />} path="accounts" />
+                        {/* Admin Routes */}
+                        <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+                            <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }} />}>
+                                <Route index element={<Dashboard />} />
+                                <Route path="transactions" element={<Transaction />} />
+                                <Route path="barangays" element={<BarangayList />} />
+                                <Route path="appointments" element={<AppointmentList />} />
+                                <Route path="manage" element={<ManageAccountLayout />}>
+                                    <Route index element={<ManageAccount />} />
+                                    <Route path="create" element={<CreateAccount />} />
+                                    <Route path="update" element={<UpdateAccount />} />
+                                    <Route path="accounts" element={<AccountList />} />
+                                </Route>
+                                <Route path="report/submitted/:barangayName" element={<SubmittedReports />} />
                             </Route>
-
-                            <Route element={<SubmittedReports />} path="report/submitted/:barangayName" />
                         </Route>
-                    </Route>
 
-                    {/* Barangay Routes */}
-                    <Route element={<PrivateRoute allowedRoles={['encoder']}/>}>
-                        <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay'}}/>}>
-                            <Route index element={<History />} />
-                            <Route element={<History />} path="history" />
-                            <Route element={<Report />} path="report" />
-                            <Route element={<SubmittedReports />} path="report/submitted" />
+                        {/* Barangay Routes */}
+                        <Route element={<PrivateRoute allowedRoles={['encoder']} />}>
+                            <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay' }} />}>
+                                <Route index element={<History />} />
+                                <Route path="history" element={<History />} />
+                                <Route path="report" element={<Report />} />
+                                <Route path="report/submitted" element={<SubmittedReports />} />
+                            </Route>
                         </Route>
-                    </Route>
-                    
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
+
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </React.Suspense>
             </AuthProvider>
         </BrowserRouter>
     );

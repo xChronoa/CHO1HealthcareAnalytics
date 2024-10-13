@@ -23,6 +23,7 @@ const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
                         className="self-center size-12"
                         src={logoPath}
                         alt="City of Cabuyao Logo"
+                        loading="lazy"
                     />
                 )}
             </div>

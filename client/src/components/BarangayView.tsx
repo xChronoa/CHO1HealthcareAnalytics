@@ -19,6 +19,7 @@ const BarangayView: React.FC<BarangayViewProp> = ({ logoPath, barangayId, barang
                 src={logoPath} 
                 alt="Barangay Logo" 
                 className="rounded-full shadow-xl md:scale-90 shadow-neutral-400" 
+                loading="lazy"
             />
             <button
                 onClick={handleViewClick}
