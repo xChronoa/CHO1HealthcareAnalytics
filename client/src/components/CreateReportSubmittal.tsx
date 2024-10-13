@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ReportSubmittalsData } from "../hooks/useReportSubmissions";
 import { useReportSubmissions } from "../hooks/useReportSubmissions";
 import useEffectAfterMount from "../hooks/useEffectAfterMount";
+import { useLoading } from "../context/LoadingContext";
 
 interface CreateReportSubmittalProps {
     isOpen: boolean;
@@ -18,8 +19,9 @@ const CreateReportSubmittal: React.FC<CreateReportSubmittalProps> = ({
 }) => {
     if (!isOpen) return null;
 
-    const { submitReportSubmittal, loading: reportSubmissionLoading, error: reportSubmissionErrorChild } =
+    const { submitReportSubmittal, error: reportSubmissionErrorChild } =
         useReportSubmissions();
+    const { isLoading } = useLoading();
 
     const today = new Date();
     const formattedToday = today.toISOString().split("T")[0]; // YYYY-MM-DD format
@@ -219,7 +221,7 @@ const CreateReportSubmittal: React.FC<CreateReportSubmittalProps> = ({
                                         clipRule="evenodd"
                                     />
                                 </svg>
-                                {reportSubmissionLoading
+                                {isLoading
                                     ? "Creating report submittal..."
                                     : "Create Report Submittal"}
                             </button>
