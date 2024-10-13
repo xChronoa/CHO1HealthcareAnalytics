@@ -8,14 +8,11 @@ import {
     Tooltip,
     Legend,
     PointElement,
-    ChartData,
     ChartOptions,
 } from "chart.js";
 import {
-    MorbidityReport,
     useMorbidityReport,
 } from "../../../hooks/useMorbidityReport";
-import Loading from "../../../components/Loading";
 
 ChartJS.register(
     LineElement,
@@ -27,7 +24,7 @@ ChartJS.register(
 );
 
 const MorbidityFormChart: React.FC = () => {
-    const { loading, error, morbidityReports, fetchMorbidityReports } =
+    const { error, morbidityReports, fetchMorbidityReports } =
         useMorbidityReport();
     const [selectedAgeCategory, setSelectedAgeCategory] = useState<
         string | null
@@ -57,7 +54,8 @@ const MorbidityFormChart: React.FC = () => {
     );
 
     const aggregateDataByDisease = (key: "male" | "female") => {
-        const aggregated: { [disease: string]: { [period: string]: number } } = {};
+        const aggregated: { [disease: string]: { [period: string]: number } } =
+            {};
 
         morbidityReports.forEach((entry) => {
             if (typeof entry[key] === "number") {
@@ -67,7 +65,8 @@ const MorbidityFormChart: React.FC = () => {
                 if (!aggregated[entry.disease_name][entry.report_period]) {
                     aggregated[entry.disease_name][entry.report_period] = 0;
                 }
-                aggregated[entry.disease_name][entry.report_period] += entry[key];
+                aggregated[entry.disease_name][entry.report_period] +=
+                    entry[key];
             }
         });
 
@@ -79,7 +78,10 @@ const MorbidityFormChart: React.FC = () => {
             backgroundColor: diseaseColors[disease], // Use assigned color
             tension: 0.1,
             gender: key,
-            hidden: visibility[disease] === false,
+            hidden:
+                key === "male"
+                    ? visibilityMale[disease] === false
+                    : visibilityFemale[disease] === false,
         }));
     };
 
@@ -185,7 +187,7 @@ const MorbidityFormChart: React.FC = () => {
             x: {
                 title: {
                     display: true,
-                    text: "Report Period",
+                    text: "Year-Month",
                 },
             },
             y: {
@@ -197,15 +199,23 @@ const MorbidityFormChart: React.FC = () => {
         },
     };
 
-    const handleLegendClick = (label: string) => {
-        // Implement any custom legend click logic here, if needed
-        console.log(`Clicked on legend: ${label}`);
-    };
+    const [visibilityMale, setVisibilityMale] = useState<{
+        [key: string]: boolean;
+    }>({});
+    const [visibilityFemale, setVisibilityFemale] = useState<{
+        [key: string]: boolean;
+    }>({});
 
-    const [visibility, setVisibility] = useState<{ [key: string]: boolean }>({}); // State for dataset visibility
-    const handleCheckboxChange = (label: string, event?: React.MouseEvent) => {
+    const handleCheckboxChange = (
+        label: string,
+        gender: "male" | "female",
+        event?: React.MouseEvent
+    ) => {
+        const setVisibilityForGender =
+            gender === "male" ? setVisibilityMale : setVisibilityFemale;
+
         if (shiftPressed.current && lastChecked) {
-            const checkboxes = getChartData("male").datasets.map(
+            const checkboxes = getChartData(gender).datasets.map(
                 (dataset) => dataset.label
             );
             const start = checkboxes.indexOf(lastChecked);
@@ -215,7 +225,7 @@ const MorbidityFormChart: React.FC = () => {
                 Math.max(start, end) + 1
             );
 
-            setVisibility((prevState) => {
+            setVisibilityForGender((prevState) => {
                 const newVisibility = { ...prevState };
                 range.forEach((checkbox) => {
                     newVisibility[checkbox] = !prevState[lastChecked]; // Toggle based on lastChecked state
@@ -223,9 +233,9 @@ const MorbidityFormChart: React.FC = () => {
                 return newVisibility;
             });
         } else {
-            setVisibility((prevState) => ({
+            setVisibilityForGender((prevState) => ({
                 ...prevState,
-                [label]: prevState[label] !== false ? false : true,  // Toggle between true and false
+                [label]: !prevState[label], // Toggle between true and false
             }));
             setLastChecked(label);
         }
@@ -256,7 +266,7 @@ const MorbidityFormChart: React.FC = () => {
     const downloadChart = () => {
         // Get all canvas elements within the #myChart div
         const canvases = document.querySelectorAll("#myChart canvas");
-        
+
         // Loop through each canvas and download its image
         canvases.forEach((canvas, index) => {
             if (canvas instanceof HTMLCanvasElement) {
@@ -265,16 +275,16 @@ const MorbidityFormChart: React.FC = () => {
                 link.download = `chart_${index + 1}.png`; // Give each file a unique name
                 link.click();
             } else {
-                alert("Unable to download chart. Please ensure the charts are visible.");
+                alert(
+                    "Unable to download chart. Please ensure the charts are visible."
+                );
             }
         });
     };
 
     return (
         <div>
-            {loading ? (
-                <Loading />
-            ) : error ? (
+            {error ? (
                 <p>Error: {error}</p>
             ) : (
                 <div className="flex flex-col gap-8" id="myChart">
@@ -286,69 +296,113 @@ const MorbidityFormChart: React.FC = () => {
                             Download Charts
                         </button>
                     </div>
-                    <div className="flex flex-col-reverse gap-4 sm:flex-row">
+                    <div className="flex flex-col-reverse gap-4 p-4 bg-white rounded-lg sm:flex-row-reverse">
                         <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3">
-                            <h3 className="mb-2 text-lg font-semibold">Legend</h3>
-                            {getChartData("male").datasets.map((dataset, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-2 mb-2 cursor-pointer select-none"
-                                    onClick={(event) =>
-                                        handleCheckboxChange(dataset.label, event)
-                                    }
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={visibility[dataset.label] !== false}
-                                        readOnly 
-                                        className="form-checkbox"
-                                    />
-                                    <span
-                                        className="w-4 h-4 rounded-full"
-                                        style={{ backgroundColor: dataset.borderColor }}
-                                    ></span>
-                                    <span className="text-sm">{dataset.label}</span>
-                                </div>
-                            ))}
+                            <h3 className="mb-2 text-lg font-semibold">
+                                Legend
+                            </h3>
+                            {getChartData("male").datasets.map(
+                                (dataset, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
+                                        onClick={(event) =>
+                                            handleCheckboxChange(
+                                                dataset.label,
+                                                "male",
+                                                event
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                visibilityMale[
+                                                    dataset.label
+                                                ] !== false
+                                            }
+                                            readOnly
+                                            className="form-checkbox"
+                                        />
+                                        <span
+                                            className="w-4 h-4 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    dataset.borderColor,
+                                            }}
+                                        ></span>
+                                        <span className="text-sm">
+                                            {dataset.label}
+                                        </span>
+                                    </div>
+                                )
+                            )}
                         </div>
 
                         <div className="flex-1 sm:w-2/3">
-                            <h3 className="mb-4 font-semibold text-center">Male Data</h3>
-                            <Line data={getChartData("male")} options={options} />
+                            <h3 className="mb-4 font-semibold text-center">
+                                Male Data
+                            </h3>
+                            <Line
+                                data={getChartData("male")}
+                                options={options}
+                            />
                         </div>
                     </div>
 
                     <div className="w-full h-[1px] bg-black"></div>
 
-                    <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                    <div className="flex flex-col-reverse gap-2 p-4 bg-white rounded-lg sm:flex-row-reverse">
                         <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3">
-                            <h3 className="mb-2 text-lg font-semibold">Legend</h3>
-                            {getChartData("female").datasets.map((dataset, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-2 mb-2 cursor-pointer select-none"
-                                    onClick={(event) =>
-                                        handleCheckboxChange(dataset.label, event)
-                                    }
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={visibility[dataset.label] !== false}
-                                        readOnly 
-                                        className="form-checkbox"
-                                    />
-                                    <span
-                                        className="w-4 h-4 rounded-full"
-                                        style={{ backgroundColor: dataset.borderColor }}
-                                    ></span>
-                                    <span className="text-sm">{dataset.label}</span>
-                                </div>
-                            ))}
+                            <h3 className="mb-2 text-lg font-semibold">
+                                Legend
+                            </h3>
+                            {getChartData("female").datasets.map(
+                                (dataset, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
+                                        onClick={(event) =>
+                                            handleCheckboxChange(
+                                                dataset.label,
+                                                "female",
+                                                event
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                visibilityFemale[
+                                                    dataset.label
+                                                ] !== false
+                                            }
+                                            readOnly
+                                            className="form-checkbox"
+                                        />
+                                        <span
+                                            className="w-4 h-4 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    dataset.borderColor,
+                                            }}
+                                        ></span>
+                                        <span className="text-sm">
+                                            {dataset.label}
+                                        </span>
+                                    </div>
+                                )
+                            )}
                         </div>
 
                         <div className="flex-1 sm:w-2/3">
-                            <h3 className="mb-4 font-semibold text-center">Female Data</h3>
-                            <Line data={getChartData("female")} options={options} />
+                            <h3 className="mb-4 font-semibold text-center">
+                                Female Data
+                            </h3>
+                            <Line
+                                data={getChartData("female")}
+                                options={options}
+                            />
                         </div>
                     </div>
                 </div>

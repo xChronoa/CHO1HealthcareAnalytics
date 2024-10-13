@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -12,7 +12,6 @@ import {
     ChartOptions,
 } from "chart.js";
 import { useWra } from "../../../hooks/useWra"; // Adjust the path if necessary
-import Loading from "../../../components/Loading";
 
 ChartJS.register(
     LineElement,
@@ -24,7 +23,7 @@ ChartJS.register(
 );
 
 const ModernWRAChart: React.FC = () => {
-    const { wraData, loading, error, fetchWra } = useWra();
+    const { wraData, error, fetchWra } = useWra();
 
     useEffect(() => {
         fetchWra();
@@ -55,14 +54,25 @@ const ModernWRAChart: React.FC = () => {
 
     const ageCategories = Array.from(new Set(wraData.map(entry => entry.age_category)));
 
+    const generateColor = (): string => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+
+    const ageColors = useMemo(() => {
+        // Generate a unique color for each age category
+        const colors: { [key: string]: string } = {};
+        ageCategories.forEach((category) => {
+            colors[category] = generateColor();
+        });
+        return colors;
+    }, [ageCategories]);
+
     const chartData = (): ChartData<"line"> => ({
         labels,
-        datasets: ageCategories.map((category, index) => ({
+        datasets: ageCategories.map((category) => ({
             label: capitalize(category),
             data: aggregateData(category),
             fill: false,
-            borderColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-            backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+            borderColor: ageColors[category],  // Use the pre-generated color
+            backgroundColor: ageColors[category],  // Use the pre-generated color
             tension: 0.1,
         })),
     });
@@ -110,13 +120,13 @@ const ModernWRAChart: React.FC = () => {
             x: {
                 title: {
                     display: true,
-                    text: "Report Period",
+                    text: "Year-Month",
                 },
             },
             y: {
                 title: {
                     display: true,
-                    text: "Unmet Need Modern FP",
+                    text: "Number of Women of Reproductive Age",
                 },
             },
         },
@@ -125,18 +135,18 @@ const ModernWRAChart: React.FC = () => {
     return (
         <>
             <div>
-                {loading ? (
-                    <p>Loading...</p>
-                ) : error ? (
+                {error ? (
                     <p>Error: {error}</p>
                 ) : (
-                    <Line
-                        data={chartData()}
-                        options={options}
-                    />
+                    <div className="p-4 bg-white rounded-lg">
+                        <h3 className="mb-2 font-semibold text-center">Unmet Need for Modern Family Planning</h3>
+                        <Line
+                            data={chartData()}
+                            options={options}
+                        />
+                    </div>
                 )}
             </div>
-            {loading && <Loading />}
         </>
     );
 };

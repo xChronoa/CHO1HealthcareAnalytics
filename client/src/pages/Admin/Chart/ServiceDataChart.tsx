@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -13,7 +13,7 @@ import {
 import { baseAPIUrl } from "../../../config/apiConfig";
 import FamilyPlanningChart from "./FamilyPlanningChart";
 import ModernWRAChart from "./ModernWRAChart";
-import Loading from "../../../components/Loading";
+import { useLoading } from "../../../context/LoadingContext";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, Tooltip, Legend, PointElement);
 
@@ -33,7 +33,7 @@ interface ServiceData {
 const ServiceDataChart: React.FC = () => {
     const [serviceData, setServiceData] = useState<ServiceData[]>([]);
     const [selectedService, setSelectedService] = useState<string>("Modern FP Unmet Need");
-    const [loading, setLoading] = useState<boolean>(true);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [services, setServices] = useState<string[]>([]);
 
@@ -45,6 +45,7 @@ const ServiceDataChart: React.FC = () => {
     useEffect(() => {
         const fetchServices = async () => {
             try {
+                incrementLoading();
                 const response = await fetch(`${baseAPIUrl}/services`, {
                     headers: {
                         "Content-Type": "application/json",
@@ -66,7 +67,7 @@ const ServiceDataChart: React.FC = () => {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         };
 
@@ -79,8 +80,8 @@ const ServiceDataChart: React.FC = () => {
 
             if (selectedService === "Modern FP Unmet Need" || selectedService === "Family Planning") return;
 
-            setLoading(true);
             try {
+                incrementLoading();
                 const response = await fetch(
                     `${baseAPIUrl}/service-data-reports/${encodeURIComponent(encodeURIComponent(selectedService))}`,
                     {
@@ -105,7 +106,7 @@ const ServiceDataChart: React.FC = () => {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         };
 
@@ -123,6 +124,18 @@ const ServiceDataChart: React.FC = () => {
     const labels = Array.from(
         new Set(filteredData.map((data) => data.report_period))
     );
+
+    const indicatorColors = useMemo(() => {
+        // Initialize disease color map once
+        const colors: { [indicator_name: string]: string } = {};
+        serviceData.forEach((entry) => {
+            const indicatorKey = entry.indicator_name || "Unknown Indicator"; // Fallback to default key
+            if (!colors[indicatorKey]) {
+                colors[indicatorKey] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+            }
+        });
+        return colors;
+    }, [serviceData]);
 
     const aggregateDataByIndicator = (ageCategory: string | null, valueType: string | null) => {
         const indicators = Array.from(
@@ -153,8 +166,8 @@ const ServiceDataChart: React.FC = () => {
                     )
                 ),
                 fill: false,
-                borderColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-                backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                borderColor: indicatorColors[indicator || "Unknown Indicator"],
+                backgroundColor: indicatorColors[indicator || "Unknown Indicator"],
                 tension: 0.1,
             };
         }).filter(dataset => dataset !== null);  // Filter out null datasets
@@ -180,8 +193,8 @@ const ServiceDataChart: React.FC = () => {
             }));
     
             return (
-                <div>
-                    <h3>Teenage Pregnancy</h3>
+                <div className="p-4 bg-white rounded-lg">
+                    <h3 className="mb-2 font-medium text-center">Teenage Pregnancy</h3>
                     <Line
                         data={{
                             labels, // Assuming labels is already defined for your x-axis
@@ -219,7 +232,7 @@ const ServiceDataChart: React.FC = () => {
 
                         renderedCategories.add(ageCategory);
                         return (
-                            <div key={ageCategory}>
+                            <div key={ageCategory} className="p-4 bg-white rounded-lg">
                                 <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                                 <Line
                                     data={{
@@ -245,7 +258,7 @@ const ServiceDataChart: React.FC = () => {
 
                         renderedValueTypes.add(valueType);
                         return (
-                            <div key={valueType}>
+                            <div key={valueType} className="p-4 bg-white rounded-lg">
                                 <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
                                 <Line
                                     data={{
@@ -271,7 +284,7 @@ const ServiceDataChart: React.FC = () => {
     
                 renderedCategories.add(ageCategory);
                 return (
-                    <div key={ageCategory}>
+                    <div key={ageCategory} className="p-4 bg-white rounded-lg">
                         <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                         <Line
                             data={{
@@ -295,7 +308,7 @@ const ServiceDataChart: React.FC = () => {
     
                 renderedValueTypes.add(valueType);
                 return (
-                    <div key={valueType}>
+                    <div key={valueType} className="p-4 bg-white rounded-lg">
                         <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
                         <Line
                             data={{
@@ -373,9 +386,7 @@ const ServiceDataChart: React.FC = () => {
     return (
         <>
             <div>
-                {loading ? (
-                    <p>Loading...</p>
-                ) : error ? (
+                {error ? (
                     <p>Error: {error}</p>
                 ) : (
                     <div className="flex flex-col items-center justify-center">
@@ -401,7 +412,7 @@ const ServiceDataChart: React.FC = () => {
                                 Download Charts
                             </button>
                         </div>
-                        <div className="flex flex-col justify-center w-9/12 gap-24" id="myChart">
+                        <div className="flex flex-col justify-center w-full gap-8 sm:w-9/12" id="myChart" >
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     renderCharts()
@@ -415,7 +426,6 @@ const ServiceDataChart: React.FC = () => {
                     </div>
                 )}
             </div>
-            {loading && <Loading />}
         </>
     );
 };
