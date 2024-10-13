@@ -55,7 +55,8 @@ const Sidebar: React.FC<SidebarProps> = memo(
                             <img
                                 src={logoPath}
                                 alt="Logo"
-                                className="origin-center scale-95"
+                                className="origin-center scale-75 sm:scale-95"
+                                loading="lazy"
                             />
                             <h3 className="text-center text-nowrap">
                                 {barangay ? `Barangay ${barangay}` : "Cabuyao Health Office 1"}
@@ -85,16 +86,6 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     isMinimized={isMinimized}
                                     destination="report/submitted"
                                 />
-                                <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
-                                    <SidebarButton
-                                        icon={faRightFromBracket}
-                                        labelText="Log out"
-                                        additionalStyle="py-2 text-white uppercase bg-red-700"
-                                        isMinimized={isMinimized}
-                                        destination=""
-                                        logout={logout}
-                                    />
-                                </div>
                             </>
                         ) : 
                         (
@@ -129,18 +120,18 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     isMinimized={isMinimized}
                                     destination="manage"
                                 />
-                                <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
-                                    <SidebarButton
-                                        icon={faRightFromBracket}
-                                        labelText="Log out"
-                                        additionalStyle="py-2 text-white uppercase bg-red-700"
-                                        isMinimized={isMinimized}
-                                        destination=""
-                                        logout={logout}
-                                    />
-                                </div>
                             </>
                         )}
+                        <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
+                        <SidebarButton
+                            icon={faRightFromBracket}
+                            labelText="Log out"
+                            additionalStyle="py-2 text-white uppercase bg-red-700"
+                            isMinimized={isMinimized}
+                            destination=""
+                            logout={logout}
+                        />
+                    </div>
                     </div>
                     <div
                         className={`absolute top-0 ${
