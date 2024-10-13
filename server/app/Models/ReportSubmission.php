@@ -32,7 +32,7 @@ class ReportSubmission extends Model
     /**
      * Get the statuses for this report submission.
      */
-    public function reportStatuses()
+    public function reportStatus()
     {
         return $this->hasMany(ReportStatus::class, 'report_status_id');
     }

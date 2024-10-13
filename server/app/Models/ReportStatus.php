@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\M1_Report\WomenOfReproductiveAge;
+use App\Models\M1_Report\FamilyPlanningReport;
+use App\Models\M1_Report\ServiceData;
 
 class ReportStatus extends Model
 {
@@ -29,5 +32,29 @@ class ReportStatus extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the women of reproductive age data associated with this report status.
+     */
+    public function womenOfReproductiveAge()
+    {
+        return $this->hasMany(WomenOfReproductiveAge::class, 'wra_id');
+    }
+
+    /**
+     * Get the family planning reports associated with this report status.
+     */
+    public function familyPlanningReports()
+    {
+        return $this->hasMany(FamilyPlanningReport::class, 'report_id');
+    }
+
+    /**
+     * Get the service data associated with this report status.
+     */
+    public function serviceData()
+    {
+        return $this->hasMany(ServiceData::class, 'service_data_id');
     }
 }
