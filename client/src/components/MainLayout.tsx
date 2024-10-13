@@ -11,7 +11,6 @@ import logos from "../assets/logoImports";
 
 // Interface for Sidebar Configuration
 interface SidebarConfig {
-    // logo: string;  // Path to the logo image
     type: 'admin' | 'barangay';  // Type of sidebar layout
 }
 
