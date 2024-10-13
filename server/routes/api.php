@@ -122,8 +122,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
 
     // Filtered Report by Month and Barangay
-    Route::get("/service-data-reports/", [ServiceDataController::class, "getFilteredServiceDataReports"]);
+    Route::post("/service-data-reports/", [ServiceDataController::class, "getFilteredServiceDataReports"]);
+    Route::post("/wra-reports/filtered", [WomenOfReproductiveAgeController::class, "getFilteredWomenOfReproductiveAges"]);
+    Route::post("/family-planning-reports/filtered", [FamilyPlanningReportController::class, "getFilteredFamilyPlanningReports"]);
     Route::post("/morbidity-reports/filtered", [MorbidityReportController::class, "getFilteredMorbidityReports"]);
+    Route::post("/m1-report", [ReportStatusController::class, 'getFilteredM1Reports']);
     
     
     // Route for logging out an authenticated user
