@@ -8,7 +8,6 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -51,11 +50,7 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                     Non-Communicable Disease Prevention and Control Services
                 </legend>
                 <div className="flex flex-col gap-12">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading non-communicable disease prevention and control services...
-                        </div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error: {error}
                         </div>

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 export interface Disease {
     disease_id: number;
@@ -8,7 +9,6 @@ export interface Disease {
 }
 
 interface UseDisease {
-    loading: boolean;
     error: string | null;
     diseases: Disease[];
     
@@ -16,13 +16,13 @@ interface UseDisease {
 }
 
 export const useDisease = (): UseDisease => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [diseases, setDiseases] = useState<Disease[]>([]);
 
     const fetchDiseases = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); 
 
             const response = await fetch(`${baseAPIUrl}/diseases/`, {
@@ -43,9 +43,9 @@ export const useDisease = (): UseDisease => {
         } catch (error: any) {
             setError(error);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { loading, error, diseases, fetchDiseases }
+    return { error, diseases, fetchDiseases }
 }

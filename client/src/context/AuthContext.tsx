@@ -1,6 +1,6 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from "react";
-import Loading from "../components/Loading";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "./LoadingContext";
 
 /**
  * Interface defining the authentication context.
@@ -11,8 +11,6 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     error: string | null;
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
 }
 
@@ -38,8 +36,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [authenticated, setAuthenticated] = useState<boolean>(localStorage.getItem("authenticated") === "true");
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
 
     /**
      * Checks the authentication status of the user by making a request to the server.
@@ -48,6 +46,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                incrementLoading();
                 const response = await fetch(`${baseAPIUrl}/auth/check`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -72,7 +71,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 setError("An error occurred while checking authentication.");
                 setAuthenticated(false);
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         };
 
@@ -87,10 +86,9 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
      * @returns {Promise<any | null>} The response data or null in case of an error.
      */
     const handleFetch = async (url: string, method: string, body?: any): Promise<any | null> => {
-        setLoading(true);
-        setError(null);
-
         try {
+            incrementLoading();
+            setError(null);
             const response = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -120,7 +118,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         } catch {
             setError("An unexpected error occurred. Please try again later.");
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     };
 
@@ -154,8 +152,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, authenticated, login, logout, error, loading, setLoading, setError }}>
-            {!loading ? children : <Loading />}
+        <AuthContext.Provider value={{ user, authenticated, login, logout, error, setError }}>
+            {children}
         </AuthContext.Provider>
     );
 };

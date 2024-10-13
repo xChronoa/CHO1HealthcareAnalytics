@@ -9,7 +9,6 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -37,9 +36,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                 B1. Prenatal Care
             </legend>
             <div className="flex flex-col gap-4">
-                {indicatorLoading ? (
-                    <div>Loading prenatal care...</div>
-                ) : error ? (
+                {error ? (
                     <div>Error loading prenatal care: {error}</div>
                 ) : (
                     indicators.map((indicator) => {

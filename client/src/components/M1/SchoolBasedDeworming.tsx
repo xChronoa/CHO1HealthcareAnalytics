@@ -8,7 +8,6 @@ export const SchoolBasedDeworming: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -53,11 +52,7 @@ export const SchoolBasedDeworming: React.FC<ServiceProps> = ({
                     School-Based Deworming Services (Annual Reporting)
                 </legend>
                 <div className="flex flex-col gap-4">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading school-based deworming services...
-                        </div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error: {error}
                         </div>

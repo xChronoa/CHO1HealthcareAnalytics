@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 interface AppointmentCategory {
     appointment_category_id: number;
@@ -9,18 +10,18 @@ interface AppointmentCategory {
 interface UseAppointmentCategory {
     fetchAppointmentCategories: () => Promise<void>;
     appointmentCategories: AppointmentCategory[];
-    appointmentCategoryLoading: boolean;
 }
 
 export const useAppointmentCategory = (): UseAppointmentCategory => {
     const [appointmentCategories, setAppointmentCategories] = useState<
         AppointmentCategory[]
     >([]);
-    const [appointmentCategoryLoading, setAppointmentCategoryLoading] = useState(false);
+
+    const { incrementLoading, decrementLoading } = useLoading();
 
     const fetchAppointmentCategories = useCallback(async () => {
         try {
-            setAppointmentCategoryLoading(true);
+            incrementLoading();
 
             const response = await fetch(
                 `${baseAPIUrl}/appointment-categories`
@@ -38,9 +39,9 @@ export const useAppointmentCategory = (): UseAppointmentCategory => {
         } catch (error) {
             console.error("Error fetching appointment categories:", error);
         } finally {
-            setAppointmentCategoryLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { fetchAppointmentCategories, appointmentCategories, appointmentCategoryLoading};
+    return { fetchAppointmentCategories, appointmentCategories };
 };

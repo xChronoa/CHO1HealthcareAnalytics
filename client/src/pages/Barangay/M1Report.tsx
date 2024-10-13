@@ -31,7 +31,6 @@ import {
     updateServiceData,
 } from "../../utils/m1FormDataUtils";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
-import Loading from "../../components/Loading";
 
 interface M1ReportProps {
     setReportDatas: (type: "m1" | "m2", data: any) => void;
@@ -43,7 +42,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
     onCheckIncomplete,
 }) => {
     const storedData = localStorage.getItem("m1formData");
-    const { loading: serviceLoading, services, fetchServices } = useServices();
+    const { services, fetchServices } = useServices();
 
     const initialFormData: FormData = storedData
         ? JSON.parse(storedData)
@@ -686,7 +685,6 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     ) : null}
                 </div>
             </div>
-            {serviceLoading && <Loading />}
         </>
     );
 };

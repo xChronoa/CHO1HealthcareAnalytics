@@ -1,10 +1,9 @@
 import BarangayView from "../../components/BarangayView";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useBarangay } from "../../hooks/useBarangay";
-import Loading from "../../components/Loading";
 
 const BarangayList: React.FC = () => {
-    const { fetchBarangays, barangays, barangayLoading } = useBarangay();
+    const { fetchBarangays, barangays } = useBarangay();
 
     useEffectAfterMount(() => {
         fetchBarangays();
@@ -23,7 +22,6 @@ const BarangayList: React.FC = () => {
                 ))}
             </section>
         </div>
-        {barangayLoading && <Loading />}
     </>
     );
 };

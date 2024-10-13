@@ -5,6 +5,7 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import { useLoading } from "../context/LoadingContext";
 
 // For specifying the logo to be displayed based on inputted department.
 type LoginProp = {
@@ -12,9 +13,10 @@ type LoginProp = {
 };
 
 const Login: React.FC<LoginProp> = ({ image }) => {
-    const { user, authenticated, login, error, loading } = useAuth();
+    const { user, authenticated, login, error } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { isLoading } = useLoading();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +32,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
     };
 
     // Redirect if the user is already authenticated
-    if (user && authenticated && !loading) {
+    if (user && authenticated) {
         const redirectPath = user.role === "admin" ? "/admin" : "/barangay";
         return <Navigate to={redirectPath} />;
     }
@@ -43,6 +45,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                         className="transition-all min-w-max size-50 md:size-60 size-44"
                         src={image}
                         alt="City of Cabuyao Logo"
+                        loading="lazy"
                     />
                     <h2 className="text-2xl font-bold text-black uppercase">
                         login
@@ -120,7 +123,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                             type="submit"
                             className="w-full py-2 mt-5 font-bold text-white uppercase rounded-lg shadow-lg bg-green"
                         >
-                            {loading ? "Logging in..." : "Login"}
+                            {isLoading ? "Logging in..." : "Login"}
                         </button>
                     </div>
                 </form>

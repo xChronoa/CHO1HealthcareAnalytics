@@ -2,7 +2,6 @@ import { useState } from "react";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { usePatient } from "../../hooks/usePatient";
 import { useAppointment } from "../../hooks/useAppointment";
-import Loading from "../../components/Loading";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 import ServiceDataChart from "./Chart/ServiceDataChart";
 import MorbidityFormChart from "./Chart/MorbidityFormChart";
@@ -13,9 +12,9 @@ interface DashboardProp {
 
 const Dashboard: React.FC<DashboardProp> = () => {
     const [section, setSection] = useState<string>("m1");
-    const { fetchCount: fetchPatientCount, patientCount, loading: patientLoading } = usePatient();
-    const { fetchCount: fetchAppointmentCount, appointmentCount, appointmentLoading } = useAppointment();
-    const { fetchPendingReportCount, pendingReportCount, loading: reportSubmissionLoading } = useReportSubmissions();
+    const { fetchCount: fetchPatientCount, patientCount} = usePatient();
+    const { fetchCount: fetchAppointmentCount, appointmentCount } = useAppointment();
+    const { fetchPendingReportCount, pendingReportCount } = useReportSubmissions();
 
     const handleToggle = (selectedSection: string) => {
         setSection(selectedSection);
@@ -99,7 +98,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     </div>
                 </div>
             </div>
-            {(appointmentLoading || reportSubmissionLoading || patientLoading) && <Loading />}
         </>
     );
 };

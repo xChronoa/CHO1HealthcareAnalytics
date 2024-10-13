@@ -8,13 +8,11 @@ const AppointmentList: React.FC = () => {
     const {
         fetchAppointmentCategories,
         appointmentCategories,
-        appointmentCategoryLoading,
     } = useAppointmentCategory();
     const {
         fetchAppointmentsByCategory,
         fetchPatientsAppointments,
         appointments,
-        appointmentLoading,
         error,
         minDate,
         maxDate,
@@ -141,16 +139,7 @@ const AppointmentList: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {appointmentLoading ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-2 text-center"
-                                        >
-                                            Loading appointments...
-                                        </td>
-                                    </tr>
-                                ) : error ? (
+                                {error ? (
                                     <tr>
                                         <td
                                             colSpan={6}
@@ -203,11 +192,7 @@ const AppointmentList: React.FC = () => {
                         </table>
 
                         <div className="md:hidden">
-                            {appointmentLoading ? (
-                                <p className="text-center text-gray-500">
-                                    Loading appointments...
-                                </p>
-                            ) : error ? (
+                            {error ? (
                                 <p className="text-center text-red-500">
                                     Error loading appointments: {error}
                                 </p>
@@ -253,7 +238,6 @@ const AppointmentList: React.FC = () => {
                     </div>
                 </section>
             </div>
-            {(appointmentLoading || appointmentCategoryLoading) && <Loading />}
         </>
     );
 };

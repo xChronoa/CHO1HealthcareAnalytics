@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 interface UseReportStatus {
-    loading: boolean;
     error: string | null;
     statuses: ReportStatus[];
     earliestDate: string;
@@ -11,7 +11,7 @@ interface UseReportStatus {
         reportYear: number,
         reportMonth: number
     ) => Promise<void>;
-    fetchEarliestAndLatestDates: (barangayId: number | null) => Promise<void>;
+    fetchEarliestAndLatestDates: (barangayId?: number | null) => Promise<void>;
 }
 
 interface ReportStatus {
@@ -24,7 +24,7 @@ interface ReportStatus {
 }
 
 export const useReportStatus = (): UseReportStatus => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [statuses, setStatuses] = useState<ReportStatus[]>([]);
     const [earliestDate, setEarliestDate] = useState<string>("");
@@ -32,7 +32,7 @@ export const useReportStatus = (): UseReportStatus => {
 
     const fetchReportStatuses = useCallback(
         async (reportYear: number, reportMonth: number) => {
-            setLoading(true);
+            incrementLoading();
             setError(null);
 
             try {
@@ -76,19 +76,25 @@ export const useReportStatus = (): UseReportStatus => {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         },
         []
     );
 
     const fetchEarliestAndLatestDates = useCallback(
-        async (barangayId: number | null) => {
-            setLoading(true);
+        async (barangayId?: number | null) => {
+            incrementLoading();
             setError(null);
 
             try {
                 const url = `${baseAPIUrl}/statuses/min-max`; // The URL remains the same
+
+                // Prepare the request body conditionally
+                const requestBody: { barangay_id?: number } = {};
+                if (barangayId !== null) {
+                    requestBody.barangay_id = barangayId; // Only add if barangayId is not null
+                }
 
                 // Make the POST request
                 const response = await fetch(url, {
@@ -98,7 +104,7 @@ export const useReportStatus = (): UseReportStatus => {
                         Accept: "application/json",
                     },
                     credentials: "include", // Ensure credentials are included for authentication
-                    body: JSON.stringify({ barangay_id: barangayId }), // Send barangayId in the body
+                    body: JSON.stringify(requestBody), // Send barangayId in the body
                 });
 
                 // Check if the response is okay
@@ -121,7 +127,7 @@ export const useReportStatus = (): UseReportStatus => {
                 setEarliestDate("");
                 setLatestDate("");
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         },
         [] // Dependency array for useCallback
@@ -129,7 +135,6 @@ export const useReportStatus = (): UseReportStatus => {
 
     return {
         statuses,
-        loading,
         error,
         earliestDate,
         latestDate,

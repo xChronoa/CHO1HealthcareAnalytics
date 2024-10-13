@@ -1,15 +1,16 @@
 import { useState, useCallback } from "react";
 import { Indicator } from "../types/Indicator";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 // Define the custom hook
 export const useIndicator = () => {
     const [indicators, setIndicators] = useState<Indicator[]>([]);
-    const [indicatorLoading, setIndicatorLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
 
     const fetchIndicatorsByServiceName = useCallback(async (service_name: string) => {
-        setIndicatorLoading(true);
+        incrementLoading();
         setError(null);
 
         try {
@@ -36,7 +37,7 @@ export const useIndicator = () => {
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setIndicatorLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -44,7 +45,6 @@ export const useIndicator = () => {
     return {
         fetchIndicatorsByServiceName,
         indicators,
-        indicatorLoading,
         error 
     };
 };

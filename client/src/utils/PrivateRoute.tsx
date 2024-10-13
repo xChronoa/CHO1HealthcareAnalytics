@@ -1,18 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Loading from "../components/Loading";
 
 export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
     allowedRoles,
 }) => {
-    const { user, authenticated, loading } = useAuth();
-    
-    if (loading) {
-        // Show a loading spinner or placeholder while checking authentication
-        return <Loading />;
-    }
-    
-    if (!authenticated && !loading) {
+    const { user, authenticated } = useAuth();
+
+    if (!authenticated) {
         // If the user is not authenticated, redirect to the appropriate login page
         const loginPath = location.pathname.startsWith("/admin")
         ? "/admin/login"

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 export interface AgeCategory {
     age_category_id: number;
@@ -15,20 +16,19 @@ export interface WomenOfReproductiveAge {
 }
 
 interface UseWra {
-    loading: boolean;
     error: string | null;
     wraData: WomenOfReproductiveAge[];
     fetchWra: () => Promise<void>;
 }
 
 export const useWra = (): UseWra => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [wraData, setWraData] = useState<WomenOfReproductiveAge[]>([]);
 
     const fetchWra = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null);
 
             const response = await fetch(`${baseAPIUrl}/wra-reports`, {
@@ -48,9 +48,9 @@ export const useWra = (): UseWra => {
         } catch (error: any) {
             setError(error.message);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { loading, error, wraData, fetchWra, };
+    return { error, wraData, fetchWra, };
 };

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { User } from "../types/User";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 interface UseUser {
     // Functions
@@ -12,7 +13,6 @@ interface UseUser {
 
     // Variables
     users: User[] | null;
-    loading: boolean;
     success: boolean;
     error: string | null;
     errorMessage?: Errors;
@@ -27,14 +27,14 @@ interface Errors {
 
 export const useUser = (): UseUser => {
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [success, setSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<Errors>({});
 
     const fetchUsers = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             
             const response = await fetch(`${baseAPIUrl}/users`, {
@@ -62,13 +62,13 @@ export const useUser = (): UseUser => {
         } catch (error) {
             setError("An unexpected error occurred. Please try again later.");
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const getUser = useCallback(async (user_id: number): Promise<User> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             
             const response = await fetch(`${baseAPIUrl}/users/${user_id}`, {
@@ -95,14 +95,14 @@ export const useUser = (): UseUser => {
             setError("An unexpected error occurred. Please try again later.");
             throw error; // Re-throw the error to handle it in the calling code if needed
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
     
 
     const createUser = useCallback(async (user: User): Promise<boolean> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             setErrorMessage({});
             setSuccess(false);
@@ -129,13 +129,13 @@ export const useUser = (): UseUser => {
             setError(error.message);
             return false;
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const updateUser = useCallback(async (user: User): Promise<boolean> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             setErrorMessage({});
             setSuccess(false);
@@ -162,13 +162,13 @@ export const useUser = (): UseUser => {
             setError(error.message);
             return false;
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const disableUser = useCallback(async (user: User): Promise<boolean> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null);
             setErrorMessage({});
             setSuccess(false);
@@ -195,7 +195,7 @@ export const useUser = (): UseUser => {
             setError(error.message);
             return false;
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -206,7 +206,6 @@ export const useUser = (): UseUser => {
         updateUser,
         disableUser,
         users,
-        loading,
         success,
         error,
         errorMessage,

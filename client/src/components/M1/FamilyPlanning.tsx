@@ -1,6 +1,7 @@
 import React from "react";
 import { FamilyPlanningEntry } from "../../types/M1FormData";
 import { baseAPIUrl } from "../../config/apiConfig";
+import { useLoading } from "../../context/LoadingContext";
 
 interface FPMethod {
     method_id: number;
@@ -23,14 +24,13 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
     updateFamilyPlanningData,
 }) => {
     const ageCategories = ["10-14", "15-19", "20-49"];
-
+    const { incrementLoading, decrementLoading } = useLoading();
     const [fpMethods, setFPMethods] = React.useState<FPMethod[]>([]);
-    const [fpLoading, setFPLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         const fetchFPMethods = async () => {
-            setFPLoading(true);
+            incrementLoading();
             setError(null);
 
             try {
@@ -57,7 +57,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
             } catch (err: any) {
                 setError(err.message);
             } finally {
-                setFPLoading(false);
+                decrementLoading();
             }
         };
 
@@ -133,9 +133,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                         User of Family Planning Method for {category} years old
                     </legend>
 
-                    {fpLoading ? (
-                        <div>Loading family planning methods...</div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error fetching family planning methods: {error}
                         </div>

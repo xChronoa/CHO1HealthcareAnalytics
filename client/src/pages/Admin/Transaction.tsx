@@ -5,8 +5,6 @@ import Loading from "../../components/Loading";
 
 const Transaction: React.FC = () => {
     const {
-        loadingDates,
-        loadingSubmissions,
         error: reportSubmissionErrorParent,
         submissions,
         earliestDate,
@@ -153,16 +151,7 @@ const Transaction: React.FC = () => {
                             </thead>
                             {/* Table Contents */}
                             <tbody>
-                                {(loadingDates || loadingSubmissions) ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-2 text-center"
-                                        >
-                                            Loading report statuses...
-                                        </td>
-                                    </tr>
-                                ) : reportSubmissionErrorParent ? (
+                                {reportSubmissionErrorParent ? (
                                     <tr>
                                         <td
                                             colSpan={6}
@@ -209,7 +198,6 @@ const Transaction: React.FC = () => {
                     fetchEarliestAndLatestDates={fetchEarliestAndLatestDates}
                 />
             )}
-            {(loadingDates || loadingSubmissions) && <Loading />}
         </>
     );
 };

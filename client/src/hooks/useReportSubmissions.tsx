@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 const alert = withReactContent(Swal);
 
@@ -12,9 +13,6 @@ export interface ReportSubmittalsData {
 }
 
 interface UseReportSubmission {
-    loading: boolean;
-    loadingDates: boolean;
-    loadingSubmissions: boolean;
     error: string | null;
     submissions: ReportSubmission[];
     earliestDate: string;
@@ -53,9 +51,7 @@ export interface Report {
 };
 
 export const useReportSubmissions = (): UseReportSubmission => {
-    const [loading, setLoading] = useState(false);
-    const [loadingDates, setLoadingDates] = useState(false);
-    const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [submissions, setSubmissions] = useState<ReportSubmission[]>([]);
     const [earliestDate, setEarliestDate] = useState<string>("");
@@ -90,7 +86,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
             if (!result.isConfirmed) return false;
 
             try {
-                setLoading(true);
+                incrementLoading();
                 setError(null);
 
                 const response = await fetch(
@@ -123,7 +119,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
                 setError(error.message);
                 return false;
             } finally {
-                setLoading(false);
+                decrementLoading();
             }
         },
         []
@@ -136,7 +132,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
             status: string,
             barangayId?: number
         ) => {
-            setLoadingSubmissions(true);
+            incrementLoading();
             setError(null);
 
             try {
@@ -184,7 +180,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
             } catch (error: any) {
                 setError(error.message);
             } finally {
-                setLoadingSubmissions(false);
+                decrementLoading();
             }
         },
         []
@@ -192,7 +188,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
 
     const fetchPendingReportCount = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null);
 
             const response = await fetch(
@@ -222,13 +218,13 @@ export const useReportSubmissions = (): UseReportSubmission => {
         } catch (error: any) {
             setError(error.message);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const fetchEarliestAndLatestDates = useCallback(async () => {
         try {
-            setLoadingDates(true);
+            incrementLoading();
             setError(null);
             const response = await fetch(
                 `${baseAPIUrl}/submissions/min-max`,
@@ -259,13 +255,13 @@ export const useReportSubmissions = (): UseReportSubmission => {
             setEarliestDate("");
             setLatestDate("");
         } finally {
-            setLoadingDates(false);
+            decrementLoading();
         }
     }, []);
 
     const fetchReportSubmissionsForBarangay = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null);
     
             const response = await fetch(
@@ -303,14 +299,11 @@ export const useReportSubmissions = (): UseReportSubmission => {
         } catch (error: any) {
             setError(error.message);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     return {
-        loading,
-        loadingDates,
-        loadingSubmissions,
         error,
         submissions,
         earliestDate,

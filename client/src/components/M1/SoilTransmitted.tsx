@@ -8,7 +8,6 @@ export const SoilTransmitted: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -25,11 +24,7 @@ export const SoilTransmitted: React.FC<ServiceProps> = ({
                     Soil Transmitted Helminthiasis Prevention and Control
                 </legend>
                 <div className="flex flex-col gap-4">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading soil transmitted helminthiasis...
-                        </div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error: {error}
                         </div>

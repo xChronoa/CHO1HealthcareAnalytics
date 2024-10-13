@@ -1,5 +1,4 @@
 import { useUser } from "../../hooks/useUser";
-import Loading from "../../components/Loading";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useNavigate } from "react-router-dom";
 import { User } from "../../types/User";
@@ -9,7 +8,7 @@ import withReactContent from "sweetalert2-react-content";
 const alert = withReactContent(Swal);
 
 const AccountList: React.FC = () => {
-    const { users, fetchUsers, disableUser, loading } = useUser();
+    const { users, fetchUsers, disableUser } = useUser();
     const navigate = useNavigate();
 
     useEffectAfterMount(() => {
@@ -195,8 +194,6 @@ const AccountList: React.FC = () => {
                     </div>
                 </section>
             </div>
-
-            {loading && <Loading />}
         </>
     );
 };

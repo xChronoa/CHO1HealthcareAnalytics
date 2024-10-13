@@ -6,7 +6,6 @@ import { IncompleteData, IncompleteUpdate } from "../../types/IncompleteForm";
 import { useServices } from "../../hooks/useServices";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { Disease, useDisease } from "../../hooks/useDisease";
-import Loading from "../../components/Loading";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 import { AgeCategory, useAgeCategory } from "../../hooks/useAgeCategory";
 import { InputValues, M2FormData } from "../../types/M2FormData";
@@ -24,10 +23,10 @@ const Report: React.FC = () => {
         return storedData ? JSON.parse(storedData) : {};
     });
 
-    const { services, fetchServices, loading: serviceLoading } = useServices();
-    const { diseases, fetchDiseases, loading: diseaseLoading } = useDisease();
-    const { diseases: formDiseases, fetchDiseases: fetchFormDiseases, loading: formDiseasesLoading } = useDisease();
-    const { ageCategories, fetchAgeCategories, loading: ageCategoriesLoading } = useAgeCategory();
+    const { services, fetchServices } = useServices();
+    const { diseases, fetchDiseases } = useDisease();
+    const { diseases: formDiseases, fetchDiseases: fetchFormDiseases } = useDisease();
+    const { ageCategories, fetchAgeCategories } = useAgeCategory();
     const [reportLoading, setReportLoading] = useState<boolean>(false);
 
     useEffectAfterMount(() => {
@@ -249,7 +248,7 @@ const Report: React.FC = () => {
         localStorage.setItem("incompleteSections", JSON.stringify(incompleteSections));
     }, [incompleteSections]);
 
-    const { fetchReportSubmissionsForBarangay, loading: submissionLoading, error: submissionError, m1Reports, m2Reports } = useReportSubmissions();
+    const { fetchReportSubmissionsForBarangay, error: submissionError, m1Reports, m2Reports } = useReportSubmissions();
     
     const [m1ReportId, setM1ReportId] = useState<number | null>(null);
     const [m2ReportId, setM2ReportId] = useState<number | null>(null);
@@ -428,7 +427,6 @@ const Report: React.FC = () => {
                     </>
                 )}
             </div>
-            {(serviceLoading || diseaseLoading || ageCategoriesLoading || formDiseasesLoading || submissionLoading || reportLoading) && <Loading />}
         </>
     );
 };

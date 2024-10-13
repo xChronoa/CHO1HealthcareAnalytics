@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 // Define types for the data models
 interface Patient {
@@ -32,8 +33,6 @@ export const useAppointment = () => {
     // State variables for managing appointments and their loading/error states
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [appointment, setAppointment] = useState<Appointment | null>(null);
-    const [appointmentLoading, setAppointmentLoading] =
-        useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     const [minDate, setMinDate] = useState("");
@@ -41,9 +40,11 @@ export const useAppointment = () => {
     
     const [appointmentCount, setAppointmentCount] = useState<number>(0);
 
+    const { incrementLoading, decrementLoading } = useLoading();
+
     const fetchCount = useCallback(async () => {
         try {
-            setAppointmentLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/appointments/count`, {
                 method: "GET",
                 headers: {
@@ -62,7 +63,7 @@ export const useAppointment = () => {
         } catch (error) {
             setError("An unexpected error occurred. Please try again later.");
         } finally {
-            setAppointmentLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -70,7 +71,7 @@ export const useAppointment = () => {
      * Fetch all appointments from the API.
      */
     const fetchAppointments = useCallback(async () => {
-        setAppointmentLoading(true);
+        incrementLoading();
         setError(null);
 
         try {
@@ -94,7 +95,7 @@ export const useAppointment = () => {
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setAppointmentLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -102,7 +103,7 @@ export const useAppointment = () => {
      * Fetch all appointments from the API.
      */
     const fetchPatientsAppointments = useCallback(async () => {
-        setAppointmentLoading(true);
+        incrementLoading();
         setError(null);
 
         try {
@@ -138,7 +139,7 @@ export const useAppointment = () => {
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setAppointmentLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -148,7 +149,7 @@ export const useAppointment = () => {
      * @param id - The appointment ID
      */
     const fetchAppointmentById = useCallback(async (id: number) => {
-        setAppointmentLoading(true);
+        incrementLoading();
         setError(null);
 
         try {
@@ -172,7 +173,7 @@ export const useAppointment = () => {
         } catch (err: any) {
             setError(err.message);
         } finally {
-            setAppointmentLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -183,7 +184,7 @@ export const useAppointment = () => {
      */
     const createAppointment = useCallback(
         async (newAppointment: Partial<Appointment>) => {
-            setAppointmentLoading(true);
+            incrementLoading();
             setError(null);
 
             try {
@@ -208,7 +209,7 @@ export const useAppointment = () => {
             } catch (err: any) {
                 setError(err.message);
             } finally {
-                setAppointmentLoading(false);
+                decrementLoading();
             }
         },
         []
@@ -222,7 +223,7 @@ export const useAppointment = () => {
      */
     const updateAppointment = useCallback(
         async (id: number, updatedAppointment: Partial<Appointment>) => {
-            setAppointmentLoading(true);
+            incrementLoading();
             setError(null);
 
             try {
@@ -251,7 +252,7 @@ export const useAppointment = () => {
             } catch (err: any) {
                 setError(err.message);
             } finally {
-                setAppointmentLoading(false);
+                decrementLoading();
             }
         },
         []
@@ -265,7 +266,7 @@ export const useAppointment = () => {
      */
     const fetchAppointmentsByCategory = useCallback(
         async (categoryName: string, date?: string) => {
-            setAppointmentLoading(true);
+            incrementLoading();
             setError(null);
 
             // Build query parameters
@@ -298,7 +299,7 @@ export const useAppointment = () => {
             } catch (err: any) {
                 setError(err.message);
             } finally {
-                setAppointmentLoading(false);
+                decrementLoading();
             }
         },
         [] // Dependencies array: update this if you need to use dependencies
@@ -308,7 +309,6 @@ export const useAppointment = () => {
     return {
         appointments,
         appointment,
-        appointmentLoading,
         error,
         minDate,
         maxDate,

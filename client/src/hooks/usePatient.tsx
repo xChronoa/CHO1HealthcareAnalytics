@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Patient } from "../types/Patient";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 interface UsePatient {
     // Functions
@@ -13,7 +14,6 @@ interface UsePatient {
     // Variables
     patientCount: number;
     patients: Patient[] | null;
-    loading: boolean;
     success: boolean;
     error: string | null;
     errorMessage?: Errors;
@@ -32,14 +32,14 @@ interface Errors {
 export const usePatient = (): UsePatient => {
     const [patientCount, setPatientCount] = useState<number>(0);
     const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [success, setSuccess] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<Errors>({});
 
     const fetchCount = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/patients/count`, {
                 method: "GET",
                 headers: {
@@ -58,13 +58,13 @@ export const usePatient = (): UsePatient => {
         } catch (error) {
             setError("An unexpected error occurred. Please try again later.");
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const fetchPatients = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/patients`, {
                 method: "GET",
                 headers: {
@@ -88,13 +88,13 @@ export const usePatient = (): UsePatient => {
         } catch (error) {
             setError("An unexpected error occurred. Please try again later.");
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const getPatient = useCallback(async (patient_id: number): Promise<Patient> => {
         try {
-            setLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/patients/${patient_id}`, {
                 method: "GET",
                 headers: {
@@ -119,14 +119,14 @@ export const usePatient = (): UsePatient => {
             setError("An unexpected error occurred. Please try again later.");
             throw error; // Re-throw the error to handle it in the calling code if needed
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
     
 
     const createPatient = useCallback(async (patient: Patient): Promise<boolean> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             setErrorMessage({});
             setSuccess(false);
@@ -153,13 +153,13 @@ export const usePatient = (): UsePatient => {
             setError(error.message);
             return false;
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const updatePatient = useCallback(async (patient: Patient): Promise<boolean> => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); // Reset error before request
             setErrorMessage({});
             setSuccess(false);
@@ -186,7 +186,7 @@ export const usePatient = (): UsePatient => {
             setError(error.message);
             return false;
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
@@ -198,7 +198,6 @@ export const usePatient = (): UsePatient => {
         updatePatient,
         patientCount,
         patients,
-        loading,
         success,
         error,
         errorMessage,

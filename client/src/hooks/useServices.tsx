@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 export interface Service {
     service_id: number;
@@ -7,7 +8,6 @@ export interface Service {
 }
 
 interface UseServices {
-    loading: boolean;
     error: string | null;
     services: Service[];
     service: Service;
@@ -17,7 +17,7 @@ interface UseServices {
 }
 
 export const useServices = (): UseServices => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [services, setServices] = useState<Service[]>([]);
     const [service, setService] = useState<Service>({
@@ -27,7 +27,7 @@ export const useServices = (): UseServices => {
 
     const fetchServices = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); 
 
             const response = await fetch(`${baseAPIUrl}/services/`, {
@@ -48,13 +48,13 @@ export const useServices = (): UseServices => {
         } catch (error: any) {
             setError(error);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
     const fetchServiceByName = useCallback(async (serviceName: string) => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); 
 
             const response = await fetch(`${baseAPIUrl}/services/${serviceName}`, {
@@ -74,9 +74,9 @@ export const useServices = (): UseServices => {
         } catch (error: any) {
             setError(error);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { loading, error, services, service, fetchServices, fetchServiceByName }
+    return { error, services, service, fetchServices, fetchServiceByName }
 }

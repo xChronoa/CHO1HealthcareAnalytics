@@ -13,6 +13,7 @@ import "react-phone-number-input/style.css";
 import { baseAPIUrl } from "../config/apiConfig";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useLoading } from "../context/LoadingContext";
 
 interface FormData {
     first_name: string;
@@ -30,6 +31,7 @@ interface FormData {
 }
 
 const Appointment: React.FC = () => {
+    const { incrementLoading, decrementLoading } = useLoading();
     const { fetchAppointmentCategories, appointmentCategories } =
         useAppointmentCategory();
     const [formData, setFormData] = useState<FormData>({
@@ -195,7 +197,7 @@ const Appointment: React.FC = () => {
         // }
 
         try {
-            setLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
                 headers: {
@@ -258,7 +260,7 @@ const Appointment: React.FC = () => {
             });
             console.error("An error occurred:", error);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     };
 

@@ -8,7 +8,6 @@ export const ImmunizationServices: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -25,11 +24,7 @@ export const ImmunizationServices: React.FC<ServiceProps> = ({
                     C1. Immunization Services for Newborns, Infants and School-Aged Children/Adolescents
                 </legend>
                 <div className="flex flex-col gap-4">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading immunization services...
-                        </div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error immunization services: {error}
                         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import logos from '../assets/logoImports';
 import { baseAPIUrl } from '../config/apiConfig';
+import { useLoading } from '../context/LoadingContext';
 
 interface Barangay {
     barangay_id: number;
@@ -10,12 +11,12 @@ interface Barangay {
 
 export const useBarangay = () => {
     const [barangays, setBarangays] = useState<Barangay[]>([]);
-    const [barangayLoading, setBarangayLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
 
     const fetchBarangays = async () => {
         try {
-            setBarangayLoading(true);
+            incrementLoading();
             const response = await fetch(`${baseAPIUrl}/barangays`, {
                 method: 'GET',
                 headers: {
@@ -41,10 +42,10 @@ export const useBarangay = () => {
         } catch (error) {
             setError((error as Error).message);
         } finally {
-            setBarangayLoading(false);
+            decrementLoading();
         }
     };
 
 
-    return { fetchBarangays, barangays, barangayLoading, error };
+    return { fetchBarangays, barangays, error };
 };

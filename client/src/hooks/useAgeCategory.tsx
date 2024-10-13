@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 export interface AgeCategory {
     age_category_id: number;
@@ -7,7 +8,6 @@ export interface AgeCategory {
 }
 
 interface UseAgeCategory {
-    loading: boolean;
     error: string | null;
     ageCategories: AgeCategory[];
     
@@ -15,13 +15,13 @@ interface UseAgeCategory {
 }
 
 export const useAgeCategory = (): UseAgeCategory => {
-    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
+    const { incrementLoading, decrementLoading } = useLoading();
 
     const fetchAgeCategories = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null); 
 
             const response = await fetch(`${baseAPIUrl}/age-categories/`, {
@@ -42,9 +42,9 @@ export const useAgeCategory = (): UseAgeCategory => {
         } catch (error: any) {
             setError(error);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { loading, error, ageCategories, fetchAgeCategories }
+    return { error, ageCategories, fetchAgeCategories }
 }

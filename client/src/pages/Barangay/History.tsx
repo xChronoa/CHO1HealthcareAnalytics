@@ -10,7 +10,6 @@ const History: React.FC = () => {
 
     const {
         statuses,
-        loading: reportStatusLoading,
         error: reportStatusError,
         earliestDate,
         latestDate,
@@ -103,16 +102,7 @@ const History: React.FC = () => {
                             </thead>
                             {/* Table Contents */}
                             <tbody>
-                                {reportStatusLoading ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-2 text-center"
-                                        >
-                                            Loading report statuses...
-                                        </td>
-                                    </tr>
-                                ) : reportStatusError ? (
+                                {reportStatusError ? (
                                     <tr>
                                         <td
                                             colSpan={6}
@@ -155,7 +145,6 @@ const History: React.FC = () => {
                     </div>
                 </section>
             </div>
-            {reportStatusLoading && <Loading />}
             
             {isOpen && (
                 <PendingReportNotice

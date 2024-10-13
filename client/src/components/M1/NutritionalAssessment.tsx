@@ -8,7 +8,6 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -53,11 +52,7 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                     Nutritional Assessment of Children 0-59 mos. Old
                 </legend>
                 <div className="flex flex-col gap-4">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading nutritional assessments...
-                        </div>
-                    ) : error ? (
+                    {error ? (
                         <div>
                             Error: {error}
                         </div>

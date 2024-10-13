@@ -7,14 +7,15 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { useBarangay } from "../../hooks/useBarangay";
 import { useUser } from "../../hooks/useUser";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
-import Loading from "../../components/Loading";
+import { useLoading } from "../../context/LoadingContext";
 
 const UpdateAccount: React.FC = () => {
     const location = useLocation();
-    const { getUser, updateUser, loading, success, errorMessage } = useUser();
-    const { fetchBarangays, barangays, barangayLoading } = useBarangay();
+    const { getUser, updateUser, success, errorMessage } = useUser();
+    const { fetchBarangays, barangays} = useBarangay();
     const [user, setUser] = useState<User>(location.state?.user);
     const [redirecting, setRedirecting] = useState(false);
+    const { isLoading } = useLoading();
 
     const hasErrors =
         errorMessage &&
@@ -52,7 +53,7 @@ const UpdateAccount: React.FC = () => {
         const updateSuccess = await updateUser(user);
 
         if (updateSuccess) {
-            if (!loading) {
+            if (!isLoading) {
                 setRedirecting(true);
                 setUser({
                     username: "",
@@ -203,7 +204,7 @@ const UpdateAccount: React.FC = () => {
                                 >
                                     {/* Can be replaced with the barangay values from the database */}
                                     <option hidden>Select Barangay</option>
-                                    {barangayLoading ? (
+                                    {isLoading ? (
                                         <option disabled>Loading...</option>
                                     ) : (
                                         barangays.map((barangay) => (
@@ -242,14 +243,13 @@ const UpdateAccount: React.FC = () => {
                         >
                             {redirecting
                                 ? "Redirecting..."
-                                : loading
+                                : isLoading
                                 ? "Updating..."
                                 : "Update"}
                         </button>
                     </form>
                 </div>
             </div>
-            {(loading || barangayLoading) && <Loading />}
         </>
     );
 };

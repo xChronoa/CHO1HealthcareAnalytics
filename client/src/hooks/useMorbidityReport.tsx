@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
+import { useLoading } from "../context/LoadingContext";
 
 // Define the interface for Morbidity Report data
 export interface MorbidityReport {
@@ -13,7 +14,6 @@ export interface MorbidityReport {
 }
 
 interface UseMorbidityReport {
-    loading: boolean;
     error: string | null;
     morbidityReports: MorbidityReport[];
     fetchMorbidityReports: () => Promise<void>;
@@ -21,13 +21,13 @@ interface UseMorbidityReport {
 
 // Create the custom hook
 export const useMorbidityReport = (): UseMorbidityReport => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [morbidityReports, setMorbidityReports] = useState<MorbidityReport[]>([]);
 
     const fetchMorbidityReports = useCallback(async () => {
         try {
-            setLoading(true);
+            incrementLoading();
             setError(null);
 
             const response = await fetch(`${baseAPIUrl}/morbidity-reports`, {
@@ -47,9 +47,9 @@ export const useMorbidityReport = (): UseMorbidityReport => {
         } catch (error: any) {
             setError(error.message);
         } finally {
-            setLoading(false);
+            decrementLoading();
         }
     }, []);
 
-    return { loading, error, morbidityReports, fetchMorbidityReports };
+    return { error, morbidityReports, fetchMorbidityReports };
 };

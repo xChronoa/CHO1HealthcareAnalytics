@@ -8,10 +8,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { Disease, useDisease } from "../../hooks/useDisease";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
-import { AgeCategory, useAgeCategory } from "../../hooks/useAgeCategory";
+import { useAgeCategory } from "../../hooks/useAgeCategory";
 import Loading from "../../components/Loading";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
-import { InputValues, M2FormData } from "../../types/M2FormData";
+import { InputValues } from "../../types/M2FormData";
 
 interface M2ReportProps {
     setReportDatas: (type: 'm1' | 'm2', data: any) => void;
@@ -27,8 +27,8 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
     const [incompleteDiseases, setIncompleteDiseases] = useState<string[]>([]);
     
     const [formData, setFormData] = useState<InputValues>(initializeFormData());
-    const { loading: diseaseLoading, error: diseaseError, diseases, fetchDiseases } = useDisease();
-    const { loading: ageCategoryLoading, error: ageCategoryError, ageCategories, fetchAgeCategories } = useAgeCategory();
+    const { error: diseaseError, diseases, fetchDiseases } = useDisease();
+    const { error: ageCategoryError, ageCategories, fetchAgeCategories } = useAgeCategory();
 
     // Initialize form data from local storage or default to an empty object
     function initializeFormData(): InputValues {
@@ -244,7 +244,6 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                     </div>
                 ))}
             </div>
-            {(ageCategoryLoading || diseaseLoading) && <Loading />}
         </div>
     );
 };

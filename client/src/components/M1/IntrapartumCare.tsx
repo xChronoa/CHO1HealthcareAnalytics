@@ -8,7 +8,6 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
     updateServiceData,
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -56,9 +55,7 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                 <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">
                     B2. Intrapartum Care and Delivery Outcome
                 </legend>
-                {indicatorLoading ? (
-                    <div>Loading intrapartum care and delivery outcome...</div>
-                ) : error ? (
+                {error ? (
                     <div>
                         Error intrapartum care and delivery outcome: {error}
                     </div>

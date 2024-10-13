@@ -6,12 +6,12 @@ import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
 import { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
-import Loading from "../../components/Loading";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useLoading } from "../../context/LoadingContext";
 
 const CreateAccount: React.FC = () => {
-    const { createUser, loading, success, errorMessage } = useUser();
-    const { barangays, fetchBarangays, barangayLoading } = useBarangay();
+    const { createUser, success, errorMessage } = useUser();
+    const { barangays, fetchBarangays } = useBarangay();
     const [user, setUser] = useState<User>({
         username: "",
         password: "",
@@ -20,6 +20,7 @@ const CreateAccount: React.FC = () => {
         barangay_name: "",
     });
     const [redirecting, setRedirecting] = useState(false);
+    const { isLoading } = useLoading();
 
     const hasErrors =
         errorMessage &&
@@ -43,7 +44,7 @@ const CreateAccount: React.FC = () => {
         const createSuccess = await createUser(user);
 
         if (createSuccess) {
-            if (!loading) {
+            if (!isLoading) {
                 setRedirecting(true);
                 setUser({
                     username: "",
@@ -196,7 +197,7 @@ const CreateAccount: React.FC = () => {
                         >
                             {/* Can be replaced with the barangay values from the database */}
                             <option hidden>Select Barangay</option>
-                            {barangayLoading ? (
+                            {isLoading ? (
                                 <option disabled>Loading...</option>
                             ) : (
                                 barangays.map((barangay) => (
@@ -219,13 +220,12 @@ const CreateAccount: React.FC = () => {
                     >
                         {redirecting
                             ? "Redirecting..."
-                            : loading
+                            : isLoading
                             ? "Creating..."
                             : "Create"}
                     </button>
                 </form>
             </div>
-            {loading && <Loading />}
         </div>
     );
 };
