@@ -1,6 +1,6 @@
 const Loading: React.FC = () => {
     return (
-        <div className="fixed inset-0 flex items-center justify-center w-full h-full bg-white bg-opacity-60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full bg-white bg-opacity-60"> {/* Added z-50 */}
             <div className="flex flex-col-reverse items-center justify-center">
                 <span className="mt-5 text-3xl text-center">Loading</span>
                 <svg
