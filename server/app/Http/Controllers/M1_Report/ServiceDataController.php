@@ -18,7 +18,7 @@ class ServiceDataController extends Controller
     {
         try {
             // Get the service_name from the request query parameters
-            $serviceName = $request->query('service_name');
+            $serviceName = $request->query('service_name');;
 
             // Build the query with eager loading and filtering
             $query = ServiceData::with([
@@ -92,10 +92,10 @@ class ServiceDataController extends Controller
         try {
             // Get the authenticated user and request parameters
             $user = Auth::user();
-            $serviceName = $request->query('service_name');
-            $barangayId = $request->query('barangay_id');
-            $reportMonth = $request->query('report_month');
-            $reportYear = $request->query('report_year');
+            $serviceName = $request->service_name;
+            $barangayId = $request->barangay_id;
+            $reportMonth = $request->report_month;
+            $reportYear = $request->report_year;
 
             // Initialize the query with necessary relationships
             $query = ServiceData::with([
@@ -151,40 +151,90 @@ class ServiceDataController extends Controller
             // Fetch the filtered service data
             $serviceData = $query->get();
 
-            // Transform the data for frontend consumption
-            $formattedData = $serviceData->map(function ($data) {
-                // Ensure relationships exist to avoid null errors
-                $indicatorName = $data->indicator ? $data->indicator->indicator_name : null;
-                $ageCategory = $data->ageCategory ? $data->ageCategory->age_category : null;
-                $barangayName = $data->reportStatus && $data->reportStatus->reportSubmission && $data->reportStatus->reportSubmission->barangay
-                    ? $data->reportStatus->reportSubmission->barangay->barangay_name
-                    : 'Unknown';
+            // Transform the data into the desired structure
+            $formattedData = [];
 
-                // Generate the report period using reportTemplate data if available
-                $reportPeriod = $data->reportStatus && $data->reportStatus->reportSubmission && $data->reportStatus->reportSubmission->reportTemplate
-                    ? Carbon::create(
-                        $data->reportStatus->reportSubmission->reportTemplate->report_year,
-                        $data->reportStatus->reportSubmission->reportTemplate->report_month,
-                        1
-                    )->format('Y-m')
-                    : 'Unknown';
+            foreach ($serviceData as $data) {
+                $serviceKey = $data->service ? $data->service->service_name : 'Unknown';
+                $indicator = $data->indicator;
+                $indicatorId = $indicator ? $indicator->indicator_id : null;
+                $indicatorName = $indicator ? $indicator->indicator_name : 'Unknown';
 
-                // Include the service name if available
-                $serviceName = $data->service ? $data->service->service_name : 'Unknown';
+                // Initialize service if not already set
+                if (!isset($formattedData[$serviceKey])) {
+                    $formattedData[$serviceKey] = [
+                        'indicators' => [],
+                    ];
+                }
 
-                return [
-                    'service_data_id' => $data->service_data_id,
-                    'service_id' => $data->service_id,
-                    'indicator_name' => $indicatorName,
-                    'age_category' => $ageCategory,
-                    'barangay_name' => $barangayName,
-                    'report_period' => $reportPeriod,
-                    'value_type' => $data->value_type,
-                    'value' => $data->value,
-                    'remarks' => $data->remarks,
-                    'service_name' => $serviceName, // Include service name in the response
-                ];
-            })->filter(); // Filter out null values from missing relationships
+                // Initialize indicator if not already set
+                if (!isset($formattedData[$serviceKey]['indicators'][$indicatorId])) {
+                    $formattedData[$serviceKey]['indicators'][$indicatorId] = [
+                        'indicator_id' => $indicatorId,
+                        'indicator_name' => $indicatorName,
+                        'age_categories' => [],
+                        'total' => 0, // Initialize total
+                        'male' => 0,   // Initialize male
+                        'female' => 0, // Initialize female
+                        'remarks' => $data->remarks ? $data->remarks : '', // Set remarks if available
+                    ];
+                }
+
+                // Check for age category
+                if ($data->ageCategory) {
+                    $ageCategoryKey = $data->ageCategory->age_category;
+
+                    // Initialize age category if not already set
+                    if (!isset($formattedData[$serviceKey]['indicators'][$indicatorId]['age_categories'][$ageCategoryKey])) {
+                        $formattedData[$serviceKey]['indicators'][$indicatorId]['age_categories'][$ageCategoryKey] = [
+                            'value' => 0,
+                        ];
+                    }
+
+                    // Aggregate value for the age category
+                    $formattedData[$serviceKey]['indicators'][$indicatorId]['age_categories'][$ageCategoryKey]['value'] += $data->value;
+
+                    // Update total from the accumulated value of age categories
+                    $formattedData[$serviceKey]['indicators'][$indicatorId]['total'] += $data->value;
+                } else {
+                    // Handle case for male and female values (if applicable)
+                    if ($data->value_type) {
+                        switch ($data->value_type) {
+                            case 'male':
+                                $formattedData[$serviceKey]['indicators'][$indicatorId]['male'] += $data->value;
+                                break;
+
+                            case 'female':
+                                $formattedData[$serviceKey]['indicators'][$indicatorId]['female'] += $data->value;
+                                break;
+
+                            case 'total':
+                                $formattedData[$serviceKey]['indicators'][$indicatorId]['total'] += $data->value; // This will be relevant if you use total elsewhere
+                                break;
+
+                            default:
+                                // Handle unknown or unexpected value_types if necessary
+                                break;
+                        }
+                    }
+                }
+            }
+
+            // After processing, handle indicators with null ids
+            foreach ($formattedData as &$services) {
+                if (isset($services['indicators'])) {
+                    // Iterate over indicators to ensure all data is correctly structured
+                    foreach ($services['indicators'] as &$indicatorData) {
+                        if ($indicatorData['indicator_id'] === null) {
+                            // Handle cases where indicator_id is null
+                            $indicatorData['indicator_id'] = 'Unknown'; // Or any default value you prefer
+                            $indicatorData['indicator_name'] = 'Unknown'; // Set name accordingly
+                        }
+                    }
+                    // Convert to indexed array for easier access
+                    $services['indicators'] = array_values($services['indicators']);
+                }
+            }
 
             return response()->json([
                 'status' => 'success',
@@ -196,7 +246,7 @@ class ServiceDataController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'An error occurred while fetching service data reports.',
+                'message' => 'An error occurred while fetching service data reports.'  . $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
