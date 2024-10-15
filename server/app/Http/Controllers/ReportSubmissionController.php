@@ -319,7 +319,7 @@ class ReportSubmissionController extends Controller
 
             // Apply status filtering
             if ($status !== 'all') {
-                if ($status === 'submitted') {
+                if ($status === 'submitted' || $status === "submitted late") {
                     $query->whereIn('report_submissions.status', ['submitted', 'submitted late']);
                 } else {
                     $query->where('report_submissions.status', $status);
@@ -384,9 +384,9 @@ class ReportSubmissionController extends Controller
         $reportSubmissions = DB::table('report_submissions as rs')
             ->join('report_submission_templates as rst', 'rs.report_submission_template_id', '=', 'rst.report_submission_template_id')
             ->where('rs.barangay_id', $barangayId) // Filter by barangay_id
-            ->where('rs.status', 'pending') // Filter by pending status
             ->select(
                 'rs.report_submission_id',
+                'rs.status',
                 'rst.report_type',
                 DB::raw("CONCAT(rst.report_month, '-', rst.report_year) as report_month_year")
             )
