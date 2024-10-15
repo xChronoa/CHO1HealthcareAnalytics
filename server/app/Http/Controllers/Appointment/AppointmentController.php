@@ -34,19 +34,19 @@ class AppointmentController extends Controller
             'birthdate' => 'required|date',
             'address' => 'required|string|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'email' => 'required|email|unique:patients,email',
+            'email' => 'required|email',
             'appointment_date' => 'required|date',
             'appointment_category_name' => 'required|string|exists:appointment_categories,appointment_category_name',
             'patient_note' => 'nullable|string',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+    
         // Start a transaction
         DB::beginTransaction();
-
+    
         try {
             // Create the patient
             $patient = Patient::create([
@@ -58,18 +58,18 @@ class AppointmentController extends Controller
                 'phone_number' => $request->phone_number,
                 'email' => $request->email,
             ]);
-
+    
             // Retrieve the appointment_category_id using the appointment_category_name
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
             $appointmentCategoryId = $appointmentCategory->appointment_category_id;
-
+    
             // Check for the highest queue_number for the given appointment_date
             $maxQueueNumber = Appointment::whereDate('appointment_date', $request->appointment_date)
                 ->max('queue_number');
-
+    
             // If no appointments exist for the date, start at 1, otherwise increment
             $queueNumber = $maxQueueNumber ? $maxQueueNumber + 1 : 1;
-
+    
             // Create the appointment with the generated queue number
             $appointment = Appointment::create([
                 'patient_id' => $patient->patient_id,
@@ -78,10 +78,10 @@ class AppointmentController extends Controller
                 'patient_note' => $request->patient_note,
                 'queue_number' => $queueNumber,
             ]);
-
+    
             // Commit the transaction
             DB::commit();
-
+    
             // Return a response with the generated queue number
             return response()->json([
                 'message' => 'Patient and Appointment created successfully',
@@ -91,7 +91,7 @@ class AppointmentController extends Controller
         } catch (\Exception $e) {
             // Rollback the transaction if anything goes wrong
             DB::rollBack();
-
+    
             // Return an error response
             return response()->json([
                 'message' => 'An error occurred while creating the patient and appointment',
