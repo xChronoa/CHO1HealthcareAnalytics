@@ -411,7 +411,7 @@ class ReportStatusController extends Controller
                 MIN(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as earliest_date,
                 MAX(CONCAT(report_submission_templates.report_year, "-", LPAD(report_submission_templates.report_month, 2, "0"))) as latest_date
             ')
-                ->where('status', 'submitted');
+                ->whereIn('status', ['submitted', 'submitted late']);
 
             // Apply the barangay_id filter
             if ($barangayId) {
