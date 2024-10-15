@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { usePatient } from "../../hooks/usePatient";
 import { useAppointment } from "../../hooks/useAppointment";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 import ServiceDataChart from "./Chart/ServiceDataChart";
 import MorbidityFormChart from "./Chart/MorbidityFormChart";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import Swal from "sweetalert2";
 
 interface DashboardProp {
     barangayLogo?: string;
@@ -12,9 +15,11 @@ interface DashboardProp {
 
 const Dashboard: React.FC<DashboardProp> = () => {
     const [section, setSection] = useState<string>("m1");
-    const { fetchCount: fetchPatientCount, patientCount} = usePatient();
-    const { fetchCount: fetchAppointmentCount, appointmentCount } = useAppointment();
-    const { fetchPendingReportCount, pendingReportCount } = useReportSubmissions();
+    const { fetchCount: fetchPatientCount, patientCount } = usePatient();
+    const { fetchCount: fetchAppointmentCount, appointmentCount } =
+        useAppointment();
+    const { fetchPendingReportCount, pendingReportCount } =
+        useReportSubmissions();
 
     const handleToggle = (selectedSection: string) => {
         setSection(selectedSection);
@@ -28,10 +33,87 @@ const Dashboard: React.FC<DashboardProp> = () => {
         }`;
 
     useEffectAfterMount(() => {
-        fetchPatientCount(),
-        fetchAppointmentCount();
-        fetchPendingReportCount();
+        fetchPatientCount(), fetchAppointmentCount(), fetchPendingReportCount();
     }, [fetchPatientCount, fetchAppointmentCount, fetchPendingReportCount]);
+
+    const chartRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLHeadingElement>(null);
+
+    const downloadChart = async () => {
+        const input = chartRef.current;
+
+        if (!input) {
+            // Display toast notification for error
+            Swal.fire({
+                icon: "error",
+                title: "Oops!",
+                text: "We can’t find the chart to download. Please refresh the page and try again.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                background: "#f8d7da",
+                color: "#721c24",
+                customClass: {
+                    popup: "border border-danger",
+                },
+            });
+            return;
+        }
+
+        try {
+            const canvas = await html2canvas(input as HTMLElement);
+            const imgData = canvas.toDataURL("image/png");
+
+            // Create a PDF with the exact dimensions of the chart
+            const pdf = new jsPDF({
+                orientation:
+                    canvas.width > canvas.height ? "landscape" : "portrait",
+                unit: "px",
+                format: [canvas.width, canvas.height],
+            });
+
+            // Add the image to the PDF, fitting it exactly to the page
+            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+            pdf.save(`${section.toUpperCase()} - ${textRef.current ? textRef.current.textContent : ""} - Chart.pdf`);
+
+            // Show success toast notification
+            Swal.fire({
+                icon: "success",
+                title: "Download Successful!",
+                text: "Your chart has been downloaded successfully.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: "#fff",
+                color: "#155724",
+                customClass: {
+                    popup: "border border-success",
+                },
+            });
+        } catch (error) {
+            // Display toast notification indicating download failure
+            Swal.fire({
+                icon: "error",
+                title: "Download Failed",
+                text: "Something went wrong while generating the PDF. Please try again.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                background: "#f8d7da",
+                color: "#721c24",
+                customClass: {
+                    popup: "border border-danger",
+                },
+            });
+            console.error("Error generating PDF: ", error);
+        }
+    };
 
     return (
         <>
@@ -46,7 +128,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-patients">
                         <label htmlFor="patient-amount">Total Patients</label>
                         <span className="text-2xl font-bold text-center text-black bg-transparent patient-amount">
-                        {patientCount}
+                            {patientCount}
                         </span>
                     </div>
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-appointments">
@@ -71,30 +153,41 @@ const Dashboard: React.FC<DashboardProp> = () => {
 
                 {/* Data Visualization of M1 and M2 report */}
                 <div className="mt-5 visualize-data">
-                    <div className="flex items-center justify-center transition-all toggle-sections">
-                        <button
-                            onClick={() => handleToggle("m1")}
-                            className={`${getButtonClass(
-                                "m1"
-                            )} rounded-tl-lg rounded-bl-lg`}
-                        >
-                            M1 Data
-                        </button>
-                        <button
-                            onClick={() => handleToggle("m2")}
-                            className={`${getButtonClass(
-                                "m2"
-                            )} rounded-tr-lg rounded-br-lg`}
-                        >
-                            M2 Data
-                        </button>
-                    </div>
+                    <section className="flex flex-row items-center justify-between buttons">
+                        <div className="flex items-center justify-center transition-all toggle-sections">
+                            <button
+                                onClick={() => handleToggle("m1")}
+                                className={`${getButtonClass(
+                                    "m1"
+                                )} rounded-tl-lg rounded-bl-lg`}
+                            >
+                                M1 Data
+                            </button>
+                            <button
+                                onClick={() => handleToggle("m2")}
+                                className={`${getButtonClass(
+                                    "m2"
+                                )} rounded-tr-lg rounded-br-lg`}
+                            >
+                                M2 Data
+                            </button>
+                        </div>
+                        <div className="download">
+                            <button
+                                onClick={downloadChart}
+                                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Download Charts
+                            </button>
+                        </div>
+                    </section>
                     <div className="mt-4">
-                        {/* <h2 className="text-xl font-bold">
-                            {`Displaying ${section.toUpperCase()} Data`}
-                        </h2> */}
-                        {section === "m1" && <> <ServiceDataChart />  </>}
-                        {section === "m2" && <MorbidityFormChart />}
+                        {section === "m1" && (
+                            <ServiceDataChart chartRef={chartRef} textRef={textRef}/>
+                        )}
+                        {section === "m2" && (
+                            <MorbidityFormChart chartRef={chartRef} textRef={textRef}/>
+                        )}
                     </div>
                 </div>
             </div>
