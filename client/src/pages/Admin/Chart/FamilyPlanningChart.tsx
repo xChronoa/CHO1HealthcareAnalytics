@@ -13,6 +13,8 @@ import {
 import { baseAPIUrl } from "../../../config/apiConfig";
 import Loading from "../../../components/Loading";
 import { useLoading } from "../../../context/LoadingContext";
+import { faMinimize, faMaximize } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 ChartJS.register(
     LineElement,
@@ -224,52 +226,85 @@ const FamilyPlanningChart: React.FC = () => {
 
     const ageCategories = ["10-14", "15-19", "20-49"];
 
+    const [maximizedCharts, setMaximizedCharts] = useState<{ [key: number]: boolean }>({});
+
+    const toggleSize = (index: number) => {
+        setMaximizedCharts((prevState) => ({
+            ...prevState,
+            [index]: !prevState[index],
+        }));
+    };
+
     return (
         <>
-            <div>
-                {error ? (
-                    <p>Error: {error}</p>
-                ) : (
-                    <div className="flex flex-col gap-8">
-                        {ageCategories.map((ageCategory, index) => {
-                            const filteredData = data.filter(
-                                (entry) => entry.age_category === ageCategory
-                            );
-                            return (
-                                <div key={index} className="p-4 bg-white rounded-lg">
-                                    <h3 className="mb-2 font-semibold text-center">User of Family Planning Method for {ageCategory} years old</h3>
-                                    <Line
-                                        data={chartData(filteredData)}
-                                        options={{ ...options, plugins: { ...options.plugins, tooltip: { ...options.plugins.tooltip, callbacks: { ...options.plugins.tooltip.callbacks, afterLabel: (tooltipItem: any) => {
-                                            const reportPeriod = tooltipItem.label;
-                                            const methods: { [key: string]: number } = {};
+            {error ? (
+                <p>Error: {error}</p>
+            ) : (
+                <>
+                    {ageCategories.map((ageCategory, index) => {
+                        const filteredData = data.filter(
+                            (entry) => entry.age_category === ageCategory
+                        );
+                        const isMaximized = maximizedCharts[index];
 
-                                            filteredData.forEach((entry) => {
-                                                if (entry.report_period === reportPeriod) {
-                                                    const key = tooltipItem.dataset.label
-                                                        .toLowerCase()
-                                                        .replace(/ /g, "_") as keyof FamilyPlanningReport;
-                                                    if (typeof entry[key] === "number") {
-                                                        methods[entry.method_name] =
-                                                            (methods[entry.method_name] || 0) +
-                                                            entry[key];
-                                                    }
-                                                }
-                                            });
+                        return (
+                            <div
+                                key={index}
+                                className={`chart p-4 bg-white rounded-lg ${
+                                    isMaximized ? "w-full" : "w-9/12"
+                                } transition-all relative`}
+                            >
+                                <h3 className="mb-2 font-semibold text-center">
+                                    User of Family Planning Method for {ageCategory} years old
+                                </h3>
+                                <FontAwesomeIcon
+                                    icon={isMaximized ? faMinimize : faMaximize}
+                                    className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                    onClick={() => toggleSize(index)}
+                                />
+                                <Line
+                                    data={chartData(filteredData)}
+                                    options={{
+                                        ...options,
+                                        plugins: {
+                                            ...options.plugins,
+                                            tooltip: {
+                                                ...options.plugins.tooltip,
+                                                callbacks: {
+                                                    ...options.plugins.tooltip.callbacks,
+                                                    afterLabel: (tooltipItem: any) => {
+                                                        const reportPeriod = tooltipItem.label;
+                                                        const methods: { [key: string]: number } = {};
 
-                                            const methodDetails = Object.entries(methods)
-                                                .map(([method, count]) => `${method}: ${count}`)
-                                                .join("\n");
+                                                        filteredData.forEach((entry) => {
+                                                            if (entry.report_period === reportPeriod) {
+                                                                const key = tooltipItem.dataset.label
+                                                                    .toLowerCase()
+                                                                    .replace(/ /g, "_") as keyof FamilyPlanningReport;
+                                                                if (typeof entry[key] === "number") {
+                                                                    methods[entry.method_name] =
+                                                                        (methods[entry.method_name] || 0) +
+                                                                        entry[key];
+                                                                }
+                                                            }
+                                                        });
 
-                                            return `\nMethods:\n${methodDetails}`;
-                                        }}}}}}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
+                                                        const methodDetails = Object.entries(methods)
+                                                            .map(([method, count]) => `${method}: ${count}`)
+                                                            .join("\n");
+
+                                                        return `\nMethods:\n${methodDetails}`;
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    }}
+                                />
+                            </div>
+                        );
+                    })}
+                </>
+            )}
         </>
     );
 };

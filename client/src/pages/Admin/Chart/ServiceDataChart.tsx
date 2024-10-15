@@ -14,6 +14,8 @@ import { baseAPIUrl } from "../../../config/apiConfig";
 import FamilyPlanningChart from "./FamilyPlanningChart";
 import ModernWRAChart from "./ModernWRAChart";
 import { useLoading } from "../../../context/LoadingContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMaximize, faMinimize } from "@fortawesome/free-solid-svg-icons";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, Tooltip, Legend, PointElement);
 
@@ -30,7 +32,15 @@ interface ServiceData {
     service_name: string;
 }
 
-const ServiceDataChart: React.FC = () => {
+interface ServiceDataChartProps {
+    chartRef: React.RefObject<HTMLDivElement>;
+    textRef: React.RefObject<HTMLHeadingElement>;
+}
+
+const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
+    chartRef,
+    textRef
+}) => {
     const [serviceData, setServiceData] = useState<ServiceData[]>([]);
     const [selectedService, setSelectedService] = useState<string>("Modern FP Unmet Need");
     const { incrementLoading, decrementLoading } = useLoading();
@@ -172,7 +182,15 @@ const ServiceDataChart: React.FC = () => {
             };
         }).filter(dataset => dataset !== null);  // Filter out null datasets
     };
+
+    const [maximizedCharts, setMaximizedCharts] = useState<{ [key: string]: boolean }>({});
     
+    const toggleSize = (chartId: string) => {
+        setMaximizedCharts((prevState: { [key: string]: boolean }) => ({
+            ...prevState,
+            [chartId]: !prevState[chartId],
+        }));
+    };
 
     const renderCharts = () => {
         const hasAgeCategory = filteredData.some((data) => data.age_category);
@@ -182,25 +200,35 @@ const ServiceDataChart: React.FC = () => {
             const ageCategories = Array.from(
                 new Set(filteredData.map((data) => data.age_category))
             );
-    
+
             const datasets = ageCategories.map((ageCategory) => ({
                 label: ageCategory || "Unknown Age Category",
                 data: filteredData
                     .filter((data) => data.age_category === ageCategory)
-                    .map((data) => data.value), // Assuming the value you want to plot is in the 'value' field
+                    .map((data) => data.value),
                 borderColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
                 fill: false,
             }));
-    
+
+            const chartId = "teenage-pregnancy"; // Assign a unique id for this chart
+            const isMaximized = maximizedCharts[chartId];
+
             return (
-                <div className="p-4 bg-white rounded-lg">
+                <div className={`p-4 bg-white rounded-lg ${
+                                    isMaximized ? "w-full" : "w-9/12"
+                                } transition-all relative`}>
                     <h3 className="mb-2 font-medium text-center">Teenage Pregnancy</h3>
+                    <FontAwesomeIcon
+                        icon={isMaximized ? faMinimize : faMaximize}
+                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                        onClick={() => toggleSize(chartId)}
+                    />
                     <Line
                         data={{
-                            labels, // Assuming labels is already defined for your x-axis
+                            labels,
                             datasets,
                         }}
-                        options={options} // Assuming options is already defined for chart customization
+                        options={options}
                     />
                 </div>
             );
@@ -210,7 +238,6 @@ const ServiceDataChart: React.FC = () => {
         const renderedValueTypes = new Set();
 
         if (hasAgeCategory && hasValueType) {
-            // Handle case with both age_category and value_type
             const ageCategories = Array.from(
                 new Set(filteredData.map((data) => data.age_category))
             );
@@ -221,19 +248,27 @@ const ServiceDataChart: React.FC = () => {
             return (
                 <>
                     {ageCategories.map((ageCategory) => {
-                        // Skip if already rendered
                         if (renderedCategories.has(ageCategory)) return null;
 
-                        // Ensure only age_category charts are rendered for relevant indicators
                         const dataExistsForCategory = filteredData.some(
                             (data) => data.age_category === ageCategory && !data.value_type
                         );
                         if (!dataExistsForCategory) return null;
 
                         renderedCategories.add(ageCategory);
+                        const chartId = `age-${ageCategory}`;
+                        const isMaximized = maximizedCharts[chartId];
+
                         return (
-                            <div key={ageCategory} className="p-4 bg-white rounded-lg">
-                                <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
+                            <div key={ageCategory} className={`p-4 bg-white rounded-lg ${
+                                    isMaximized ? "w-full" : "w-9/12"
+                                } transition-all relative`}>
+                                <h3 className="mb-2 font-semibold text-center">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
+                                <FontAwesomeIcon
+                                    icon={isMaximized ? faMinimize : faMaximize}
+                                    className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                    onClick={() => toggleSize(chartId)}
+                                />
                                 <Line
                                     data={{
                                         labels,
@@ -244,22 +279,29 @@ const ServiceDataChart: React.FC = () => {
                             </div>
                         );
                     })}
-                    
 
                     {valueTypes.map((valueType) => {
-                        // Skip if already rendered
                         if (renderedValueTypes.has(valueType)) return null;
 
-                        // Ensure only value_type charts are rendered for relevant indicators
                         const dataExistsForType = filteredData.some(
                             (data) => data.value_type === valueType && !data.age_category
                         );
                         if (!dataExistsForType) return null;
 
                         renderedValueTypes.add(valueType);
+                        const chartId = `value-${valueType}`;
+                        const isMaximized = maximizedCharts[chartId];
+
                         return (
-                            <div key={valueType} className="p-4 bg-white rounded-lg">
-                                <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
+                            <div key={valueType} className={`p-4 bg-white rounded-lg ${
+                                    isMaximized ? "w-full" : "w-9/12"
+                                } transition-all relative`}>
+                                <h3 className="mb-2 font-semibold text-center">{capitalize(valueType || "Unknown Value Type")}</h3>
+                                <FontAwesomeIcon
+                                    icon={isMaximized ? faMinimize : faMaximize}
+                                    className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                    onClick={() => toggleSize(chartId)}
+                                />
                                 <Line
                                     data={{
                                         labels,
@@ -273,19 +315,27 @@ const ServiceDataChart: React.FC = () => {
                 </>
             );
         } else if (hasAgeCategory) {
-            // Display charts based on age_category
             const ageCategories = Array.from(
                 new Set(filteredData.map((data) => data.age_category))
             );
-    
+
             return ageCategories.map((ageCategory) => {
-                // Skip if already rendered
                 if (renderedCategories.has(ageCategory)) return null;
-    
+
                 renderedCategories.add(ageCategory);
+                const chartId = `age-${ageCategory}`;
+                const isMaximized = maximizedCharts[chartId];
+
                 return (
-                    <div key={ageCategory} className="p-4 bg-white rounded-lg">
-                        <h3 className="font-semibold">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
+                    <div key={ageCategory} className={`chart p-4 bg-white rounded-lg ${
+                                    isMaximized ? "w-full" : "w-9/12"
+                                } transition-all relative`}>
+                        <h3 className="mb-2 font-semibold text-center">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
+                        <FontAwesomeIcon
+                            icon={isMaximized ? faMinimize : faMaximize}
+                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                            onClick={() => toggleSize(chartId)}
+                        />
                         <Line
                             data={{
                                 labels,
@@ -297,19 +347,27 @@ const ServiceDataChart: React.FC = () => {
                 );
             });
         } else if (hasValueType) {
-            // Display charts based on value_type
             const valueTypes = Array.from(
                 new Set(filteredData.map((data) => data.value_type))
             );
-    
+
             return valueTypes.map((valueType) => {
-                // Skip if already rendered
                 if (renderedValueTypes.has(valueType)) return null;
-    
+
                 renderedValueTypes.add(valueType);
+                const chartId = `value-${valueType}`;
+                const isMaximized = maximizedCharts[chartId];
+
                 return (
-                    <div key={valueType} className="p-4 bg-white rounded-lg">
-                        <h3 className="font-semibold">{capitalize(valueType || "Unknown Value Type")}</h3>
+                    <div key={valueType} className={`chart p-4 bg-white rounded-lg ${
+                                isMaximized ? "w-full" : "w-9/12"
+                            } transition-all relative`}>
+                        <h3 className="mb-2 font-semibold text-center">{capitalize(valueType || "Unknown Value Type")}</h3>
+                        <FontAwesomeIcon
+                            icon={isMaximized ? faMinimize : faMaximize}
+                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                            onClick={() => toggleSize(chartId)}
+                        />
                         <Line
                             data={{
                                 labels,
@@ -365,23 +423,6 @@ const ServiceDataChart: React.FC = () => {
             },
         },
     };
-
-    const downloadChart = () => {
-        // Get all canvas elements within the #myChart div
-        const canvases = document.querySelectorAll("#myChart canvas");
-        
-        // Loop through each canvas and download its image
-        canvases.forEach((canvas, index) => {
-            if (canvas instanceof HTMLCanvasElement) {
-                const link = document.createElement("a");
-                link.href = canvas.toDataURL("image/png");
-                link.download = `chart_${index + 1}.png`; // Give each file a unique name
-                link.click();
-            } else {
-                alert("Unable to download chart. Please ensure the charts are visible.");
-            }
-        });
-    };
     
     return (
         <>
@@ -390,7 +431,7 @@ const ServiceDataChart: React.FC = () => {
                     <p>Error: {error}</p>
                 ) : (
                     <div className="flex flex-col items-center justify-center">
-                        <div className="flex flex-row items-center justify-between w-9/12 gap-8 mb-8 options">
+                        <div className="flex flex-row items-center justify-between w-9/12 gap-8 options">
                             <select
                                 className="flex-1 w-full py-2 pl-2 rounded-lg lg:w-fit"
                                 onChange={handleServiceChange}
@@ -405,24 +446,21 @@ const ServiceDataChart: React.FC = () => {
                                     </option>
                                 ))}
                             </select>
-                            <button
-                                onClick={downloadChart}
-                                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
-                            >
-                                Download Charts
-                            </button>
                         </div>
-                        <div className="flex flex-col justify-center w-full gap-8 sm:w-9/12" id="myChart" >
-                            {selectedService !== "Family Planning" ? (
-                                selectedService !== "Modern FP Unmet Need" ? (
-                                    renderCharts()
+                        <section className="flex flex-col items-center justify-center w-full px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
+                            <h1 id="chart-title" className="w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green" ref={textRef}>{selectedService}</h1>
+                            <div className="flex flex-col items-center justify-center w-full gap-8 charts">
+                                {selectedService !== "Family Planning" ? (
+                                    selectedService !== "Modern FP Unmet Need" ? (
+                                        renderCharts()
+                                    ) : (
+                                        <ModernWRAChart />
+                                    )
                                 ) : (
-                                    <ModernWRAChart />
-                                )
-                            ) : (
-                                <FamilyPlanningChart />
-                            )}
-                        </div>
+                                    <FamilyPlanningChart />
+                                )}
+                            </div>
+                        </section>
                     </div>
                 )}
             </div>

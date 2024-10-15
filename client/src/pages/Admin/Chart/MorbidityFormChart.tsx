@@ -23,7 +23,15 @@ ChartJS.register(
     PointElement
 );
 
-const MorbidityFormChart: React.FC = () => {
+interface MorbidityFormChartProps {
+    chartRef: React.RefObject<HTMLDivElement>;
+    textRef: React.RefObject<HTMLHeadingElement>;
+}
+
+const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
+    chartRef,
+    textRef
+}) => {
     const { error, morbidityReports, fetchMorbidityReports } =
         useMorbidityReport();
     const [selectedAgeCategory, setSelectedAgeCategory] = useState<
@@ -263,41 +271,14 @@ const MorbidityFormChart: React.FC = () => {
         };
     }, []);
 
-    const downloadChart = () => {
-        // Get all canvas elements within the #myChart div
-        const canvases = document.querySelectorAll("#myChart canvas");
-
-        // Loop through each canvas and download its image
-        canvases.forEach((canvas, index) => {
-            if (canvas instanceof HTMLCanvasElement) {
-                const link = document.createElement("a");
-                link.href = canvas.toDataURL("image/png");
-                link.download = `chart_${index + 1}.png`; // Give each file a unique name
-                link.click();
-            } else {
-                alert(
-                    "Unable to download chart. Please ensure the charts are visible."
-                );
-            }
-        });
-    };
-
     return (
         <div>
             {error ? (
                 <p>Error: {error}</p>
             ) : (
-                <div className="flex flex-col gap-8" id="myChart">
-                    <div className="flex flex-row items-center justify-between w-9/12 gap-8 mb-8 options">
-                        <button
-                            onClick={downloadChart}
-                            className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
-                        >
-                            Download Charts
-                        </button>
-                    </div>
-                    <div className="flex flex-col-reverse gap-4 p-4 bg-white rounded-lg sm:flex-row-reverse">
-                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3">
+                <section className="flex flex-col gap-8 px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
+                    <div className="flex flex-col-reverse gap-4 p-4 bg-white rounded-lg sm:flex-row-reverse chart">
+                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3 legend">
                             <h3 className="mb-2 text-lg font-semibold">
                                 Legend
                             </h3>
@@ -352,8 +333,8 @@ const MorbidityFormChart: React.FC = () => {
 
                     <div className="w-full h-[1px] bg-black"></div>
 
-                    <div className="flex flex-col-reverse gap-2 p-4 bg-white rounded-lg sm:flex-row-reverse">
-                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3">
+                    <div className="flex flex-col-reverse gap-2 p-4 bg-white rounded-lg sm:flex-row-reverse chart">
+                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3 legend">
                             <h3 className="mb-2 text-lg font-semibold">
                                 Legend
                             </h3>
@@ -405,7 +386,7 @@ const MorbidityFormChart: React.FC = () => {
                             />
                         </div>
                     </div>
-                </div>
+                </section>
             )}
         </div>
     );

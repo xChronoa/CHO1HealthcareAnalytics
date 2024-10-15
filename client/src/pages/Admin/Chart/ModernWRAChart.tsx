@@ -12,6 +12,8 @@ import {
     ChartOptions,
 } from "chart.js";
 import { useWra } from "../../../hooks/useWra"; // Adjust the path if necessary
+import { faMinimize, faMaximize } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 ChartJS.register(
     LineElement,
@@ -132,21 +134,30 @@ const ModernWRAChart: React.FC = () => {
         },
     };
 
+    const [isMaximized, setIsMaximized] = useState<boolean>(false);
+
+    const toggleSize = () => setIsMaximized(prev => !prev);
+
     return (
         <>
-            <div>
-                {error ? (
-                    <p>Error: {error}</p>
-                ) : (
-                    <div className="p-4 bg-white rounded-lg">
-                        <h3 className="mb-2 font-semibold text-center">Unmet Need for Modern Family Planning</h3>
-                        <Line
-                            data={chartData()}
-                            options={options}
-                        />
-                    </div>
-                )}
-            </div>
+            {error ? (
+                <p>Error: {error}</p>
+            ) : (
+                <div className={`chart p-4 bg-white rounded-lg ${
+                    isMaximized ? "w-full" : "w-9/12"
+                } transition-all relative`}>
+                    <FontAwesomeIcon
+                        icon={isMaximized ? faMinimize : faMaximize}
+                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                        onClick={() => toggleSize()}
+                    />
+                    <h3 className="mb-2 font-semibold text-center">Unmet Need for Modern Family Planning</h3>
+                    <Line
+                        data={chartData()}
+                        options={options}
+                    />
+                </div>
+            )}
         </>
     );
 };
