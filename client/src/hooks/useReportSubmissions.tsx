@@ -48,6 +48,7 @@ export interface ReportSubmission {
 export interface Report {
     report_submission_id: number;
     report_month_year: string; // Example format: "MM-YYYY"
+    status: string;
 };
 
 export const useReportSubmissions = (): UseReportSubmission => {
