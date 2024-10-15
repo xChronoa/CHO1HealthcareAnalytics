@@ -76,7 +76,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                         <div className="flex flex-col input-group">
                             <label htmlFor="username">Username</label>
                             <input
-                                className="px-4 py-2 bg-gray-100 shadow-xl"
+                                className="px-4 py-2 bg-gray-100 shadow-xl border-gray-300 rounded-md border-[1px]"
                                 type="text"
                                 name="username"
                                 id="username"
@@ -92,7 +92,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
 
                             <div className="relative w-full input">
                                 <input
-                                    className="w-full px-4 py-2 pr-12 bg-gray-100 shadow-xl"
+                                    className="w-full px-4 py-2 pr-12 bg-gray-100 shadow-xl border-gray-300 rounded-md border-[1px]"
                                     type={showPassword ? "text" : "password"}
                                     name="password"
                                     id="password"
