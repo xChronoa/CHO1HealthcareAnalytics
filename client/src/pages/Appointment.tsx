@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useTransition, MouseEvent } from "react";
 import cabuyao_logo from "../assets/images/cabuyao_logo.png";
 import "../styles/appointment.css";
 import { useAppointmentCategory } from "../hooks/useAppointmentCategory";
@@ -31,9 +31,8 @@ interface FormData {
 }
 
 const Appointment: React.FC = () => {
-    const { incrementLoading, decrementLoading } = useLoading();
-    const { fetchAppointmentCategories, appointmentCategories } =
-        useAppointmentCategory();
+    const { isLoading, incrementLoading, decrementLoading } = useLoading();
+    const { fetchAppointmentCategories, appointmentCategories } = useAppointmentCategory();
     const [formData, setFormData] = useState<FormData>({
         first_name: "",
         last_name: "",
@@ -48,66 +47,33 @@ const Appointment: React.FC = () => {
         patient_note: "",
         terms: false,
     });
-    const [otpTimer, setOtpTimer] = useState<number>(60);
-    const [otpTimerActive, setOtpTimerActive] = useState<boolean>(false);
-    const [confirm, setConfirm] = useState<ConfirmationResult | null>(null);
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [resendCountdown, setResendCountdown] = useState(0);
+    const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+    const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+    const [isPending, startTransition] = useTransition();
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [validationErrors, setValidationErrors] = useState<
-        Record<string, string>
-    >({});
     const [generalError, setGeneralError] = useState<string | null>(null);
-
-    const validateForm = () => {
-        const errors: Record<string, string> = {};
-        const requiredFields: Array<keyof FormData> = [
-            "first_name",
-            "last_name",
-            "sex",
-            "birthdate",
-            "address",
-            "appointment_date",
-            "appointment_category_name",
-            "email",
-            "phone_number",
-            "terms",
-            "otp"
-        ];
-
-        requiredFields.forEach((field) => {
-            const value = formData[field];
-            if (field === "terms" && !value) {
-                errors[field] = "You must accept the terms and conditions.";
-            } else if (
-                !value ||
-                (typeof value === "string" && value.trim() === "")
-            ) {
-                errors[field] =
-                    "This field cannot be empty or just whitespace.";
-            }
-        });
-
-        return errors;
-    };
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchAppointmentCategories();
-    }, [fetchAppointmentCategories]);
-
-    useEffect(() => {
-        let timer: NodeJS.Timeout | null = null;
-        if (otpTimerActive && otpTimer > 0) {
-            timer = setInterval(() => {
-                setOtpTimer((prev) => prev - 1);
-            }, 1000);
-        } else if (otpTimer <= 0) {
-            setOtpTimerActive(false);
+        let timer: NodeJS.Timeout;
+        if (resendCountdown > 0) {
+            timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
         }
-        return () => {
-            if (timer) clearInterval(timer);
-        };
-    }, [otpTimer, otpTimerActive]);
+
+        return () => clearTimeout(timer);
+    }, [resendCountdown]);
+
+    useEffect(() => {
+        const recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha", { size: "invisible" });
+        setRecaptchaVerifier(recaptchaVerifier);
+
+        return () => recaptchaVerifier.clear();
+    }, []);
+
+    const handlePhoneNumberChange = (value: string | undefined) => {
+        setFormData((prev) => ({ ...prev, phone_number: value || "" }));
+    };
 
     const handleChange = (
         event: React.ChangeEvent<
@@ -137,73 +103,112 @@ const Appointment: React.FC = () => {
         }
     };
 
-    const handleSubmit = async (event: FormEvent) => {
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+        const requiredFields: Array<keyof FormData> = [
+            "first_name", "last_name", "sex", "birthdate", "address", "appointment_date",
+            "appointment_category_name", "email", "phone_number", "otp", "terms"
+        ];
+
+        requiredFields.forEach((field) => {
+            const value = formData[field];
+            if (!value || (typeof value === "string" && value.trim() === "")) {
+                errors[field] = field === "terms" ? "You must accept the terms and conditions." : "This field cannot be empty.";
+            }
+        });
+
+        return errors;
+    };
+
+    const scrollToError = (fieldId: string) => {
+        const errorElement = document.getElementById(fieldId);
+        if (errorElement) {
+            errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            errorElement.focus();
+        }
+    };
+
+    const requestOtp = async (event?: MouseEvent<HTMLButtonElement>) => {
+        event?.preventDefault();
+
+        setResendCountdown(60);
+        setErrors({});
+
+        if (!recaptchaVerifier) {
+            return setGeneralError("RecaptchaVerifier is not initialized");
+        }
+        
+        const phoneNumber = formData.phone_number?.trim();
+        if (!phoneNumber) {
+            setErrors((prev) => ({ ...prev, phone_number: "Phone number is required." }));
+            scrollToError('phone_number');
+            return;
+        }
+        
+        try {
+            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+            startTransition(() => {
+                setConfirmationResult(confirmationResult);
+            });
+        } catch (error: any) {
+            setResendCountdown(0);
+            handleOTPError(error);
+        }
+    };
+
+    const verifyOTP = async (): Promise<boolean> => {
+        try {
+            if (!confirmationResult) {
+                setErrors((prev) => ({ ...prev, otp: "You must request an OTP before verifying." }));
+                scrollToError('otp');
+                return false;
+            }
+
+            const result = await confirmationResult.confirm(formData.otp);
+            
+            return !!result;
+        } catch (error: any) {
+            if (error.code === 'auth/invalid-verification-code') {
+                setErrors((prev) => ({ ...prev, otp: "Invalid OTP. Please try again." }));
+                scrollToError('otp');
+            } else if (error.code === 'auth/code-expired') {
+                setErrors((prev) => ({...prev, otp: "The OTP session has expired. Please request a new OTP."}));
+                scrollToError('otp');
+            } else {
+                setGeneralError("An error occurred while verifying the OTP. Please try again.");
+                Swal.fire({
+                    title: "Error",
+                    text: generalError || "An unknown error occurred. Please try again.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+            return false;
+        }
+    };
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setErrors({});
-        setValidationErrors({});
         setGeneralError(null);
-
-        // Validate form
+        
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
-            setValidationErrors(validationErrors);
-
-            // Convert validation errors to a readable format with HTML
-            const fieldLabels: { [key: string]: string } = {
-                first_name: "First Name",
-                last_name: "Last Name",
-                sex: "Sex",
-                birthdate: "Birthdate",
-                address: "Address",
-                appointment_date: "Appointment Date",
-                appointment_category_name: "Appointment Category",
-                email: "Email",
-                phone_number: "Phone Number",
-                otp: "OTP",
-                patient_note: "Patient Note",
-                terms: "Terms",
-            };
-
-            const errorMessages = Object.entries(validationErrors)
-                .map(([field, errors]) => {
-                    const fieldName = fieldLabels[field] || field;
-                    return `<p><strong>${fieldName}:</strong> ${errors}</p>`;
-                })
-                .join("");
-
-            Swal.fire({
-                title: "Validation Errors",
-                html: `
-                    <div style="
-                        font-size: 16px;
-                        line-height: 1.5;
-                        max-height: 300px;
-                        overflow-y: auto;
-                        padding: 10px;
-                    ">
-                        Please fix the following errors:<br>${errorMessages}
-                    </div>
-            `,
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-
+            setErrors(validationErrors);
+            
+            scrollToError(Object.keys(validationErrors)[0]);
+            
             return;
         }
 
-        // if (!(await verifyOTP())) {
-        //     setGeneralError("Invalid OTP. Please try again.");
-        //     return;
-        // }
-
+        const isOtpValid = await verifyOTP();
+        if (!isOtpValid) return;
+        
         try {
             incrementLoading();
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
                 body: JSON.stringify(formData),
             });
 
@@ -211,113 +216,75 @@ const Appointment: React.FC = () => {
                 const data = await response.json();
                 if (data.errors) {
                     setErrors(data.errors);
-                    Swal.fire({
-                        title: "Error",
-                        text: "There was an issue with your submission. Please check the errors and try again.",
-                        icon: "error",
-                        confirmButtonText: "OK",
-                    });
                 } else {
                     setGeneralError("An unexpected error occurred.");
-                    Swal.fire({
-                        title: "Error",
-                        text: "An unexpected error occurred. Please try again later.",
-                        icon: "error",
-                        confirmButtonText: "OK",
-                    });
+                    showErrorAlert();
                 }
             } else {
                 const result = await response.json();
-                const patientDetails = {
+                sessionStorage.setItem("appointmentDetails", JSON.stringify({
                     ...formData,
                     queue_number: result.queue_number,
-                };
-
-                // Store appointment details in sessionStorage
-                sessionStorage.setItem(
-                    "appointmentDetails",
-                    JSON.stringify(patientDetails)
-                );
-
-                // Show SweetAlert notification
-                Swal.fire({
-                    title: "Appointment Confirmed!",
-                    text: "Your appointment has been successfully booked.",
-                    icon: "success",
-                    confirmButtonText: "OK",
-                }).then(() => {
-                    // Redirect to confirmation page
-                    navigate("/appointment/confirmation");
-                });
+                }));
+                showSuccessAlert();
             }
         } catch (error) {
+            console.error(error);
             setGeneralError("An error occurred while submitting the form.");
-            Swal.fire({
-                title: "Error",
-                text: "An error occurred while submitting the form. Please try again later.",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            console.error("An error occurred:", error);
+            showErrorAlert();
         } finally {
             decrementLoading();
         }
     };
 
-    const handlePhoneNumberChange = (value: string | undefined) => {
-        setFormData((prev) => ({
-            ...prev,
-            phone_number: value || "",
-        }));
+    const showSuccessAlert = () => {
+        Swal.fire({
+            title: "Appointment Confirmed!",
+            text: "Your appointment has been successfully booked.",
+            icon: "success",
+            confirmButtonText: "OK",
+        }).then(() => navigate("/appointment/confirmation"));
     };
 
-    const sendOTP = async () => {
-        if (!formData.phone_number) {
-            return;
-        }
-
-        try {
-            const recaptcha = new RecaptchaVerifier(auth, "recaptcha", {});
-            const confirmation = await signInWithPhoneNumber(
-                auth,
-                formData.phone_number,
-                recaptcha
-            );
-            setConfirm(confirmation);
-            setOtpTimer(60); // Reset timer to 60 seconds
-            setOtpTimerActive(true); // Start timer
-        } catch (error) {
-            console.error(error);
-        }
+    const showErrorAlert = () => {
+        Swal.fire({
+            title: "Error",
+            text: "An error occurred while submitting the form. Please try again later.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
     };
 
-    const verifyOTP = async (): Promise<boolean> => {
-        try {
-            if (!confirm) {
-                throw new Error("No confirmation result available.");
+    const handleOTPError = (error: any) => {
+        if (error.code) {
+            switch (error.code) {
+                case "auth/invalid-phone-number":
+                    setErrors((prev) => ({
+                        ...prev,
+                        phone_number: "Invalid phone number. Please check the number.",
+                    }));
+                    scrollToError('phone_number');
+                    break;
+                case "auth/too-many-requests":
+                    setGeneralError("Too many requests. Please try again later.");
+                    showErrorAlert();
+                    break;
+                default:
+                    setGeneralError("Failed to send OTP. Please try again.");
+                    showErrorAlert();
             }
-
-            // Confirm the OTP
-            const result = await confirm.confirm(formData.otp);
-
-            // Handle successful OTP verification
-            if (result) {
-                // OTP is valid
-                return true;
-            } else {
-                // OTP is invalid or not confirmed
-                return false;
-            }
-        } catch (error) {
-            // Handle errors (invalid OTP, network issues, etc.)
-            setGeneralError("Invalid OTP. Please try again.");
-            return false;
+        } else {
+            setGeneralError("An unknown error occurred. Please try again.");
+            showErrorAlert();
         }
     };
+
+    useEffect(() => {
+        fetchAppointmentCategories();
+    }, [fetchAppointmentCategories]);
 
     const [minDate, setMinDate] = useState<string>("");
 
-    // Calculate tomorrow's date
     useEffect(() => {
         const today = new Date();
         const tomorrow = new Date(today);
@@ -327,7 +294,7 @@ const Appointment: React.FC = () => {
         const dd = String(tomorrow.getDate()).padStart(2, "0");
         setMinDate(`${yyyy}-${mm}-${dd}`);
     }, []);
-
+    
     return (
         <>
             <div className="flex flex-col items-center justify-center gap-2 my-5 title">
@@ -353,52 +320,56 @@ const Appointment: React.FC = () => {
 
                 <form
                     id="appointment"
-                    className="flex flex-col justify-center w-full p-5 mt-2 mb-16 border-2 border-black rounded sm:w-3/4"
+                    className="flex flex-col justify-center w-full p-5 mt-2 mb-16 bg-white border-2 border-black rounded sm:w-3/4"
                     onSubmit={handleSubmit}
                 >
-                    <div className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
-                        <div className="flex items-center w-full gap-2 first-name">
-                            <label className="min-w-24" htmlFor="first_name">
-                                First Name:
-                            </label>
-                            <input
-                                className="w-full"
-                                type="text"
-                                name="first_name"
-                                id="first_name"
-                                placeholder="First Name"
-                                value={formData.first_name}
-                                onChange={handleChange}
-                                required
-                            />
+                    <section className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
+                        <div className="flex flex-col justify-center w-full gap-2 first-name">
+                            <div className="flex items-center w-full gap-2 first-name">
+                                <label className="min-w-24" htmlFor="first_name">
+                                    First Name:
+                                </label>
+                                <input
+                                    className="w-full border-gray-300 rounded-md border-[1px]"
+                                    type="text"
+                                    name="first_name"
+                                    id="first_name"
+                                    placeholder="First Name"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
                             {errors.first_name && (
                                 <span className="text-red-600">
                                     {errors.first_name}
                                 </span>
                             )}
                         </div>
-
-                        <div className="flex items-center w-full gap-2 last-name">
-                            <label className="min-w-24" htmlFor="last_name">
-                                Last Name:
-                            </label>
-                            <input
-                                className="w-full"
-                                type="text"
-                                name="last_name"
-                                id="last_name"
-                                placeholder="Last Name"
-                                value={formData.last_name}
-                                onChange={handleChange}
-                                required
-                            />
+                        
+                        <div className="flex flex-col justify-center w-full gap-2 last-name ">
+                            <div className="flex items-center w-full gap-2 last-name">
+                                <label className="min-w-24" htmlFor="last_name">
+                                    Last Name:
+                                </label>
+                                <input
+                                    className="w-full border-gray-300 rounded-md border-[1px]"
+                                    type="text"
+                                    name="last_name"
+                                    id="last_name"
+                                    placeholder="Last Name"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
                             {errors.last_name && (
-                                <span className="text-red-600">
+                                <span className="text-red-600"> 
                                     {errors.last_name}
                                 </span>
                             )}
                         </div>
-                    </div>
+                    </section>
 
                     <div className="flex flex-col gap-2 mb-3 input-group">
                         <label htmlFor="sex">Sex:</label>
@@ -433,7 +404,7 @@ const Appointment: React.FC = () => {
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="birthdate">Date of Birth:</label>
                         <input
-                            className="w-full"
+                            className="w-full border-gray-300 rounded-md border-[1px]"
                             type="date"
                             name="birthdate"
                             id="birthdate"
@@ -451,6 +422,7 @@ const Appointment: React.FC = () => {
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="address">Address:</label>
                         <input
+                            className="w-full border-gray-300 rounded-md border-[1px]"
                             type="text"
                             name="address"
                             id="address"
@@ -471,7 +443,7 @@ const Appointment: React.FC = () => {
                             Appointment Date:
                         </label>
                         <input
-                            className="w-full"
+                            className="w-full border-gray-300 rounded-md border-[1px]"
                             type="date"
                             name="appointment_date"
                             id="appointment_date"
@@ -492,7 +464,7 @@ const Appointment: React.FC = () => {
                             Appointment Type:
                         </label>
                         <select
-                            className="p-2"
+                            className="p-2 w-full border-gray-300 rounded-md border-[1px]"
                             name="appointment_category_name"
                             id="appointment_category_name"
                             value={formData.appointment_category_name}
@@ -519,13 +491,14 @@ const Appointment: React.FC = () => {
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="email">Email:</label>
                         <input
-                            className=""
+                            className="w-full border-gray-300 rounded-md border-[1px]"
                             type="email"
                             name="email"
                             id="email"
                             placeholder="Your Email Address"
                             value={formData.email}
                             onChange={handleChange}
+                            required
                         />
                         {errors.email && (
                             <span className="text-red-600">{errors.email}</span>
@@ -539,6 +512,7 @@ const Appointment: React.FC = () => {
                             value={formData.phone_number}
                             onChange={handlePhoneNumberChange}
                             id="phone_number"
+                            className="w-full border-gray-300 rounded-md border-[1px] pl-2"
                             required
                         />
                         {errors.phone_number && (
@@ -549,31 +523,36 @@ const Appointment: React.FC = () => {
                         <div
                             className="flex items-center justify-center w-full mt-2 mb-0"
                             id="recaptcha"
-                        ></div>
+                        />
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
                         <button
                             type="button"
-                            onClick={sendOTP}
-                            disabled={otpTimerActive}
-                            className="px-4 py-2 text-white transition-all rounded bg-green hover:opacity-75"
+                            onClick={requestOtp}
+                            disabled={!formData.phone_number || isPending || resendCountdown > 0}
+                            className={`px-4 py-2 text-white transition-all rounded  ${!formData.phone_number || isPending || resendCountdown > 0 ? "bg-[#3d8c40]" : "bg-green hover:opacity-90"}`}
                         >
-                            {otpTimerActive
-                                ? `Send OTP (${otpTimer}s)`
-                                : "Send OTP"}
+                            {resendCountdown > 0 
+                                ? `Resend OTP in ${resendCountdown}`
+                                : isPending
+                                ? "Sending OTP"
+                                : "Send OTP"
+                            }
                         </button>
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="otp">OTP:</label>
                         <input
+                            className="w-full border-gray-300 rounded-md border-[1px]"
                             type="text"
                             name="otp"
                             id="otp"
                             placeholder="Enter OTP"
                             value={formData.otp}
                             onChange={handleChange}
+                            required
                         />
                         {errors.otp && (
                             <span className="text-red-600">{errors.otp}</span>
@@ -590,7 +569,7 @@ const Appointment: React.FC = () => {
                             placeholder="Additional information or special requests"
                             value={formData.patient_note}
                             onChange={handleChange}
-                            className="p-2"
+                            className="p-2 w-full border-gray-300 rounded-md border-[1px]"
                         />
                         {errors.patient_note && (
                             <span className="text-red-600">
@@ -636,11 +615,11 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <button
-                        className="p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-xl bg-green hover:opacity-75"
+                        className={`p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-xl ${isLoading ? "bg-[#3d8c40]" : "bg-green hover:opacity-90"}`}
                         type="submit"
-                        disabled={loading}
+                        disabled={isLoading}
                     >
-                        {loading ? "Submitting..." : "Submit"}
+                        {isLoading ? "Submitting..." : "Submit"}
                     </button>
                 </form>
             </div>
