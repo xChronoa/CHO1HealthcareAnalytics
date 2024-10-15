@@ -10,6 +10,8 @@ import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 import { AgeCategory, useAgeCategory } from "../../hooks/useAgeCategory";
 import { InputValues, M2FormData } from "../../types/M2FormData";
 import { baseAPIUrl } from "../../config/apiConfig";
+import { useLoading } from "../../context/LoadingContext";
+import { useNavigate } from "react-router-dom";
 
 const Report: React.FC = () => {
     const [section, setSection] = useState<string>("m1");
@@ -27,7 +29,8 @@ const Report: React.FC = () => {
     const { diseases, fetchDiseases } = useDisease();
     const { diseases: formDiseases, fetchDiseases: fetchFormDiseases } = useDisease();
     const { ageCategories, fetchAgeCategories } = useAgeCategory();
-    const [reportLoading, setReportLoading] = useState<boolean>(false);
+    const { isLoading, incrementLoading, decrementLoading } = useLoading();
+    const navigate = useNavigate();
 
     useEffectAfterMount(() => {
         const m1Data = localStorage.getItem("m1formData");
@@ -147,7 +150,7 @@ const Report: React.FC = () => {
         }
 
         try {
-            setReportLoading(true);
+            incrementLoading();
 
             const response = await fetch(
                 `${baseAPIUrl}/statuses/submit/report`,
@@ -177,9 +180,7 @@ const Report: React.FC = () => {
                     text: 'Report submitted successfully.',
                     icon: 'success',
                     confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.href = '/barangay/history';
-                });
+                }).then(() => navigate("/barangay/history"));
             }
 
             localStorage.clear();
@@ -191,7 +192,7 @@ const Report: React.FC = () => {
                 confirmButtonText: 'OK'
             });
         } finally {
-            setReportLoading(false);
+            decrementLoading();
         }
     };
 
@@ -257,41 +258,65 @@ const Report: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<string>(maxDate || '');
 
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedDateValue = event.target.value; // Format: YYYY-MM
-        setSelectedDate(selectedDateValue);
-
-        const [selectedYear, selectedMonth] = selectedDateValue.split('-');
-
-        // Ensure selectedMonth has leading zero if necessary
-        const formattedSelectedMonth = String(selectedMonth).padStart(2, '0');
-            
-        // Find the corresponding m1 report
-        const matchingM1Report = m1Reports.find(
-            report => {
-                const [reportMonth, reportYear] = report.report_month_year.split('-');
-
-                // Ensure reportMonth has leading zero if necessary
-                const formattedReportMonth = String(reportMonth).padStart(2, '0');
-
-                return formattedReportMonth === formattedSelectedMonth && reportYear === selectedYear;
+        const selectedDateValue = event.target.value; // Get selected date in YYYY-MM format
+        setSelectedDate(selectedDateValue); // Update state with selected date
+    
+        const [selectedYear, selectedMonth] = selectedDateValue.split('-'); // Split into year and month
+        
+        // Array of month names for converting numeric month to text
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+    
+        const monthIndex = parseInt(selectedMonth, 10) - 1; // Convert to zero-based index
+        const monthName = monthNames[monthIndex]; // Get the month name
+    
+        // Find matching m1 and m2 reports for the selected month and year
+        const matchingM1Report = m1Reports.find(report => {
+            const [reportMonth, reportYear] = report.report_month_year.split('-');
+            return parseInt(reportMonth, 10) - 1 === monthIndex && reportYear === selectedYear;
+        });
+    
+        const matchingM2Report = m2Reports.find(report => {
+            const [reportMonth, reportYear] = report.report_month_year.split('-');
+            return parseInt(reportMonth, 10) - 1 === monthIndex && reportYear === selectedYear;
+        });
+    
+        // Check status of m1 and m2 reports
+        let alreadySubmitted = false; // Flag to check if either report has been submitted
+    
+        if (matchingM1Report) {
+            if (matchingM1Report.status === "submitted" || matchingM1Report.status === "submitted late") {
+                alreadySubmitted = true; // Set flag if m1 report is submitted
+                setM1ReportId(null); // Set ID to null if already submitted
+            } else {
+                setM1ReportId(matchingM1Report.report_submission_id); // Set ID if not submitted
             }
-        );
-
-        // Find the corresponding m2 report
-        const matchingM2Report = m2Reports.find(
-            report => {
-                const [reportMonth, reportYear] = report.report_month_year.split('-');
-
-                // Ensure reportMonth has leading zero if necessary
-                const formattedReportMonth = String(reportMonth).padStart(2, '0');
-                
-                return formattedReportMonth === formattedSelectedMonth && reportYear === selectedYear;
+        } else {
+            setM1ReportId(null); // No matching report found
+        }
+    
+        if (matchingM2Report) {
+            if (matchingM2Report.status === "submitted" || matchingM2Report.status === "submitted late") {
+                alreadySubmitted = true; // Set flag if m2 report is submitted
+                setM2ReportId(null); // Set ID to null if already submitted
+            } else {
+                setM2ReportId(matchingM2Report.report_submission_id); // Set ID if not submitted
             }
-        );
-
-        // Set the report IDs in the state
-        setM1ReportId(matchingM1Report ? matchingM1Report.report_submission_id : null);
-        setM2ReportId(matchingM2Report ? matchingM2Report.report_submission_id : null);
+        } else {
+            setM2ReportId(null); // No matching report found
+        }
+    
+        // Show alert if either report has been submitted
+        if (alreadySubmitted) {
+            Swal.fire({
+                icon: "info",
+                title: "Already Submitted",
+                text: `You have already submitted the report for the report period of ${monthName} ${selectedYear}.`,
+                confirmButtonText: "OK",
+            });
+        }
     };
 
     useEffectAfterMount(() => {
@@ -420,8 +445,8 @@ const Report: React.FC = () => {
                             {section === "m1" && <M1Report setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} />}
                             {section === "m2" && <MorbidityForm setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} diseases={diseases}/>}
                             
-                            <button type='submit' disabled={reportLoading} className="uppercase w-full py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500">
-                                {reportLoading ? "Submitting..." : "submit"}
+                            <button type='submit' disabled={isLoading} className="uppercase w-full py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500">
+                                {isLoading ? "Submitting..." : "submit"}
                             </button>
                         </form>
                     </>
