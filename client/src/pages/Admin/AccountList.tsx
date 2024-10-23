@@ -95,7 +95,7 @@ const AccountList: React.FC = () => {
                                             <td className="px-4 py-2 font-semibold uppercase align-top">
                                                 {user.barangay_name}
                                             </td>
-                                            <td className="px-4 py-2 font-semibold uppercase align-top">
+                                            <td className={`px-4 py-2 font-semibold uppercase align-top ${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>
                                                 {user.status}
                                             </td>
                                             <td className="flex items-center justify-center gap-2 px-4 py-2 font-semibold uppercase align-top">
@@ -163,7 +163,7 @@ const AccountList: React.FC = () => {
                                             <span className="font-semibold">
                                                 Status:
                                             </span>
-                                            <span>{user.status}</span>
+                                            <span className={`${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>{user.status}</span>
                                         </div>
                                         <div className="flex gap-2">
                                             <button
