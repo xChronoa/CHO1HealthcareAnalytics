@@ -2,6 +2,8 @@
 import { Outlet } from "react-router-dom";
 import Footer from "./Footer";
 import Header from "./Header";
+import { useAuth } from "../context/AuthContext";
+import Loading from "./Loading";
 
 /**
  * GuestLayout component that serves as a wrapper for the guest content of the application.
@@ -10,6 +12,11 @@ import Header from "./Header";
  * @returns {JSX.Element} The main layout component containing the common layout elements.
  */
 const GuestLayout: React.FC = () => {
+    const { loading } = useAuth();
+
+    if(loading) {
+        return <Loading />
+    }
 
     return (
         <>
