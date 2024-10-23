@@ -7,7 +7,7 @@ import { useLoading } from "./LoadingContext";
  */
 interface AuthContextType {
     user: User | null;
-    authenticated: boolean;
+    loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     error: string | null;
@@ -34,9 +34,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * @returns {JSX.Element} The AuthProvider component.
  */
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [authenticated, setAuthenticated] = useState<boolean>(localStorage.getItem("authenticated") === "true");
     const { incrementLoading, decrementLoading } = useLoading();
+    const [loading, setLoading] = useState<boolean>(true);
+    const [user, setUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     /**
@@ -55,23 +55,23 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    setAuthenticated(data.authenticated);
+
                     setUser({
                         role: data.role,
                         barangay_name: data.barangay_name,
                     });
-                    localStorage.setItem("authenticated", String(data.authenticated));
                 } else {
-                    const { message } = await response.json();
-                    setError(message || "Failed to fetch authentication.");
-                    setAuthenticated(false);
+                    const { message, status } = await response.json();
+                    if (status !== "not_logged") {
+                        setError(message || "Failed to fetch authentication.");
+                    }
                 }
 
             } catch {
                 setError("An error occurred while checking authentication.");
-                setAuthenticated(false);
             } finally {
                 decrementLoading();
+                setLoading(false);
             }
         };
 
@@ -133,8 +133,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         const data = await handleFetch(`${baseAPIUrl}/login`, "POST", { email, password, previousPath });
         if (data) {
 
-            localStorage.setItem("authenticated", "true");
-            setAuthenticated(true);
             setUser(data.user);
         }
     };
@@ -146,13 +144,12 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
        const result = await handleFetch(`${baseAPIUrl}/logout`, "POST");
        if (result !== null) {
            localStorage.clear();
-           setAuthenticated(false);
            setUser(null);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, authenticated, login, logout, error, setError }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, error, setError }}>
             {children}
         </AuthContext.Provider>
     );
