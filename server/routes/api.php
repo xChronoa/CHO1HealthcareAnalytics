@@ -7,6 +7,7 @@ use App\Http\Controllers\M2_Report\DiseaseController;
 use App\Http\Controllers\ReportStatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 // Personal Access Token
 use Laravel\Sanctum\PersonalAccessToken;
@@ -133,40 +134,52 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
 });
 
-
-
 /**
- * Public route to check if user is authenticated
+ * Public route to check if the user is authenticated.
  */
 Route::get('/auth/check', function (Request $request) {
-    // Check if the 'auth_token' cookie exists
-    $token = $request->cookie('auth_token');
+    // Retrieve the 'cho_session' cookie from the request
+    $token = $request->cookie('cho_session');
 
-    // Set the Authorization header with the token if it exists
-    if ($token) {
-        // Find the token in the database
-        $tokenRecord = PersonalAccessToken::findToken($token);
+    // Check if the token exists
+    if (!$token) {
+        return response()->json(['message' => 'Please log in to continue.', 'status' => "not_logged"], 401);
+    }
 
-        if ($tokenRecord) {
-            // Token exists, retrieve the user associated with the token
-            $user = $tokenRecord->tokenable;
+    try {
+        // Attempt to find the token in the database
+        $tokenRecord = PersonalAccessToken::findToken(decrypt($token));
 
-            // Build the user response array
-            $response = [
-                'authenticated' => true,
-                'role' => $user->role,
-            ];
-
-            // Include barangay information if it exists
-            if ($user->barangay) {
-                $response['barangay_name'] = $user->barangay->barangay_name;
-            }
-
-            return response()->json(
-                $response
-            );
+        // Check if the token is found
+        if (!$tokenRecord) {
+            return response()->json(['message' => 'Your session has expired. Please log in again.'], 401)
+                            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
         }
-    } else {
-        return response()->json(['authenticated' => false], 200);
+
+        // Token is valid; retrieve the associated user
+        $user = $tokenRecord->tokenable;
+
+        // Check if the user is disabled
+        if ($user->status === 'disabled') {
+            // Clear the cookie to log out the user
+            return response()->json(['message' => 'Your account has been disabled. Please contact support for assistance.'])
+                            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
+        }
+
+        // Build the response array
+        $response = [
+            'role' => $user->role,
+            // Include barangay information if available
+            'barangay_name' => optional($user->barangay)->barangay_name,
+        ];
+
+        return response()->json($response);
+        
+    } catch (ModelNotFoundException $e) {
+        // Handle case where token does not correspond to a user
+        return response()->json(['message' => 'User not found. Please log in again.'], 404);
+    } catch (\Exception $e) {
+        // Handle any unexpected errors
+        return response()->json(['message' => 'An unexpected error occurred. Please try again later.'], 500);
     }
 });

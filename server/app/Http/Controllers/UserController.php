@@ -6,9 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use App\Models\User;
 use App\Models\Barangay;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
@@ -149,8 +150,14 @@ class UserController extends Controller
                 $data['status'] = 'active';
             }
 
+             // Update the user in a transaction
             $user = User::findOrFail($id);
             $user->update($data);
+            
+            // Invalidate tokens if status is changed to disabled
+            if (isset($data['status']) && $data['status'] === 'disabled') {
+                $user->tokens()->delete();
+            }
 
             return response()->json($data, 200);
         } catch (ModelNotFoundException $e) {
@@ -167,8 +174,18 @@ class UserController extends Controller
             // Find the user by ID or throw a ModelNotFoundException if not found
             $user = User::findOrFail($id);
 
+            // Check if the user is already disabled
+            if ($user->status === 'disabled') {
+                return response()->json(['message' => 'User is already disabled.'], 200);
+            }
+
             // Update the user's status to 'disabled'
             $user->status = ucfirst('disabled');
+
+            // Invalidate all tokens for the user
+            $user->tokens()->delete();
+
+            // Save the user status update
             $user->save();
 
             return response()->json(['message' => 'User status updated to disabled successfully']);
@@ -244,9 +261,9 @@ class UserController extends Controller
             }
 
             // Create a token for the authenticated user
-            $token = $user->createToken('auth_token', [], now()->addHours(6))->plainTextToken;
+            $token = $user->createToken('cho_session', [], now()->addHours(6))->plainTextToken;
 
-            $cookie = cookie('auth_token', $token, 60 * 5, '/', 'localhost', false, true, true, 'lax');
+            $cookie = cookie('cho_session', encrypt($token), 60 * 5, '/', 'localhost', false, true, true, 'lax');
 
             // Build the user response array
             $userResponse = [
@@ -265,7 +282,7 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $userResponse,
-                'auth_token' => $token
+                'cho_session' => $token
             ], 200)->cookie($cookie);
         }
 
@@ -284,29 +301,11 @@ class UserController extends Controller
 
         $user->currentAccessToken()->delete();
 
-        $cookie = cookie('auth_token', '', -1, '/', 'localhost', false, true, true, 'lax');
+        $cookie = cookie('cho_session', '', -1, '/', 'localhost', false, true, true, 'lax');
 
         return response()->json(['message' => 'User successfully logged out.'], 200)->cookie($cookie);
     }
-
-    // public function checkAuth(Request $request)
-    // {
-    //     if (Auth::check()) {
-    //         $user = Auth::user();
-
-    //         return response()->json([
-    //             'authenticated' => true,
-    //             'role' => $user->role,
-    //         ]);
-    //     }
-
-    //     // Either not authenticated or user IDs don't match
-    //     return response()->json([
-    //         'authenticated' => false,
-    //         'role' => null,
-    //     ]);
-    // }
-
+    
     // Get the authenticated user's details
     public function user(Request $request)
     {

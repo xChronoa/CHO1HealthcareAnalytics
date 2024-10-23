@@ -15,12 +15,12 @@ class AttachSanctumTokenFromCookie
      */
      public function handle(Request $request, Closure $next)
     {
-        // Check if the 'auth_token' cookie exists
-        $token = $request->cookie('auth_token');
+        // Check if the 'cho_session' cookie exists
+        $token = $request->cookie('cho_session');
 
         if ($token) {
             // Set the token in the Authorization header as a Bearer token
-            $request->headers->set('Authorization', 'Bearer ' . $token);
+            $request->headers->set('Authorization', 'Bearer ' . decrypt($token));
         }
 
         return $next($request);
