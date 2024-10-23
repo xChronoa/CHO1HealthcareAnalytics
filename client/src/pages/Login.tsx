@@ -4,7 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "../context/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 
 // For specifying the logo to be displayed based on inputted department.
@@ -13,10 +13,11 @@ type LoginProp = {
 };
 
 const Login: React.FC<LoginProp> = ({ image }) => {
-    const { user, authenticated, login, error } = useAuth();
+    const { user, login, error } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { isLoading } = useLoading();
+    const location = useLocation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,9 +33,9 @@ const Login: React.FC<LoginProp> = ({ image }) => {
     };
 
     // Redirect if the user is already authenticated
-    if (user && authenticated) {
+    if (user) {
         const redirectPath = user.role === "admin" ? "/admin" : "/barangay";
-        return <Navigate to={redirectPath} />;
+        return <Navigate to={redirectPath} state={{ from: location }} replace />;
     }
 
     return (
@@ -74,13 +75,13 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                         )}
                         {/* Username */}
                         <div className="flex flex-col input-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="username">Email</label>
                             <input
                                 className="px-4 py-2 bg-gray-100 shadow-xl border-gray-300 rounded-md border-[1px]"
-                                type="text"
+                                type="email"
                                 name="username"
                                 id="username"
-                                placeholder="Username or Email"
+                                placeholder="Email"
                                 required
                                 onChange={(e) => setEmail(e.target.value)}
                             />
