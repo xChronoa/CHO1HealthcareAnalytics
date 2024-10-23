@@ -4,7 +4,6 @@ import SubmittedM1 from "./SubmittedM1";
 import SubmittedM2 from "./SubmittedM2";
 import { useReportStatus } from "../../hooks/useReportStatus";
 import { useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 
 const SubmittedReports: React.FC = () => {
     // State variables to manage section and selected date
