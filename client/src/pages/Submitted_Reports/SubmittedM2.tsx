@@ -180,44 +180,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                     <head>
                         <title>Barangay ${barangayName !== null ? barangayName : user ? user?.barangay_name : ""} - Morbidity Report - ${new Date(0, Number(selectedMonth) - 1).toLocaleString("default", { month: "long" })} ${selectedYear}</title>
                         <style>
-                            @page {
-                                size: 11in 8.5in; /* Letter size in landscape */
-                            }
-
-                            body {
-                                font-family: Arial, sans-serif;
-                                margin: 0;
-                                padding: 0;
-                                visibility: hidden; /* Hide content initially */
-                                background-color: gray; /* Gray background */
-                            }
-    
-                            table {
-                                width: 100%;
-                                border-collapse: collapse;
-                            }
-                                
-                            th, td {
-                                border: 1px solid #000;
-                                padding: 8px;
-                                text-align: center;
-                            }
-    
-                            th {
-                                background-color: #f2f2f2;
-                            }
-                            
-                            @media print {
-                                body {
-                                    visibility: visible; /* Show content when printing */
-                                    background-color: white; /* Ensure white background in print */
-                                }
-                                @page { size: landscape; }
-                                    
-                                table {
-                                    font-size: 9px; /* Match the original text size */
-                                }
-                            }
+                           *,body{margin:0;padding:0}@page{size:11in 8.5in}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center;padding:8px}@media print{body,table{visibility:visible}.bg-white,body{background-color:#fff}@page{size:landscape}table{width:100%;border-collapse:collapse;font-size:9px}.px-2{padding-left:.5rem;padding-right:.5rem}tr{page-break-inside:avoid}.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.underline{text-decoration:underline}.uppercase{text-transform:uppercase}.size-14{width:5rem;height:5rem}.font-bold{font-weight:700}.italic{font-style:italic}.text-gray-500{color:#6b7280}.text-lg{font-size:1.125rem}.text-5xl{font-size:3rem}.text-2xl{font-size:1.5rem}.size-16{width:64px;height:64px}.min-w-200{min-width:200px}.text-left{text-align:left}.gap-2{gap:.5rem}}
                         </style>
                     </head>
                     <body>
@@ -244,75 +207,11 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
         <>
             <button
                 onClick={handlePrint}
-                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-[1.9rem] py-2.5 text-center"
             >
                 Download M2 Report
             </button>
-            <div id="printableTable" className="w-full overflow-x-auto 2xl:flex 2xl:items-center 2xl:justify-center">
-                <style>
-                    {`
-                         @media print {
-                            @page { size: landscape; }
-
-                            table {
-                                visibility: visible;
-                                width: 100%;
-                                border-collapse: collapse;
-                            }
-
-                            table th, table td {
-                                border: 1px solid black;
-                                text-align: center;
-                            }
-
-                            .uppercase { text-transform: uppercase; }
-
-                            .px-2 {
-                                padding-left: 0.5rem /* 8px */;
-                                padding-right: 0.5rem /* 8px */;
-                            }
-
-                            table { font-size: 9px; } /* Match the existing text size */
-
-                            tr { page-break-inside: avoid; }
-
-                            .flex { display: flex; } /* Match flexbox styles */
-
-                            .flex-col { flex-direction: column; }
-
-                            .items-center { align-items: center; } /* Align items */
-
-                            .justify-center { justify-content: center; } /* Justify content */
-
-                            .gap-2 { gap: 0.5rem; } /* Define gap between flex items */
-
-                            .underline { text-decoration: underline; } /* Underline text */
-
-                            .uppercase { text-transform: uppercase; } /* Uppercase text */
-
-                            .size-14 {
-                                width: 6rem /* 64px */;
-                                height: 6rem /* 64px */;
-                            }
-
-                            .font-bold { font-weight: bold; } /* Bold font */
-
-                            .italic { font-style: italic; } /* Italic font */
-
-                            .text-gray-500 { color: #6b7280; } /* Gray text color */
-
-                            .text-lg { font-size: 1.125rem; } /* Large text size */
-
-                            .text-5xl { font-size: 3rem; } /* Extra large text size */
-
-                            .text-2xl { font-size: 1.5rem; } /* 2xl text size */
-
-                            .size-16 { width: 64px; height: 64px; } /* Size for logos */
-                            
-                            .min-w-200 { min-width: 200px; } /* Minimum width for disease column */
-                        }
-                    `}
-                </style>
+            <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center">
                 <table className="border-collapse text-[9px] bg-white text-center table-fixed">
                     <thead>
                         <tr>
@@ -332,12 +231,12 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                                     />
                                 </div>
                             </th>
-                            <th colSpan={35} className="border border-black">
-                                <section className="flex flex-col items-center justify-center">
-                                    <div className="text-left">
+                            <td colSpan={35} className="border border-black">
+                                <section className="flex flex-col items-center justify-center gap-2">
+                                    <div className="flex flex-col gap-2 text-xs text-left">
                                         <p>
                                             FHIS REPORT for MONTH:{" "}
-                                            <span className="underline uppercase">
+                                            <span className="font-bold underline uppercase">
                                                 {new Date(
                                                     0,
                                                     Number(selectedMonth) - 1
@@ -346,7 +245,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                                                 })}{" "}
                                             </span>
                                             YEAR:{" "}  
-                                            <span className="underline">
+                                            <span className="font-bold underline">
                                                 {selectedYear}
                                             </span>
                                         </p>
@@ -365,7 +264,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                                         </p>
                                     </div>
                                     <div className="text-center">
-                                        <h1 className="text-lg uppercase bold">
+                                        <h1 className="text-lg font-bold uppercase">
                                             Morbidity Disease Report
                                         </h1>
                                         <p className="italic text-gray-500">
@@ -373,7 +272,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                                         </p>
                                     </div>
                                 </section>
-                            </th>
+                            </td>
                             <th
                                 colSpan={4}
                                 className="text-center border border-black"
