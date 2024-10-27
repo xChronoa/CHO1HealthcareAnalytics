@@ -15,9 +15,10 @@ const fetchOverride = async (input: RequestInfo | URL, init: RequestInit = {}) =
 
         // Handle 401 Unauthorized and redirect
         if (response.status === 401 && !/\/(admin|barangay)\/login/.test(window.location.pathname)) {
-            const loginPath = window.location.pathname.startsWith("/admin") 
-                ? "/admin/login" 
-                : "/barangay/login";
+            const loginPath = window.location.pathname.startsWith("/barangay") 
+                ? "/barangay/login" 
+                : "/admin/login"; // Defaults to admin login if not "barangay"
+            
             window.location.href = loginPath;
             return Promise.reject(new Error("Unauthenticated: Redirecting to login."));
         }
