@@ -191,50 +191,74 @@ const Appointment: React.FC = () => {
         event.preventDefault();
         setErrors({});
         setGeneralError(null);
-        
+    
+        // Validate form data
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-            
             scrollToError(Object.keys(validationErrors)[0]);
-            
             return;
         }
-
-        const isOtpValid = await verifyOTP();
-        if (!isOtpValid) return;
-        
+    
         try {
             incrementLoading();
+            
+            // Verify OTP
+            const isOtpValid = await verifyOTP();
+            if (!isOtpValid) return;
+    
+    
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
                 body: JSON.stringify(formData),
             });
-
+    
+            // Handle response based on status code
             if (!response.ok) {
-                const data = await response.json();
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    setGeneralError("An unexpected error occurred.");
-                    showErrorAlert();
-                }
-            } else {
-                const result = await response.json();
-                sessionStorage.setItem("appointmentDetails", JSON.stringify({
-                    ...formData,
-                    queue_number: result.queue_number,
-                }));
-                showSuccessAlert();
+                await handleErrorResponse(response);
+                return;
             }
+    
+            // Successful appointment creation
+            const result = await response.json();
+            sessionStorage.setItem("appointmentDetails", JSON.stringify({
+                ...formData,
+                queue_number: result.queue_number,
+            }));
+            showSuccessAlert();
         } catch (error) {
-            console.error(error);
-            setGeneralError("An error occurred while submitting the form.");
+            setGeneralError("An error occurred while submitting the form. Please try again later.");
             showErrorAlert();
         } finally {
             decrementLoading();
         }
+    };
+    
+    // Helper function to handle error responses
+    const handleErrorResponse = async (response: Response) => {
+        const data = await response.json();
+    
+        switch (response.status) {
+            case 409:
+                setGeneralError("You already have an appointment on this date.");
+                break;
+            case 422: // Unprocessable Entity
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else {
+                    setGeneralError("Invalid data provided. Please check your inputs.");
+                }
+                break;
+            default:
+                setGeneralError("An unexpected error occurred. Please try again later.");
+                break;
+        }
+    
+        showErrorAlert();
     };
 
     const showSuccessAlert = () => {
