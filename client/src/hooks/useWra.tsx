@@ -18,7 +18,7 @@ export interface WomenOfReproductiveAge {
 interface UseWra {
     error: string | null;
     wraData: WomenOfReproductiveAge[];
-    fetchWra: () => Promise<void>;
+    fetchWra: (barangayName: string, year: String | null) => Promise<void>;
 }
 
 export const useWra = (): UseWra => {
@@ -26,23 +26,25 @@ export const useWra = (): UseWra => {
     const [error, setError] = useState<string | null>(null);
     const [wraData, setWraData] = useState<WomenOfReproductiveAge[]>([]);
 
-    const fetchWra = useCallback(async () => {
+    const fetchWra = useCallback(async (barangayName: string, year: String | null) => {
         try {
             incrementLoading();
             setError(null);
-
+    
             const response = await fetch(`${baseAPIUrl}/wra-reports`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
                 credentials: "include",
+                body: JSON.stringify({ barangayName, year }), // Include barangayName and year in the body
             });
-
+    
             if (!response.ok) {
                 throw new Error("An error occurred while fetching the women of reproductive ages.");
             }
-
+    
             const result = await response.json();
             setWraData(result.data);
         } catch (error: any) {

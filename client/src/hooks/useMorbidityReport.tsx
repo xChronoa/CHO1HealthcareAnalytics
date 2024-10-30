@@ -16,7 +16,7 @@ export interface MorbidityReport {
 interface UseMorbidityReport {
     error: string | null;
     morbidityReports: MorbidityReport[];
-    fetchMorbidityReports: () => Promise<void>;
+    fetchMorbidityReports: (barangayName: string, year: String | null) => Promise<void>;
 }
 
 // Create the custom hook
@@ -25,17 +25,19 @@ export const useMorbidityReport = (): UseMorbidityReport => {
     const [error, setError] = useState<string | null>(null);
     const [morbidityReports, setMorbidityReports] = useState<MorbidityReport[]>([]);
 
-    const fetchMorbidityReports = useCallback(async () => {
+    const fetchMorbidityReports = useCallback(async (barangayName: string, year: String | null) => {
         try {
             incrementLoading();
             setError(null);
 
             const response = await fetch(`${baseAPIUrl}/morbidity-reports`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
                 credentials: "include", // include credentials if needed
+                body: JSON.stringify({ barangay_name: barangayName, year: year }),
             });
 
             if (!response.ok) {
