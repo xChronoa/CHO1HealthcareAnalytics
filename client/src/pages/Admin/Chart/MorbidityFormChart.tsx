@@ -10,9 +10,9 @@ import {
     PointElement,
     ChartOptions,
 } from "chart.js";
-import {
-    useMorbidityReport,
-} from "../../../hooks/useMorbidityReport";
+import { useMorbidityReport } from "../../../hooks/useMorbidityReport";
+import { faMinimize, faMaximize } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 ChartJS.register(
     LineElement,
@@ -26,22 +26,22 @@ ChartJS.register(
 interface MorbidityFormChartProps {
     chartRef: React.RefObject<HTMLDivElement>;
     textRef: React.RefObject<HTMLHeadingElement>;
+    barangay: string;
+    year: String | null;
 }
 
 const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     chartRef,
-    textRef
+    textRef,
+    barangay,
+    year,
 }) => {
     const { error, morbidityReports, fetchMorbidityReports } =
         useMorbidityReport();
-    const [selectedAgeCategory, setSelectedAgeCategory] = useState<
-        string | null
-    >(null);
-    const [lastChecked, setLastChecked] = useState<string | null>(null); // To track last checked checkbox
-    const shiftPressed = useRef(false); // Track Shift key press state
+    const [selectedOptionMale, setSelectedOptionMale] = useState<string>("All");
+    const [selectedOptionFemale, setSelectedOptionFemale] = useState<string>("All");
 
     const diseaseColors = useMemo(() => {
-        // Initialize disease color map once
         const colors: { [disease: string]: string } = {};
         morbidityReports.forEach((entry) => {
             if (!colors[entry.disease_name]) {
@@ -54,16 +54,15 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     }, [morbidityReports]);
 
     useEffect(() => {
-        fetchMorbidityReports();
-    }, [fetchMorbidityReports]);
+        fetchMorbidityReports(barangay, year);
+    }, [fetchMorbidityReports, barangay, year]);
 
     const labels = Array.from(
         new Set(morbidityReports.map((entry) => entry.report_period))
     );
 
     const aggregateDataByDisease = (key: "male" | "female") => {
-        const aggregated: { [disease: string]: { [period: string]: number } } =
-            {};
+        const aggregated: { [disease: string]: { [period: string]: number } } = {};
 
         morbidityReports.forEach((entry) => {
             if (typeof entry[key] === "number") {
@@ -73,58 +72,63 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                 if (!aggregated[entry.disease_name][entry.report_period]) {
                     aggregated[entry.disease_name][entry.report_period] = 0;
                 }
-                aggregated[entry.disease_name][entry.report_period] +=
-                    entry[key];
+                aggregated[entry.disease_name][entry.report_period] += entry[key];
             }
         });
 
-        return Object.entries(aggregated).map(([disease, periods]) => ({
+        const datasets = Object.entries(aggregated).map(([disease, periods]) => ({
             label: disease,
             data: labels.map((label) => periods[label] || 0),
             fill: false,
-            borderColor: diseaseColors[disease], // Use assigned color
-            backgroundColor: diseaseColors[disease], // Use assigned color
+            borderColor: diseaseColors[disease],
+            backgroundColor: diseaseColors[disease],
             tension: 0.1,
             gender: key,
-            hidden:
-                key === "male"
-                    ? visibilityMale[disease] === false
-                    : visibilityFemale[disease] === false,
         }));
+
+        return datasets;
     };
 
-    const getChartData = (key: "male" | "female") => ({
-        labels,
-        datasets: aggregateDataByDisease(key),
-    });
+    const getChartData = (key: "male" | "female") => {
+        const selectedOption = key === "male" ? selectedOptionMale : selectedOptionFemale;
+        const datasets = aggregateDataByDisease(key);
 
-    const options: ChartOptions<"line"> = {
+        // Filter datasets based on the selected option
+        const filteredDatasets = selectedOption === "All" ? datasets : datasets.filter(dataset => dataset.label === selectedOption);
+
+        return {
+            labels,
+            datasets: filteredDatasets,
+        };
+    };
+
+    // Define month names globally for easy reference
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+
+    const optionsMale: ChartOptions<"line"> = {
         responsive: true,
         plugins: {
             tooltip: {
                 callbacks: {
                     title: (tooltipItems: any) => {
                         const label = tooltipItems[0]?.label;
-                        const [year, month] = label
-                            ? label.split("-")
-                            : ["Unknown", "Unknown"];
-                        const monthNames = [
-                            "January",
-                            "February",
-                            "March",
-                            "April",
-                            "May",
-                            "June",
-                            "July",
-                            "August",
-                            "September",
-                            "October",
-                            "November",
-                            "December",
-                        ];
+                        const [_, month] = label ? label.split("-") : ["Unknown"];
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
-                        return `Report Period: ${year}, ${monthName}`;
+                        return `Report Period: ${monthName}`;
                     },
                     label: (tooltipItem: any) => {
                         const datasetLabel = tooltipItem.dataset.label || "";
@@ -134,46 +138,25 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     afterLabel: (tooltipItem: any) => {
                         const reportPeriod = tooltipItem.label;
                         const diseaseName = tooltipItem.dataset.label;
-                        const aggregatedByAgeCategory: {
-                            [age: string]: number;
-                        } = {};
+                        const aggregatedByAgeCategory: { [age: string]: number } = {};
+                        const gender = tooltipItem.dataset.gender.toLowerCase() as "male" | "female";
 
-                        // Extract gender from dataset label
-                        const gender =
-                            tooltipItem.dataset.gender.toLowerCase() as
-                                | "male"
-                                | "female";
-
-                        // Filter data based on the current report period, disease name, and gender
                         morbidityReports.forEach((entry) => {
                             if (
                                 entry.report_period === reportPeriod &&
                                 entry.disease_name === diseaseName
                             ) {
-                                if (
-                                    !aggregatedByAgeCategory[entry.age_category]
-                                ) {
-                                    aggregatedByAgeCategory[
-                                        entry.age_category
-                                    ] = 0;
+                                if (!aggregatedByAgeCategory[entry.age_category]) {
+                                    aggregatedByAgeCategory[entry.age_category] = 0;
                                 }
-                                // Aggregate values by age category based on gender
                                 if (typeof entry[gender] === "number") {
-                                    aggregatedByAgeCategory[
-                                        entry.age_category
-                                    ] += entry[gender];
+                                    aggregatedByAgeCategory[entry.age_category] += entry[gender];
                                 }
                             }
                         });
 
-                        // Format the output for the tooltip
-                        const ageCategoryDetails = Object.entries(
-                            aggregatedByAgeCategory
-                        )
-                            .map(
-                                ([ageCategory, total]) =>
-                                    `${ageCategory}: ${total}`
-                            )
+                        const ageCategoryDetails = Object.entries(aggregatedByAgeCategory)
+                            .map(([ageCategory, total]) => `${ageCategory}: ${total}`)
                             .join("\n");
 
                         return `\nAge Categories:\n${ageCategoryDetails}`;
@@ -181,210 +164,229 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                 },
             },
             legend: {
-                display: false,
-                position: "left",
-                labels: {
-                    usePointStyle: true,
-                    pointStyle: "circle",
-                    boxWidth: 10, // Adjust width of the legend box
-                },
-                align: "start",
+                display: selectedOptionMale !== "All",
             },
         },
         scales: {
             x: {
                 title: {
                     display: true,
-                    text: "Year-Month",
+                    text: year ? year.toString() : "",
+                },
+                ticks: {
+                    callback: (value) => monthNames[value as number % 12], // Adjust based on the data array format
                 },
             },
             y: {
                 title: {
                     display: true,
-                    text: "Values",
+                    text: "Number of Male",
                 },
             },
         },
     };
 
-    const [visibilityMale, setVisibilityMale] = useState<{
-        [key: string]: boolean;
-    }>({});
-    const [visibilityFemale, setVisibilityFemale] = useState<{
-        [key: string]: boolean;
-    }>({});
+    const optionsFemale: ChartOptions<"line"> = {
+        responsive: true,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: (tooltipItems: any) => {
+                        const label = tooltipItems[0]?.label;
+                        const [_, month] = label ? label.split("-") : ["Unknown"];
+                        const monthIndex = parseInt(month, 10) - 1;
+                        const monthName = monthNames[monthIndex] || "Unknown";
+                        return `Report Period: ${monthName}`;
+                    },
+                    label: (tooltipItem: any) => {
+                        const datasetLabel = tooltipItem.dataset.label || "";
+                        const value = tooltipItem.raw;
+                        return `${datasetLabel}: ${value}`;
+                    },
+                    afterLabel: (tooltipItem: any) => {
+                        const reportPeriod = tooltipItem.label;
+                        const diseaseName = tooltipItem.dataset.label;
+                        const aggregatedByAgeCategory: { [age: string]: number } = {};
+                        const gender = tooltipItem.dataset.gender.toLowerCase() as "male" | "female";
 
-    const handleCheckboxChange = (
-        label: string,
-        gender: "male" | "female",
-        event?: React.MouseEvent
-    ) => {
-        const setVisibilityForGender =
-            gender === "male" ? setVisibilityMale : setVisibilityFemale;
+                        morbidityReports.forEach((entry) => {
+                            if (
+                                entry.report_period === reportPeriod &&
+                                entry.disease_name === diseaseName
+                            ) {
+                                if (!aggregatedByAgeCategory[entry.age_category]) {
+                                    aggregatedByAgeCategory[entry.age_category] = 0;
+                                }
+                                if (typeof entry[gender] === "number") {
+                                    aggregatedByAgeCategory[entry.age_category] += entry[gender];
+                                }
+                            }
+                        });
 
-        if (shiftPressed.current && lastChecked) {
-            const checkboxes = getChartData(gender).datasets.map(
-                (dataset) => dataset.label
-            );
-            const start = checkboxes.indexOf(lastChecked);
-            const end = checkboxes.indexOf(label);
-            const range = checkboxes.slice(
-                Math.min(start, end),
-                Math.max(start, end) + 1
-            );
+                        const ageCategoryDetails = Object.entries(aggregatedByAgeCategory)
+                            .map(([ageCategory, total]) => `${ageCategory}: ${total}`)
+                            .join("\n");
 
-            setVisibilityForGender((prevState) => {
-                const newVisibility = { ...prevState };
-                range.forEach((checkbox) => {
-                    newVisibility[checkbox] = !prevState[lastChecked]; // Toggle based on lastChecked state
-                });
-                return newVisibility;
-            });
-        } else {
-            setVisibilityForGender((prevState) => ({
-                ...prevState,
-                [label]: !prevState[label], // Toggle between true and false
-            }));
-            setLastChecked(label);
-        }
+                        return `\nAge Categories:\n${ageCategoryDetails}`;
+                    },
+                },
+            },
+            legend: {
+                display: selectedOptionFemale !== "All",
+            },
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: year ? year.toString() : "",
+                },
+                ticks: {
+                    callback: (value) => monthNames[value as number % 12],
+                },
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: "Number of Female",
+                },
+            },
+        },
     };
 
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.shiftKey) {
-                shiftPressed.current = true;
-            }
-        };
+    // State for maximized charts
+    const [maximizedCharts, setMaximizedCharts] = useState<{ [key: string]: boolean }>({
+        male: false,
+        female: false,
+    });
 
-        const handleKeyUp = (event: KeyboardEvent) => {
-            if (!event.shiftKey) {
-                shiftPressed.current = false;
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        window.addEventListener("keyup", handleKeyUp);
-
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            window.removeEventListener("keyup", handleKeyUp);
-        };
-    }, []);
+    const toggleSize = (chartId: string) => {
+        setMaximizedCharts((prevState) => ({
+            ...prevState,
+            [chartId]: !prevState[chartId],
+        }));
+    };
 
     return (
         <div>
             {error ? (
                 <p>Error: {error}</p>
             ) : (
-                <section className="flex flex-col gap-8 px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
-                    <div className="flex flex-col-reverse gap-4 p-4 bg-white rounded-lg sm:flex-row-reverse chart">
-                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3 legend">
-                            <h3 className="mb-2 text-lg font-semibold">
-                                Legend
-                            </h3>
-                            {getChartData("male").datasets.map(
-                                (dataset, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
-                                        onClick={(event) =>
-                                            handleCheckboxChange(
-                                                dataset.label,
-                                                "male",
-                                                event
-                                            )
-                                        }
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={
-                                                visibilityMale[
-                                                    dataset.label
-                                                ] !== false
-                                            }
-                                            readOnly
-                                            className="form-checkbox"
-                                        />
-                                        <span
-                                            className="w-4 h-4 rounded-full"
-                                            style={{
-                                                backgroundColor:
-                                                    dataset.borderColor,
-                                            }}
-                                        ></span>
-                                        <span className="text-sm">
-                                            {dataset.label}
-                                        </span>
-                                    </div>
-                                )
-                            )}
-                        </div>
+                <section className="flex flex-col items-center gap-8 px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
+                    <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green">Morbidity Report</h1>
+                    
+                    {/* Male Chart */}
+                    <div 
+                        className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full
+                                    ${selectedOptionMale === "All" ? "sm:w-full" : maximizedCharts.male ? "sm:w-full" : "sm:w-9/12"}`}
+                    >
+                        {/* Resize Icon */}
+                        {selectedOptionMale !== "All" && 
+                            <FontAwesomeIcon
+                                icon={maximizedCharts.male ? faMinimize : faMaximize}
+                                className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer sm:block hover:text-green hover:scale-125"
+                                onClick={() => toggleSize("male")}
+                            />
+                        }
 
-                        <div className="flex-1 sm:w-2/3">
-                            <h3 className="mb-4 font-semibold text-center">
-                                Male Data
-                            </h3>
+                        {/* Chart */}
+                        <div className={`flex-1 sm:w-2/3`}>
+                            {/* Chart Title & Dropdown Option */}
+                            <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionMale !== "All" ? "mr-8" : ""}`}>
+                                <h3 className="font-semibold text-center">Male</h3>
+                                <select 
+                                    value={selectedOptionMale} 
+                                    onChange={(e) => setSelectedOptionMale(e.target.value)} 
+                                    className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-fit bg-green"
+                                >
+                                    <option value="All">All</option>
+                                    {aggregateDataByDisease("male").map((dataset, index) => (
+                                        <option key={index} value={dataset.label}>
+                                            <span style={{ color: dataset.borderColor }}>{dataset.label}</span>
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
                             <Line
                                 data={getChartData("male")}
-                                options={options}
+                                options={optionsMale}
                             />
                         </div>
+
+                        {/* Legend */}
+                        {selectedOptionMale === "All" && (
+                            <div className="legend-container">
+                                <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                                <div className="legend-list h-56 overflow-y-auto border-r md:h-80 xl:h-[28rem] lg:h-[25rem] w-full bg-gray-200 p-2">
+                                    {getChartData("male").datasets.map((dataset, index) => (
+                                        <div key={index} className="flex items-center gap-2 mb-2">
+                                            <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
+                                            <span className="text-xs">{dataset.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-
+    
                     <div className="w-full h-[1px] bg-black"></div>
+    
+                    {/* Female Chart */}
+                    <div 
+                        className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full
+                                    ${selectedOptionFemale === "All" ? "sm:w-full" : maximizedCharts.female ? "sm:w-full" : "sm:w-9/12"}`}
+                    >
+                        {/* Resize Icon */}
+                        {selectedOptionFemale !== "All" && 
+                            <FontAwesomeIcon
+                                icon={maximizedCharts.female ? faMinimize : faMaximize}
+                                className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer sm:block hover:text-green hover:scale-125"
+                                onClick={() => toggleSize("female")}
+                            />
+                        }
 
-                    <div className="flex flex-col-reverse gap-2 p-4 bg-white rounded-lg sm:flex-row-reverse chart">
-                        <div className="h-56 pr-4 overflow-y-auto border-r md:h-80 lg:h-96 sm:w-1/3 legend">
-                            <h3 className="mb-2 text-lg font-semibold">
-                                Legend
-                            </h3>
-                            {getChartData("female").datasets.map(
-                                (dataset, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
-                                        onClick={(event) =>
-                                            handleCheckboxChange(
-                                                dataset.label,
-                                                "female",
-                                                event
-                                            )
-                                        }
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={
-                                                visibilityFemale[
-                                                    dataset.label
-                                                ] !== false
-                                            }
-                                            readOnly
-                                            className="form-checkbox"
-                                        />
-                                        <span
-                                            className="w-4 h-4 rounded-full"
-                                            style={{
-                                                backgroundColor:
-                                                    dataset.borderColor,
-                                            }}
-                                        ></span>
-                                        <span className="text-sm">
-                                            {dataset.label}
-                                        </span>
-                                    </div>
-                                )
-                            )}
-                        </div>
+                        {/* Chart */}
+                        <div className={`flex-1 sm:w-2/3`}>
+                            {/* Chart Title & Dropdown Option */}
+                            <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionFemale !== "All" ? "mr-8" : ""}`}>
+                                <h3 className="font-semibold text-center">Female</h3>
+                                <select 
+                                    value={selectedOptionFemale} 
+                                    onChange={(e) => setSelectedOptionFemale(e.target.value)} 
+                                    className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-fit bg-green"
+                                >
+                                    <option value="All">All</option>
+                                    {aggregateDataByDisease("female").map((dataset, index) => (
+                                        <option key={index} value={dataset.label}>
+                                            <span style={{ color: dataset.borderColor }}>{dataset.label}</span>
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div className="flex-1 sm:w-2/3">
-                            <h3 className="mb-4 font-semibold text-center">
-                                Female Data
-                            </h3>
                             <Line
                                 data={getChartData("female")}
-                                options={options}
+                                options={optionsFemale}
                             />
                         </div>
+
+                        {/* Legend */}
+                        {selectedOptionFemale === "All" && (
+                            <div className="legend-container">
+                                <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                                <div className="legend-list h-56 overflow-y-auto border-r md:h-80 xl:h-[28rem] lg:h-[25rem] w-full bg-gray-200 p-2">
+                                    {getChartData("female").datasets.map((dataset, index) => (
+                                        <div key={index} className="flex items-center gap-2 mb-2">
+                                            <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
+                                            <span className="text-xs">{dataset.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}
