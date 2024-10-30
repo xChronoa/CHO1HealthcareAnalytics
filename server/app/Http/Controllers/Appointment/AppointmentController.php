@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Appointment\Patient;
 use Illuminate\Support\Facades\Validator;
 
+use App\Mail\AppointmentConfirmation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
 class AppointmentController extends Controller
 {
     /**
@@ -39,37 +43,47 @@ class AppointmentController extends Controller
             'appointment_category_name' => 'required|string|exists:appointment_categories,appointment_category_name',
             'patient_note' => 'nullable|string',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-    
+
         // Start a transaction
         DB::beginTransaction();
-    
+
         try {
-            // Create the patient
-            $patient = Patient::create([
+            // Check if a patient with the same name and email exists
+            $patient = Patient::firstOrCreate([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
+                'email' => $request->email,
+            ], [
                 'sex' => $request->sex,
                 'birthdate' => $request->birthdate,
                 'address' => $request->address,
                 'phone_number' => $request->phone_number,
-                'email' => $request->email,
             ]);
-    
+
+            // Check if the patient already has an appointment on the same date
+            $existingAppointment = Appointment::where('patient_id', $patient->patient_id)
+                ->whereDate('appointment_date', $request->appointment_date)
+                ->exists();
+
+            if ($existingAppointment) {
+                return response()->json(['error' => 'You already have an appointment on this date.'], 409);
+            }
+
             // Retrieve the appointment_category_id using the appointment_category_name
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
             $appointmentCategoryId = $appointmentCategory->appointment_category_id;
-    
+
             // Check for the highest queue_number for the given appointment_date
             $maxQueueNumber = Appointment::whereDate('appointment_date', $request->appointment_date)
                 ->max('queue_number');
-    
+
             // If no appointments exist for the date, start at 1, otherwise increment
             $queueNumber = $maxQueueNumber ? $maxQueueNumber + 1 : 1;
-    
+
             // Create the appointment with the generated queue number
             $appointment = Appointment::create([
                 'patient_id' => $patient->patient_id,
@@ -78,20 +92,33 @@ class AppointmentController extends Controller
                 'patient_note' => $request->patient_note,
                 'queue_number' => $queueNumber,
             ]);
-    
-            // Commit the transaction
-            DB::commit();
-    
-            // Return a response with the generated queue number
-            return response()->json([
-                'message' => 'Patient and Appointment created successfully',
-                'appointment' => $appointment,
-                'queue_number' => $queueNumber
-            ]);
+
+            // Send confirmation email
+            try {
+                Mail::to($patient->email)
+                    ->send(new AppointmentConfirmation(
+                        $patient,
+                        $appointment,
+                        $appointmentCategory->appointment_category_name
+                    ));
+
+                // Commit the transaction
+                DB::commit();
+
+                return response()->json([
+                    "Success" => "Successful email",
+                    'patient' => $patient,
+                    "appointment" => $appointment,
+                    "appointmentCategory" => $appointmentCategory->appointment_category_name
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack(); // Rollback if email fails
+                return response()->json(["Error" => $e->getMessage()], 500);
+            }
         } catch (\Exception $e) {
             // Rollback the transaction if anything goes wrong
             DB::rollBack();
-    
+
             // Return an error response
             return response()->json([
                 'message' => 'An error occurred while creating the patient and appointment',
