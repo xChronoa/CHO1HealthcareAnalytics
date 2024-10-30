@@ -198,8 +198,6 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                 windowPrint.print();
                 windowPrint.close(); // Close the print window after printing
             }, 100); // Adjust timeout if necessary
-        } else {
-            console.error("Failed to open print window.");
         }
     };
 

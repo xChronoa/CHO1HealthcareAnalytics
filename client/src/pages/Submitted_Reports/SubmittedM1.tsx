@@ -310,8 +310,6 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                 windowPrint.print(); 
                 windowPrint.close(); // Close the print window after printing
             }, 100); // Adjust timeout if necessary
-        } else {
-            console.error("Failed to open print window.");
         }
     };
 
