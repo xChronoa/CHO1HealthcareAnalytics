@@ -116,10 +116,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Dashboard
-    Route::get("/wra-reports/", [WomenOfReproductiveAgeController::class, "getWomenOfReproductiveAges"]);
-    Route::get("/family-planning-reports", [FamilyPlanningReportController::class, "getFamilyPlanningReports"]);
-    Route::get("/service-data-reports/{service_name}", [ServiceDataController::class, "getServiceDataReports"]);
-    Route::get("/morbidity-reports/", [MorbidityReportController::class, "getMorbidityReports"]);
+    Route::post("/wra-reports/", [WomenOfReproductiveAgeController::class, "getWomenOfReproductiveAges"]);
+    Route::post("/family-planning-reports", [FamilyPlanningReportController::class, "getFamilyPlanningReports"]);
+    Route::post("/service-data-reports/{service_name}", [ServiceDataController::class, "getServiceDataReports"]);
+    Route::post("/morbidity-reports/", [MorbidityReportController::class, "getMorbidityReports"]);
     
 
     // Filtered Report by Month and Barangay
