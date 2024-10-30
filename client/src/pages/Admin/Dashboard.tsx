@@ -8,6 +8,10 @@ import MorbidityFormChart from "./Chart/MorbidityFormChart";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Swal from "sweetalert2";
+import { useBarangay } from "../../hooks/useBarangay";
+import { useLoading } from "../../context/LoadingContext";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface DashboardProp {
     barangayLogo?: string;
@@ -115,6 +119,66 @@ const Dashboard: React.FC<DashboardProp> = () => {
         }
     };
 
+    const { barangays, fetchBarangays } = useBarangay();
+    const { isLoading } = useLoading();
+
+    useEffectAfterMount(() => {
+        fetchBarangays();
+    }, []);
+
+    useEffectAfterMount(() => {
+        if (barangays.length > 0) {
+            setSelectedBarangay(barangays[0].barangay_name);
+        }
+    }, [barangays]);
+
+    const {
+        earliestDate,
+        latestDate,
+        fetchEarliestAndLatestDates,
+    } = useReportSubmissions();
+
+    const [selectedBarangay, setSelectedBarangay] = useState<string>(''); // State for selected barangay
+    const [selectedYear, setSelectedYear] = useState<string | null>(null);
+    const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
+    const [minDate, setMinDate] = useState<Date | undefined>(undefined);
+
+    useEffectAfterMount(() => {
+        // Fetch the earliest and latest dates when the component mounts
+        fetchEarliestAndLatestDates();
+    }, [fetchEarliestAndLatestDates]);
+
+    useEffectAfterMount(() => {
+        if (latestDate) {
+            const [year, month] = latestDate.split('-');
+            const maxDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
+
+            setMaxDate(maxDateObj);
+            setSelectedYear(year); // Initialize selectedYear to year as string
+        }
+    }, [latestDate]);
+
+    useEffectAfterMount(() => {
+        if (earliestDate) {
+            const [year, month] = earliestDate.split('-');
+            const minDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
+            setMinDate(minDateObj);
+        }
+    }, [earliestDate]);
+
+    const handleYearChange = (date: Date | null) => {
+        if (date) {
+            const yearString = date.getFullYear().toString(); // Extract year as string
+            setSelectedYear(yearString); // Set the selected year as a string
+        } else {
+            setSelectedYear(null); // Reset if date is null
+        }
+    };
+
+    const handleBarangayChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedBarangay(event.target.value); // Update state with selected barangay name
+    };
+
     return (
         <>
             <div className="w-11/12 py-16">
@@ -181,13 +245,71 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             </button>
                         </div>
                     </section>
+                    <section className="flex flex-row justify-between filter">
+                        <div className="flex flex-col mb-3 input-group w-fit">
+                            <label htmlFor="barangay_name">Barangay</label>
+                            <select
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-lg border-1"
+                                name="barangay_name"
+                                id="barangay_name"
+                                value={selectedBarangay}
+                                onChange={handleBarangayChange}
+                                required
+                            >
+                                {/* Can be replaced with the barangay values from the database */}
+                                {isLoading && !selectedBarangay ? (
+                                    <option hidden>Loading...</option>
+                                ) : (
+                                    barangays.map((barangay) => (
+                                        <option
+                                            key={barangay.barangay_id}
+                                            value={barangay.barangay_name}
+                                        >
+                                            {barangay.barangay_name}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                        <div className="flex flex-col mb-3 input-group w-fit">
+                            <label htmlFor="year">Year</label>
+                            <DatePicker
+                                minDate={minDate}
+                                maxDate={maxDate}
+                                selected={selectedYear ? new Date(`${selectedYear}-01-01`) : null}
+                                onChange={handleYearChange}
+                                showYearPicker                   // Enables year-only view
+                                dateFormat="yyyy"                // Sets display format to year only
+                                className="py-2 border border-gray-300 rounded-lg shadow-lg w-fit"
+                                placeholderText={`${isLoading ? "Loading..." : "Select Year"}`}    // Optional placeholder
+                                showYearDropdown                  // Enables year dropdown
+                                scrollableYearDropdown            // Makes dropdown scrollable
+                                yearDropdownItemNumber={10}       // Shows 10 years at a time in dropdown
+                                onFocus={e => e.target.blur()}
+                            />
+                        </div>
+                    </section>
                     <div className="mt-4">
-                        {section === "m1" && (
-                            <ServiceDataChart chartRef={chartRef} textRef={textRef}/>
-                        )}
-                        {section === "m2" && (
-                            <MorbidityFormChart chartRef={chartRef} textRef={textRef}/>
-                        )}
+                    {selectedYear && selectedBarangay && (
+                        <>
+                            {section === "m1" && (
+                                <ServiceDataChart
+                                    chartRef={chartRef}
+                                    textRef={textRef}
+                                    barangay={selectedBarangay}
+                                    year={selectedYear} // Use selectedYear directly
+                                />
+                            )}
+                            {section === "m2" && (
+                                <MorbidityFormChart
+                                    chartRef={chartRef}
+                                    textRef={textRef}
+                                    barangay={selectedBarangay}
+                                    year={selectedYear} // Use selectedYear directly
+                                />
+                            )}
+                        </>
+                    )}
                     </div>
                 </div>
             </div>
