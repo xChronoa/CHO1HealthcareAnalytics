@@ -18,31 +18,114 @@ interface DashboardProp {
 }
 
 const Dashboard: React.FC<DashboardProp> = () => {
+    /**
+     * 
+     * STATE INITIALIZATION AND CUSTOM HOOKS
+     * 
+     */
+    // State for selected barangay and year
     const [section, setSection] = useState<string>("m1");
-    const { fetchCount: fetchPatientCount, patientCount } = usePatient();
-    const { fetchCount: fetchAppointmentCount, appointmentCount } =
-        useAppointment();
-    const { fetchPendingReportCount, pendingReportCount } =
-        useReportSubmissions();
+    const [selectedBarangay, setSelectedBarangay] = useState<string>(''); 
+    const [selectedYear, setSelectedYear] = useState<string | null>(null);
+    const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
+    const [minDate, setMinDate] = useState<Date | undefined>(undefined);
 
+    // Refs for chart and text elements
+    const chartRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLHeadingElement>(null);
+
+    // Fetching counts from hooks
+    const { fetchCount: fetchPatientCount, patientCount } = usePatient();
+    const { fetchCount: fetchAppointmentCount, appointmentCount } = useAppointment();
+    const { fetchPendingReportCount, pendingReportCount } = useReportSubmissions();
+
+    // Barangays and dates
+    const { barangays, fetchBarangays } = useBarangay();
+    const { earliestDate, latestDate, fetchEarliestAndLatestDates } = useReportSubmissions();
+
+    // Loading management
+    const { isLoading } = useLoading();
+
+    /**
+     * 
+     * USE EFFECT
+     * 
+     */
+    // Fetch patient count, appointment count, and pending report count
+    useEffectAfterMount(() => {
+        fetchPatientCount();
+        fetchAppointmentCount();
+        fetchPendingReportCount();
+    }, [fetchPatientCount, fetchAppointmentCount, fetchPendingReportCount]);
+
+    // Fetch barangays on mount
+    useEffectAfterMount(() => {
+        fetchBarangays();
+    }, []);
+
+    // Set the selected barangay to the first one fetched
+    useEffectAfterMount(() => {
+        if (barangays.length > 0) {
+            setSelectedBarangay(barangays[0].barangay_name);
+        }
+    }, [barangays]);
+
+    // Fetch earliest and latest dates for reports
+    useEffectAfterMount(() => {
+        fetchEarliestAndLatestDates();
+    }, [fetchEarliestAndLatestDates]);
+
+    // Set the max date and selected year based on latest date
+    useEffectAfterMount(() => {
+        if (latestDate) {
+            const [year, month] = latestDate.split('-');
+            const maxDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
+            setMaxDate(maxDateObj);
+            setSelectedYear(year); // Initialize selectedYear to year as string
+        }
+    }, [latestDate]);
+
+    // Set the min date based on earliest date
+    useEffectAfterMount(() => {
+        if (earliestDate) {
+            const [year, month] = earliestDate.split('-');
+            const minDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
+            setMinDate(minDateObj);
+        }
+    }, [earliestDate]);
+
+    /**
+     * 
+     * EVENT HANDLERS
+     * 
+     */
+    // Handle section toggle
     const handleToggle = (selectedSection: string) => {
         setSection(selectedSection);
     };
 
-    const getButtonClass = (currentSection: string) =>
-        `shadow-md shadow-[#a3a19d] px-4 py-2 ${
-            currentSection === section
-                ? "bg-green text-white"
-                : "bg-slate-200 text-black"
-        }`;
+    // Handle year change in the date picker
+    const handleYearChange = (date: Date | null) => {
+        if (date) {
+            const yearString = date.getFullYear().toString(); // Extract year as string
+            setSelectedYear(yearString); // Set the selected year as a string
+        } else {
+            setSelectedYear(null); // Reset if date is null
+        }
+    };
 
-    useEffectAfterMount(() => {
-        fetchPatientCount(), fetchAppointmentCount(), fetchPendingReportCount();
-    }, [fetchPatientCount, fetchAppointmentCount, fetchPendingReportCount]);
+    // Handle barangay selection change
+    const handleBarangayChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedBarangay(event.target.value); // Update state with selected barangay name
+    };
 
-    const chartRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLHeadingElement>(null);
 
+    /**
+     * 
+     * DOWNLOAD CHART
+     * 
+     */
+    // Download the chart as a PDF
     const downloadChart = async () => {
         const input = chartRef.current;
 
@@ -51,7 +134,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
             Swal.fire({
                 icon: "error",
                 title: "Oops!",
-                text: "We can’t find the chart to download. Please refresh the page and try again.",
+                text: "We can't find the chart to download. Please refresh the page and try again.",
                 toast: true,
                 position: "top-end",
                 showConfirmButton: false,
@@ -72,8 +155,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
 
             // Create a PDF with the exact dimensions of the chart
             const pdf = new jsPDF({
-                orientation:
-                    canvas.width > canvas.height ? "landscape" : "portrait",
+                orientation: canvas.width > canvas.height ? "landscape" : "portrait",
                 unit: "px",
                 format: [canvas.width, canvas.height],
             });
@@ -115,69 +197,21 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     popup: "border border-danger",
                 },
             });
-            console.error("Error generating PDF: ", error);
         }
     };
 
-    const { barangays, fetchBarangays } = useBarangay();
-    const { isLoading } = useLoading();
-
-    useEffectAfterMount(() => {
-        fetchBarangays();
-    }, []);
-
-    useEffectAfterMount(() => {
-        if (barangays.length > 0) {
-            setSelectedBarangay(barangays[0].barangay_name);
-        }
-    }, [barangays]);
-
-    const {
-        earliestDate,
-        latestDate,
-        fetchEarliestAndLatestDates,
-    } = useReportSubmissions();
-
-    const [selectedBarangay, setSelectedBarangay] = useState<string>(''); // State for selected barangay
-    const [selectedYear, setSelectedYear] = useState<string | null>(null);
-    const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
-    const [minDate, setMinDate] = useState<Date | undefined>(undefined);
-
-    useEffectAfterMount(() => {
-        // Fetch the earliest and latest dates when the component mounts
-        fetchEarliestAndLatestDates();
-    }, [fetchEarliestAndLatestDates]);
-
-    useEffectAfterMount(() => {
-        if (latestDate) {
-            const [year, month] = latestDate.split('-');
-            const maxDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
-
-            setMaxDate(maxDateObj);
-            setSelectedYear(year); // Initialize selectedYear to year as string
-        }
-    }, [latestDate]);
-
-    useEffectAfterMount(() => {
-        if (earliestDate) {
-            const [year, month] = earliestDate.split('-');
-            const minDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
-            setMinDate(minDateObj);
-        }
-    }, [earliestDate]);
-
-    const handleYearChange = (date: Date | null) => {
-        if (date) {
-            const yearString = date.getFullYear().toString(); // Extract year as string
-            setSelectedYear(yearString); // Set the selected year as a string
-        } else {
-            setSelectedYear(null); // Reset if date is null
-        }
-    };
-
-    const handleBarangayChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedBarangay(event.target.value); // Update state with selected barangay name
-    };
+    /**
+     * 
+     * SECTION TOGGLE - CLASS STYLE
+     * 
+     */
+    // Get button class based on the section selected
+    const getButtonClass = (currentSection: string) =>
+        `shadow-md shadow-[#a3a19d] px-4 py-2 ${
+            currentSection === section
+                ? "bg-green text-white"
+                : "bg-slate-200 text-black"
+        }`;
 
     return (
         <>
@@ -216,80 +250,95 @@ const Dashboard: React.FC<DashboardProp> = () => {
                 <div className="dividing-line mt-5 w-full h-[2px] bg-black"></div>
 
                 {/* Data Visualization of M1 and M2 report */}
-                <div className="mt-5 visualize-data">
-                    <section className="flex flex-row items-center justify-between buttons">
-                        <div className="flex items-center justify-center transition-all toggle-sections">
-                            <button
-                                onClick={() => handleToggle("m1")}
-                                className={`${getButtonClass(
-                                    "m1"
-                                )} rounded-tl-lg rounded-bl-lg`}
-                            >
-                                M1 Data
-                            </button>
-                            <button
-                                onClick={() => handleToggle("m2")}
-                                className={`${getButtonClass(
-                                    "m2"
-                                )} rounded-tr-lg rounded-br-lg`}
-                            >
-                                M2 Data
-                            </button>
+                <div className="flex flex-col mt-5 visualize-data">
+                    {/* Menus */}
+                    <section className="relative flex flex-col items-center justify-between text-xs transition-all xl:flex-row buttons xl:text-sm">
+                        {/* Barangay & Year */}
+                        <div className="z-30 flex flex-row items-center justify-center flex-1 w-full gap-4 xl:w-auto xl:flex-none options-one">
+                            {/* Barangay */}
+                            <div className="flex flex-col flex-1 mb-3 input-group">
+                                <label htmlFor="barangay_name">Barangay</label>
+                                <select
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-lg border-1"
+                                    name="barangay_name"
+                                    id="barangay_name"
+                                    value={selectedBarangay}
+                                    onChange={handleBarangayChange}
+                                    required
+                                >
+                                    {/* Can be replaced with the barangay values from the database */}
+                                    {isLoading && !selectedBarangay ? (
+                                        <option hidden>Loading...</option>
+                                    ) : (
+                                        barangays.map((barangay) => (
+                                            <option
+                                                key={barangay.barangay_id}
+                                                value={barangay.barangay_name}
+                                            >
+                                                {barangay.barangay_name}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
+
+                            {/* Year */}
+                            <div className="flex flex-col flex-1 mb-3 input-group">
+                                <label htmlFor="year">Year</label>
+                                <DatePicker
+                                    name="year"
+                                    minDate={minDate}
+                                    maxDate={maxDate}
+                                    selected={selectedYear ? new Date(`${selectedYear}-01-01`) : null}
+                                    onChange={handleYearChange}
+                                    showYearPicker                   // Enables year-only view
+                                    dateFormat="yyyy"                // Sets display format to year only
+                                    className="w-full py-2 border border-gray-300 rounded-lg shadow-lg"
+                                    placeholderText={`${isLoading ? "Loading..." : "Select Year"}`}    // Optional placeholder
+                                    showYearDropdown                  // Enables year dropdown
+                                    scrollableYearDropdown            // Makes dropdown scrollable
+                                    yearDropdownItemNumber={10}       // Shows 10 years at a time in dropdown
+                                    onFocus={e => e.target.blur()}
+                                />
+                            </div>
                         </div>
-                        <div className="download">
-                            <button
-                                onClick={downloadChart}
-                                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
-                            >
-                                Download Charts
-                            </button>
+                        
+                        <div className="flex flex-row justify-between flex-1 w-full gap-4 xl:w-auto xl:flex-none options-two">
+                            {/* Section */}
+                            <div className="z-10 flex items-center justify-center flex-1 xl:flex-none xl:absolute xl:inset-0 toggle-sections">
+                                <button
+                                    onClick={() => handleToggle("m1")}
+                                    className={`${getButtonClass(
+                                        "m1"
+                                    )} rounded-l-lg text-nowrap xl:py-2 w-full xl:w-fit`}
+                                >
+                                    M1 Data
+                                </button>
+                                <button
+                                    onClick={() => handleToggle("m2")}
+                                    className={`${getButtonClass(
+                                        "m2"
+                                    )} rounded-r-lg text-nowrap xl:py-2 w-full xl:w-fit`}
+                                >
+                                    M2 Data
+                                </button>
+                            </div>
+
+                            {/* Download */}
+                            <div className="z-20 flex items-center justify-center flex-1 xl:flex-0 download">
+                                <button
+                                    onClick={downloadChart}
+                                    className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-white inline-flex justify-center items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-4 py-2.5 text-center text-nowrap flex-1"
+                                >
+                                    Download Charts 
+                                </button>
+                            </div>
                         </div>
                     </section>
-                    <section className="flex flex-row justify-between filter">
-                        <div className="flex flex-col mb-3 input-group w-fit">
-                            <label htmlFor="barangay_name">Barangay</label>
-                            <select
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-lg border-1"
-                                name="barangay_name"
-                                id="barangay_name"
-                                value={selectedBarangay}
-                                onChange={handleBarangayChange}
-                                required
-                            >
-                                {/* Can be replaced with the barangay values from the database */}
-                                {isLoading && !selectedBarangay ? (
-                                    <option hidden>Loading...</option>
-                                ) : (
-                                    barangays.map((barangay) => (
-                                        <option
-                                            key={barangay.barangay_id}
-                                            value={barangay.barangay_name}
-                                        >
-                                            {barangay.barangay_name}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                        </div>
-                        <div className="flex flex-col mb-3 input-group w-fit">
-                            <label htmlFor="year">Year</label>
-                            <DatePicker
-                                minDate={minDate}
-                                maxDate={maxDate}
-                                selected={selectedYear ? new Date(`${selectedYear}-01-01`) : null}
-                                onChange={handleYearChange}
-                                showYearPicker                   // Enables year-only view
-                                dateFormat="yyyy"                // Sets display format to year only
-                                className="py-2 border border-gray-300 rounded-lg shadow-lg w-fit"
-                                placeholderText={`${isLoading ? "Loading..." : "Select Year"}`}    // Optional placeholder
-                                showYearDropdown                  // Enables year dropdown
-                                scrollableYearDropdown            // Makes dropdown scrollable
-                                yearDropdownItemNumber={10}       // Shows 10 years at a time in dropdown
-                                onFocus={e => e.target.blur()}
-                            />
-                        </div>
-                    </section>
-                    <div className="mt-4">
+
+                    <div className="dividing-line my-5 w-full h-[2px] bg-black"></div>
+                    
+                    {/* Chart */}
                     {selectedYear && selectedBarangay && (
                         <>
                             {section === "m1" && (
@@ -310,7 +359,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             )}
                         </>
                     )}
-                    </div>
                 </div>
             </div>
         </>
