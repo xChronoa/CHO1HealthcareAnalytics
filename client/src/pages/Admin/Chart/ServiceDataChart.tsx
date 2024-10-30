@@ -35,11 +35,15 @@ interface ServiceData {
 interface ServiceDataChartProps {
     chartRef: React.RefObject<HTMLDivElement>;
     textRef: React.RefObject<HTMLHeadingElement>;
+    barangay: string;
+    year: String | null;
 }
 
 const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
     chartRef,
-    textRef
+    textRef,
+    barangay,
+    year,
 }) => {
     const [serviceData, setServiceData] = useState<ServiceData[]>([]);
     const [selectedService, setSelectedService] = useState<string>("Modern FP Unmet Need");
@@ -95,11 +99,13 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 const response = await fetch(
                     `${baseAPIUrl}/service-data-reports/${encodeURIComponent(encodeURIComponent(selectedService))}`,
                     {
+                        method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             Accept: "application/json",
                         },
                         credentials: "include",
+                        body: JSON.stringify({ selectedService, barangay_name: barangay, year: year })
                     }
                 );
 
@@ -121,7 +127,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
         };
 
         fetchServiceData();
-    }, [selectedService]);
+    }, [selectedService, barangay, year]);
 
     const handleServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedService(event.target.value);
@@ -454,10 +460,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     selectedService !== "Modern FP Unmet Need" ? (
                                         renderCharts()
                                     ) : (
-                                        <ModernWRAChart />
+                                        <ModernWRAChart barangay={barangay} year={year} />
                                     )
                                 ) : (
-                                    <FamilyPlanningChart />
+                                    <FamilyPlanningChart barangay={barangay} year={year}/>
                                 )}
                             </div>
                         </section>

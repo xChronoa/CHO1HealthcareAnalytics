@@ -24,12 +24,20 @@ ChartJS.register(
     PointElement
 );
 
-const ModernWRAChart: React.FC = () => {
+interface ModernWRAProps {
+    barangay: string;
+    year: String | null;
+}
+
+const ModernWRAChart: React.FC<ModernWRAProps> = ({
+    barangay,
+    year
+}) => {
     const { wraData, error, fetchWra } = useWra();
 
     useEffect(() => {
-        fetchWra();
-    }, [fetchWra]);
+        fetchWra(barangay, year);
+    }, [fetchWra, barangay, year]);
 
     const labels = Array.from(
         new Set(wraData.map((entry) => entry.report_period))
@@ -79,6 +87,22 @@ const ModernWRAChart: React.FC = () => {
         })),
     });
 
+    // Define month names globally for easy reference
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+
     const options: ChartOptions<'line'> = {
         responsive: true,
         plugins: {
@@ -89,20 +113,6 @@ const ModernWRAChart: React.FC = () => {
                         const [year, month] = label
                             ? label.split("-")
                             : ["Unknown", "Unknown"];
-                        const monthNames = [
-                            "January",
-                            "February",
-                            "March",
-                            "April",
-                            "May",
-                            "June",
-                            "July",
-                            "August",
-                            "September",
-                            "October",
-                            "November",
-                            "December",
-                        ];
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
                         return `Report Period: ${year}, ${monthName}`;

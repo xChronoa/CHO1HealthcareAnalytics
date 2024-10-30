@@ -39,7 +39,15 @@ interface FamilyPlanningReport {
     age_category: string;
 }
 
-const FamilyPlanningChart: React.FC = () => {
+interface FamilyPlanningChartProps {
+    barangay: string;
+    year: String | null;
+}
+
+const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
+    barangay,
+    year
+}) => {
     const [data, setData] = useState<FamilyPlanningReport[]>([]);
     const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
@@ -52,11 +60,13 @@ const FamilyPlanningChart: React.FC = () => {
                 const response = await fetch(
                     `${baseAPIUrl}/family-planning-reports`,
                     {
+                        method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             Accept: "application/json",
                         },
                         credentials: "include",
+                        body: JSON.stringify({ barangay_name: barangay, year: year })
                     }
                 );
 
@@ -82,7 +92,7 @@ const FamilyPlanningChart: React.FC = () => {
         };
 
         fetchData();
-    }, []);
+    }, [barangay, year]);
 
     const labels = Array.from(
         new Set(data.map((entry) => entry.report_period))
