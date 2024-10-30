@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -268,16 +268,20 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     };
 
     return (
-        <div>
+        <>
             {error ? (
-                <p>Error: {error}</p>
+                <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <h1 className="font-bold text-center text-red-500">
+                        Error: {error}
+                    </h1>
+                </div>
             ) : (
                 <section className="flex flex-col items-center gap-8 px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
-                    <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green">Morbidity Report</h1>
+                    <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green" ref={textRef}>Morbidity Report</h1>
                     
                     {/* Male Chart */}
                     <div 
-                        className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full
+                        className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
                                     ${selectedOptionMale === "All" ? "sm:w-full" : maximizedCharts.male ? "sm:w-full" : "sm:w-9/12"}`}
                     >
                         {/* Resize Icon */}
@@ -316,10 +320,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
                         {/* Legend */}
                         {selectedOptionMale === "All" && (
-                            <div className="legend-container">
+                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                <div className="legend-list h-56 overflow-y-auto border-r md:h-80 xl:h-[28rem] lg:h-[25rem] w-full bg-gray-200 p-2">
+                                <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
                                     {getChartData("male").datasets.map((dataset, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
                                             <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
@@ -374,10 +378,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
                         {/* Legend */}
                         {selectedOptionFemale === "All" && (
-                            <div className="legend-container">
+                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                <div className="legend-list h-56 overflow-y-auto border-r md:h-80 xl:h-[28rem] lg:h-[25rem] w-full bg-gray-200 p-2">
+                                <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
                                     {getChartData("female").datasets.map((dataset, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
                                             <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
@@ -390,7 +394,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     </div>
                 </section>
             )}
-        </div>
+        </>
     );
 };
 
