@@ -16,12 +16,32 @@ class WomenOfReproductiveAgeController extends Controller
     public function getWomenOfReproductiveAges(Request $request): JsonResponse
     {
         try {
-            // Fetch the data from the women_of_reproductive_ages table
-            $data = WomenOfReproductiveAge::with([
-                'ageCategory', // Load the ageCategory relationship
-                'reportStatus', // Load the reportStatus relationship
-            ])->get();
-
+            // Get the input parameters from the request
+            $barangayName = $request->input('barangayName');
+            $year = $request->input('year');
+    
+            // Start the query
+            $query = WomenOfReproductiveAge::with([
+                'ageCategory',
+                'reportStatus',
+            ]);
+    
+            // Apply filters if provided
+            if ($barangayName) {
+                $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
+                    $q->where('barangay_name', $barangayName);
+                });
+            }
+    
+            if ($year) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($year) {
+                    $q->where('report_year', $year);
+                });
+            }
+    
+            // Fetch the data
+            $data = $query->get();
+    
             // Transform the data for frontend consumption
             $formattedData = $data->map(function ($item) {
                 return [
@@ -36,7 +56,7 @@ class WomenOfReproductiveAgeController extends Controller
                     )->format('Y-m'),
                 ];
             });
-
+    
             return response()->json([
                 'status' => 'success',
                 'data' => $formattedData,
@@ -44,7 +64,7 @@ class WomenOfReproductiveAgeController extends Controller
         } catch (\Exception $e) {
             // Log the exception for debugging
             Log::error('Error fetching women of reproductive ages data: ' . $e->getMessage());
-
+    
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),

@@ -22,13 +22,33 @@ class MorbidityReportController extends Controller
     public function getMorbidityReports(Request $request)
     {
         try {
+            // Get parameters from the request body
+            $barangayName = $request->input('barangay_name'); // Get barangay name from request body
+            $year = $request->input('year'); // Get year from request body
+
             // Eager load necessary relationships to prevent N+1 queries
-            $reports = MorbidityReport::with([
+            $query = MorbidityReport::with([
                 'disease',
                 'ageCategory',
-                'reportStatus'
-            ])
-            ->get();
+                'reportStatus.reportSubmission.reportTemplate' // Eager load report template for year and month
+            ]);
+
+            // Apply filtering if barangay_name is provided
+            if ($barangayName) {
+                $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
+                    $q->where('barangay_name', $barangayName);
+                });
+            }
+
+            // Apply filtering if year is provided
+            if ($year) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($year) {
+                    $q->where('report_year', $year);
+                });
+            }
+
+            // Get reports with applied filters
+            $reports = $query->get();
 
             // Transform the data for frontend consumption
             $formattedReports = $reports->map(function ($report) {
@@ -41,11 +61,12 @@ class MorbidityReportController extends Controller
                         'male' => $report->male,
                         'female' => $report->female,
                         'report_status' => $report->reportStatus->status_name,
+                        'barangay_name' => $report->reportStatus->reportSubmission->barangay->barangay_name, // Add barangay_name
                         'report_period' => Carbon::create(
                             $report->reportStatus->reportSubmission->reportTemplate->report_year,
                             $report->reportStatus->reportSubmission->reportTemplate->report_month,
                             1
-                        )->format('Y-m'),
+                        )->format('Y-m'), // Add report_period
                     ];
                 }
 
@@ -143,7 +164,7 @@ class MorbidityReportController extends Controller
                     $maleCount = $report->male;
                     $femaleCount = $report->female;
                     $statusName = $report->reportStatus->status;
-    
+
                     // Set report_id, status, and report_period for the response
                     $reportId = $report->report_id;
                     $reportStatus = $statusName;
@@ -152,7 +173,7 @@ class MorbidityReportController extends Controller
                         $report->reportStatus->reportSubmission->reportTemplate->report_month,
                         1
                     )->format('Y-m');
-    
+
                     // Initialize disease if not present
                     if (!isset($groupedData[$diseaseName])) {
                         $groupedData[$diseaseName] = [
@@ -160,16 +181,16 @@ class MorbidityReportController extends Controller
                             'Total' => ['M' => 0, 'F' => 0],  // Initialize total male and female counts
                         ];
                     }
-    
+
                     // Initialize age category if not present
                     if (!isset($groupedData[$diseaseName][$ageCategory])) {
                         $groupedData[$diseaseName][$ageCategory] = ['M' => 0, 'F' => 0];
                     }
-    
+
                     // Aggregate male and female counts for the age category
                     $groupedData[$diseaseName][$ageCategory]['M'] += $maleCount;
                     $groupedData[$diseaseName][$ageCategory]['F'] += $femaleCount;
-    
+
                     // Increment total male and female counts for the disease
                     $groupedData[$diseaseName]['Total']['M'] += $maleCount;
                     $groupedData[$diseaseName]['Total']['F'] += $femaleCount;

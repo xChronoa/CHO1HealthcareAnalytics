@@ -14,11 +14,19 @@ use Illuminate\Support\Facades\Auth;
 
 class ServiceDataController extends Controller
 {
+    /**
+     * Fetch and return service data report details based on provided filters.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getServiceDataReports(Request $request): JsonResponse
     {
         try {
-            // Get the service_name from the request query parameters
-            $serviceName = $request->query('service_name');;
+            // Get parameters from the request body
+            $serviceName = $request->input('service_name'); // Get service_name from request body
+            $barangayName = $request->input('barangay_name'); // Get barangay name from request body
+            $year = $request->input('year'); // Get year from request body
 
             // Build the query with eager loading and filtering
             $query = ServiceData::with([
@@ -32,6 +40,20 @@ class ServiceDataController extends Controller
             if ($serviceName) {
                 $query->whereHas('service', function ($q) use ($serviceName) {
                     $q->where('service_name', $serviceName);
+                });
+            }
+
+            // Apply filtering if barangay_name is provided
+            if ($barangayName) {
+                $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
+                    $q->where('barangay_name', $barangayName);
+                });
+            }
+
+            // Apply filtering if year is provided
+            if ($year) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($year) {
+                    $q->where('report_year', $year);
                 });
             }
 

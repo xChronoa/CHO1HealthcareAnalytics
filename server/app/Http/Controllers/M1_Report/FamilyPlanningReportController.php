@@ -24,11 +24,31 @@ class FamilyPlanningReportController extends Controller
     public function getFamilyPlanningReports(Request $request)
     {
         try {
+            // Get barangay and year from the request query parameters
+            $barangayName = $request->input('barangay_name'); // Adjust the key as necessary
+            $year = $request->input('year'); // Adjust the key as necessary
+
             // Eager load necessary relationships to prevent N+1 queries
-            $reports = FamilyPlanningReport::with([
-                'reportStatus.reportSubmission.barangay'
-            ])
-                ->get();
+            $query = FamilyPlanningReport::with([
+                'reportStatus.reportSubmission.barangay',
+                'ageCategory', // Ensure ageCategory is loaded for further processing
+                'familyPlanningMethod' // Ensure familyPlanningMethod is loaded
+            ]);
+
+            // Apply filtering if barangay and year are provided
+            if ($barangayName) {
+                $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
+                    $q->where('barangay_name', $barangayName);
+                });
+            }
+
+            if ($year) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($year) {
+                    $q->where('report_year', $year);
+                });
+            }
+
+            $reports = $query->get();
 
             // Transform the data for frontend consumption
             $formattedReports = $reports->map(function ($report) {
@@ -43,7 +63,7 @@ class FamilyPlanningReportController extends Controller
                         'drop_outs_present_month' => $report->drop_outs_present_month,
                         'current_users_end_month' => $report->current_users_end_month,
                         'new_acceptors_present_month' => $report->new_acceptors_present_month,
-                        'age_category' => $report->ageCategory->age_category,
+                        'age_category' => $report->ageCategory ? $report->ageCategory->age_category : 'Unknown',
                         'barangay_name' => $report->reportStatus->reportSubmission->barangay->barangay_name,
                         'report_period' => Carbon::create(
                             $report->reportStatus->reportSubmission->reportTemplate->report_year,
@@ -67,7 +87,6 @@ class FamilyPlanningReportController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                // 'message' => 'Failed to fetch family planning reports. Please try again later.'
                 'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
