@@ -109,17 +109,34 @@ const Report: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        // console.log(transformInputValues(reportData.m2Report, diseases, ageCategories).length)
+        // Check if either report has been submitted for the selected date
+        const selectedDateReports = [
+            ...m1Reports.filter(report => report.report_submission_id === m1ReportId),
+            ...m2Reports.filter(report => report.report_submission_id === m2ReportId),
+        ];
 
-        // return; 
-        if(m1ReportId === null && m2ReportId === null) {
+        const alreadySubmittedReports = selectedDateReports.filter(report => 
+            report.status === "submitted" || report.status === "submitted late"
+        );
+
+        if (alreadySubmittedReports.length > 0) {
+            Swal.fire({
+                icon: "info",
+                title: "Already Submitted",
+                text: `You have already submitted the report for the selected date.`,
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        // Ensure report IDs are selected
+        if (m1ReportId === null && m2ReportId === null) {
             Swal.fire({
                 icon: "warning",
                 title: "Invalid Report Date",
                 text: "Please select the report date for this submission.",
                 confirmButtonText: "OK",
             });
-
             return;
         }
 
@@ -131,21 +148,30 @@ const Report: React.FC = () => {
                 icon: "warning",
                 title: "Incomplete Sections",
                 html: `
-                    ${m1Incomplete.length > 0 ? `
-                    <h3 class="mb-3 font-semibold">M1 Report</h3>
-                    <ul class="text-left mb-3">
-                        ${m1Incomplete.map(section => `<li class="mb-2">- ${section}</li>`).join("")}
-                    </ul>` : ""}
-                    
-                    ${m2Incomplete.length > 0 ? `
-                    <h3 class="mt-8 mb-3 font-semibold">M2 Report</h3>
-                    <ul class="text-left mb-3">
-                        ${m2Incomplete.map(disease => `<li class="mb-2">- ${disease}</li>`).join("")}
-                    </ul>` : ""}
+                    <div class="flex flex-col items-center md:items-start md:flex-row justify-center md:justify-between mt-8 gap-8 w-full">
+                        ${m1Incomplete.length > 0 ? `
+                        <div class="w-full">
+                            <h3 class="mb-3 font-semibold">M1 Report</h3>
+                            <ul class="text-left mb-3 list-disc text-xs md:text-sm">
+                                ${m1Incomplete.map(section => `<li class="mb-2">${section}</li>`).join("")}
+                            </ul>
+                        </div>` : ""}
+            
+                        ${m2Incomplete.length > 0 ? `
+                        <div class="w-full">
+                            <h3 class="mb-3 font-semibold ">M2 Report</h3>
+                            <ul class="text-left mb-3 list-disc text-xs md:text-sm">
+                                ${m2Incomplete.map(disease => `<li class="mb-2">${disease}</li>`).join("")}
+                            </ul>
+                        </div>` : ""}
+                    </div>
                 `,
-                confirmButtonText: "OK",
+                customClass: {
+                    popup: 'incomplete-section alert',
+                },
+                confirmButtonText: "Review Sections",
             });
-
+            
             return;
         }
 
@@ -174,7 +200,7 @@ const Report: React.FC = () => {
                 throw new Error("Something went wrong while submitting the report!");
             }
 
-            if(response.status === 201) {
+            if (response.status === 201) {
                 Swal.fire({
                     title: 'Success!',
                     text: 'Report submitted successfully.',
