@@ -13,5 +13,16 @@
 }
 
 body {
-    @apply font-sans; /* Use Tailwind's utility to apply the default font */
+    @apply font-sans; 
+}
+
+/* Barangay/Encoder Submit Report Page - Incomplete Section Alert */
+.incomplete-section.alert {
+    width: 50% !important;
+}
+
+@media (max-width: 768px) {
+    .incomplete-section.alert {
+        width: 100% !important;
+    }
 }
