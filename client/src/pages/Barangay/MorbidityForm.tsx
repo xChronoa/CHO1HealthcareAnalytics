@@ -122,7 +122,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                 <div className="dividing-line w-full h-[2px] bg-black"></div>
             </header>
 
-            <div className="w-full p-4 md:w-4/5">
+            <div className="w-full lg:p-4 lg:w-4/5">
                 <div className="flex flex-row w-full text-center border-white bg-green text-white italic [&>*]:px-4 [&>*]:py-2 rounded-tl-xl rounded-tr-xl font-medium uppercase text-sm md:text-[1.1rem]">
                     <h3 className="flex-[2_2_0] border-r-2 flex justify-left items-center">
                         Disease
@@ -179,24 +179,24 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                         </button>
 
                         {openSections.includes(disease.disease_name) && (
-                            <div className="p-4 bg-gray-100">
-                                <div className="flex flex-row mb-2 text-center">
-                                    <div className="w-full md:w-1/3"></div>
-                                    <h3 className="w-full md:w-1/6">Male</h3>
-                                    <h3 className="w-full md:w-1/6">Female</h3>
+                            <div className="p-4 text-xs bg-gray-100 sm:text-sm">
+                                <div className="grid grid-cols-3 gap-2 mb-2 font-bold text-center uppercase">
+                                    <h3 className="w-full border-b-2 border-black">Age Range</h3>
+                                    <h3 className="w-full border-b-2 border-black">Male</h3>
+                                    <h3 className="w-full border-b-2 border-black">Female</h3>
                                 </div>
                                 {ageCategories.map((category) => (
                                     <div
                                         key={category.age_category_id}
-                                        className="flex flex-row mb-2"
+                                        className="grid items-center grid-cols-3 gap-2 mb-2"
                                     >
-                                        <label className="w-full md:w-1/3">
+                                        <label className="w-full">
                                             {category.age_category}:
                                         </label>
                                         <input
                                             type="number"
                                             name={`${disease.disease_name}_${category.age_category}_M`}
-                                            className="w-full px-2 py-1 mx-1 my-1 md:w-1/6"
+                                            className="w-full px-2 py-1 mx-1 my-1"
                                             value={
                                                 formData[
                                                     disease.disease_name
@@ -218,7 +218,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                                         <input
                                             type="number"
                                             name={`${disease.disease_name}_${category.age_category}_F`}
-                                            className="w-full px-2 py-1 mx-1 my-1 md:w-1/6"
+                                            className="w-full px-2 py-1 mx-1 my-1"
                                             value={
                                                 formData[
                                                     disease.disease_name
