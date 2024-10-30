@@ -24,7 +24,7 @@ export const TeenagePregnancy: React.FC<ServiceProps> = ({
     ];
 
     const {
-        error: serviceError,
+        error,
         fetchServiceByName,
         service,
     } = useServices();
@@ -43,8 +43,12 @@ export const TeenagePregnancy: React.FC<ServiceProps> = ({
     return (
         <fieldset className="w-full p-4 border border-black rounded-md">
             <legend className="text-lg font-semibold">Teenage Pregnancy</legend>
-            {serviceError ? (
-                <div>Error loading teenage pregnancy: {serviceError}</div>
+            {error ? (
+                <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <h1 className="font-bold text-center text-red-500">
+                        Error: {error}
+                    </h1>
+                </div>
             ) : (
                 <div className="flex flex-col w-full gap-4 sm:flex-row">
                     {ageCategories.map((category) => (

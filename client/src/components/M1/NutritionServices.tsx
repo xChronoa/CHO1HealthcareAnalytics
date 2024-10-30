@@ -8,7 +8,6 @@ export const NutritionServices: React.FC<ServiceProps> = ({
     updateServiceData
 }) => {
     const {
-        indicatorLoading,
         error,
         indicators,
         fetchIndicatorsByServiceName,
@@ -25,13 +24,11 @@ export const NutritionServices: React.FC<ServiceProps> = ({
                     C2. Nutrition Services for Infants and Children
                 </legend>
                 <div className="flex flex-col gap-4">
-                    {indicatorLoading ? (
-                        <div>
-                            Loading nutrition services...
-                        </div>
-                    ) : error ? (
-                        <div>
-                            Error nutrition services: {error}
+                    {error ? (
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                            <h1 className="font-bold text-center text-red-500">
+                                Error: {error}
+                            </h1>
                         </div>
                     ) : (
                         indicators.map((indicator) => (

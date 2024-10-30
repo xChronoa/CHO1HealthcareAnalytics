@@ -25,8 +25,10 @@ export const SoilTransmitted: React.FC<ServiceProps> = ({
                 </legend>
                 <div className="flex flex-col gap-4">
                     {error ? (
-                        <div>
-                            Error: {error}
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                            <h1 className="font-bold text-center text-red-500">
+                                Error: {error}
+                            </h1>
                         </div>
                     ) : (
                         indicators.map((indicator) => (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FamilyPlanningEntry } from "../../types/M1FormData";
 import { baseAPIUrl } from "../../config/apiConfig";
 import { useLoading } from "../../context/LoadingContext";
@@ -28,7 +28,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
     const [fpMethods, setFPMethods] = React.useState<FPMethod[]>([]);
     const [error, setError] = React.useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchFPMethods = async () => {
             incrementLoading();
             setError(null);
@@ -47,15 +47,13 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                 );
 
                 if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch FP methods: ${response.statusText}`
-                    );
+                    throw new Error("Could not retrieve Family Planning methods. Please try again later.");
                 }
-
+    
                 const data: FPMethod[] = await response.json();
                 setFPMethods(data);
-            } catch (err: any) {
-                setError(err.message);
+            } catch (error: any) {
+                setError(error.message || "An unexpected error occurred while loading FP methods.");
             } finally {
                 decrementLoading();
             }
@@ -134,8 +132,10 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                     </legend>
 
                     {error ? (
-                        <div>
-                            Error fetching family planning methods: {error}
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                            <h1 className="font-bold text-center text-red-500">
+                                Error: {error}
+                            </h1>
                         </div>
                     ) : (
                         <>
