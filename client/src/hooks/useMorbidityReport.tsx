@@ -41,13 +41,13 @@ export const useMorbidityReport = (): UseMorbidityReport => {
             });
 
             if (!response.ok) {
-                throw new Error("An error occurred while fetching the morbidity reports.");
+                throw new Error("Failed to fetch morbidity reports. Please try again later.");
             }
-
+    
             const result = await response.json();
             setMorbidityReports(result.data);
         } catch (error: any) {
-            setError(error.message);
+            setError(error.message || "An unexpected error occurred while loading morbidity reports.");
         } finally {
             decrementLoading();
         }

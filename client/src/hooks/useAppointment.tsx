@@ -28,20 +28,24 @@ interface Appointment {
     queue_number?: number;
 }
 
-// Define the custom hook
+// Custom hook for managing appointments
 export const useAppointment = () => {
     // State variables for managing appointments and their loading/error states
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [appointment, setAppointment] = useState<Appointment | null>(null);
     const [error, setError] = useState<string | null>(null);
-
     const [minDate, setMinDate] = useState("");
     const [maxDate, setMaxDate] = useState("");
-    
     const [appointmentCount, setAppointmentCount] = useState<number>(0);
-
     const { incrementLoading, decrementLoading } = useLoading();
 
+    // Utility function for handling errors
+    const handleError = (message: string) => {
+        console.error(message);
+        setError(message);
+    };
+
+    // Fetch count of appointments
     const fetchCount = useCallback(async () => {
         try {
             incrementLoading();
@@ -55,21 +59,19 @@ export const useAppointment = () => {
             });
 
             if (!response.ok) {
-                throw new Error();
+                throw new Error("Unable to retrieve appointment count.");
             }
 
             const data = await response.json();
             setAppointmentCount(data);
         } catch (error) {
-            setError("An unexpected error occurred. Please try again later.");
+            handleError("An unexpected error occurred while fetching the appointment count. Please try again later.");
         } finally {
             decrementLoading();
         }
     }, []);
 
-    /**
-     * Fetch all appointments from the API.
-     */
+    // Fetch all appointments
     const fetchAppointments = useCallback(async () => {
         incrementLoading();
         setError(null);
@@ -85,23 +87,19 @@ export const useAppointment = () => {
             });
 
             if (!response.ok) {
-                throw new Error(
-                    `Failed to fetch appointments: ${response.statusText}`
-                );
+                throw new Error("Failed to fetch appointments. Please check your connection.");
             }
 
             const data: Appointment[] = await response.json();
             setAppointments(data);
         } catch (err: any) {
-            setError(err.message);
+            handleError(err.message || "An error occurred while retrieving appointments. Please refresh and try again.");
         } finally {
             decrementLoading();
         }
     }, []);
 
-    /**
-     * Fetch all appointments from the API.
-     */
+    // Fetch patients' appointments
     const fetchPatientsAppointments = useCallback(async () => {
         incrementLoading();
         setError(null);
@@ -117,9 +115,7 @@ export const useAppointment = () => {
             });
 
             if (!response.ok) {
-                throw new Error(
-                    `Failed to fetch appointments: ${response.statusText}`
-                );
+                throw new Error("Failed to fetch patients' appointments. Please try again.");
             }
 
             const data: Appointment[] = await response.json();
@@ -127,27 +123,18 @@ export const useAppointment = () => {
 
             // Calculate min and max dates
             if (data.length > 0) {
-                const dates = data.map((appointment) =>
-                    new Date(appointment.appointment_date).getTime()
-                );
-
-                const minTimestamp = Math.min(...dates);
-                const maxTimestamp = Math.max(...dates);
-                setMinDate(new Date(minTimestamp).toISOString().split("T")[0]);
-                setMaxDate(new Date(maxTimestamp).toISOString().split("T")[0]);
+                const dates = data.map((appointment) => new Date(appointment.appointment_date).getTime());
+                setMinDate(new Date(Math.min(...dates)).toISOString().split("T")[0]);
+                setMaxDate(new Date(Math.max(...dates)).toISOString().split("T")[0]);
             }
         } catch (err: any) {
-            setError(err.message);
+            handleError(err.message || "An error occurred while fetching patients' appointments. Please try again.");
         } finally {
             decrementLoading();
         }
     }, []);
 
-    /**
-     * Fetch a single appointment by ID.
-     *
-     * @param id - The appointment ID
-     */
+    // Fetch an appointment by ID
     const fetchAppointmentById = useCallback(async (id: number) => {
         incrementLoading();
         setError(null);
@@ -163,32 +150,26 @@ export const useAppointment = () => {
             });
 
             if (!response.ok) {
-                throw new Error(
-                    `Failed to fetch appointment: ${response.statusText}`
-                );
+                throw new Error("Failed to fetch appointment. Please check the appointment ID.");
             }
 
             const data: Appointment = await response.json();
             setAppointment(data);
         } catch (err: any) {
-            setError(err.message);
+            handleError(err.message || "An error occurred while retrieving the appointment. Please try again.");
         } finally {
             decrementLoading();
         }
     }, []);
 
-    /**
-     * Create a new appointment.
-     *
-     * @param newAppointment - The appointment data to be created
-     */
+    // Create a new appointment
     const createAppointment = useCallback(
         async (newAppointment: Partial<Appointment>) => {
             incrementLoading();
             setError(null);
 
             try {
-                const response = await fetch(`${baseAPIUrl}/`, {
+                const response = await fetch(`${baseAPIUrl}/appointments/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -199,15 +180,13 @@ export const useAppointment = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error(
-                        `Failed to create appointment: ${response.statusText}`
-                    );
+                    throw new Error("Failed to create appointment. Please check your data.");
                 }
 
                 const data: Appointment = await response.json();
                 setAppointments((prev) => [...prev, data]);
             } catch (err: any) {
-                setError(err.message);
+                handleError(err.message || "An error occurred while creating the appointment. Please try again.");
             } finally {
                 decrementLoading();
             }
@@ -215,12 +194,7 @@ export const useAppointment = () => {
         []
     );
 
-    /**
-     * Update an existing appointment.
-     *
-     * @param id - The appointment ID
-     * @param updatedAppointment - The updated appointment data
-     */
+    // Update an existing appointment
     const updateAppointment = useCallback(
         async (id: number, updatedAppointment: Partial<Appointment>) => {
             incrementLoading();
@@ -238,19 +212,13 @@ export const useAppointment = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error(
-                        `Failed to update appointment: ${response.statusText}`
-                    );
+                    throw new Error("Failed to update appointment. Please check your data.");
                 }
 
                 const data: Appointment = await response.json();
-                setAppointments((prev) =>
-                    prev.map((appointment) =>
-                        appointment.id === id ? data : appointment
-                    )
-                );
+                setAppointments((prev) => prev.map((appointment) => (appointment.id === id ? data : appointment)));
             } catch (err: any) {
-                setError(err.message);
+                handleError(err.message || "An error occurred while updating the appointment. Please try again.");
             } finally {
                 decrementLoading();
             }
@@ -258,12 +226,7 @@ export const useAppointment = () => {
         []
     );
 
-    /**
-     * Fetch appointments by category name and date.
-     *
-     * @param categoryName - The name of the appointment category
-     * @param date - The date to filter the appointments (optional)
-     */
+    // Fetch appointments by category name and date
     const fetchAppointmentsByCategory = useCallback(
         async (categoryName: string, date?: string) => {
             incrementLoading();
@@ -289,20 +252,18 @@ export const useAppointment = () => {
                 );
 
                 if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch appointments for category: ${response.statusText}`
-                    );
+                    throw new Error("Failed to fetch appointments for category. Please try again.");
                 }
 
                 const data: Appointment[] = await response.json();
                 setAppointments(data);
             } catch (err: any) {
-                setError(err.message);
+                handleError(err.message || "An error occurred while fetching appointments for the category. Please try again.");
             } finally {
                 decrementLoading();
             }
         },
-        [] // Dependencies array: update this if you need to use dependencies
+        []
     );
 
     // Return the states and functions for use in components

@@ -28,8 +28,8 @@ export const useServices = (): UseServices => {
     const fetchServices = useCallback(async () => {
         try {
             incrementLoading();
-            setError(null); 
-
+            setError(null);
+    
             const response = await fetch(`${baseAPIUrl}/services/`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -37,26 +37,31 @@ export const useServices = (): UseServices => {
                 },
                 credentials: "include",
             });
-
-            if(!response.ok) {
-                throw new Error("An error occured while fetching the services.");
+    
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("Requested services could not be found. Please verify the request or try again later.");
+                } else if (response.status === 500) {
+                    throw new Error("We’re experiencing a server issue. Please try again in a few minutes.");
+                } else {
+                    throw new Error("An unexpected error occurred. We are working to resolve this. Please try again shortly.");
+                }
             }
-
+    
             const data = await response.json();
-
             setServices(data);
         } catch (error: any) {
-            setError(error);
+            setError(error.message || "An error occurred while retrieving the data. Please refresh the page and try again.");
         } finally {
             decrementLoading();
         }
     }, []);
-
+    
     const fetchServiceByName = useCallback(async (serviceName: string) => {
         try {
             incrementLoading();
-            setError(null); 
-
+            setError(null);
+    
             const response = await fetch(`${baseAPIUrl}/services/${serviceName}`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -64,15 +69,21 @@ export const useServices = (): UseServices => {
                 },
                 credentials: "include",
             });
-
-            if(!response.ok) {
-                throw new Error("An error occured while fetching the services.");
+    
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("The requested service was not found. Please check the service name and try again.");
+                } else if (response.status === 500) {
+                    throw new Error("We’re currently experiencing server difficulties. Please try again in a few minutes.");
+                } else {
+                    throw new Error("An unexpected error occurred. Please try again shortly.");
+                }
             }
-
+    
             const data = await response.json();
             setService(data);
         } catch (error: any) {
-            setError(error);
+            setError(error.message || "An error occurred while retrieving the data. Please refresh the page and try again.");
         } finally {
             decrementLoading();
         }

@@ -32,15 +32,20 @@ export const useAgeCategory = (): UseAgeCategory => {
                 credentials: "include",
             });
 
-            if(!response.ok) {
-                throw new Error("An error occured while fetching the ageCategories.");
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error("The requested age categories could not be located. Please verify the resource or try again later.");
+                } else if (response.status === 500) {
+                    throw new Error("We are currently experiencing technical difficulties. Please try again in a few moments.");
+                } else {
+                    throw new Error("An unexpected error occurred. We are working to resolve this. Please try again shortly.");
+                }
             }
-
+    
             const data = await response.json();
-
             setAgeCategories(data);
         } catch (error: any) {
-            setError(error);
+            setError(error.message || "An issue occurred while retrieving the age categories. Please refresh and try again.");
         } finally {
             decrementLoading();
         }

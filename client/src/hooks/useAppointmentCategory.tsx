@@ -10,9 +10,11 @@ interface AppointmentCategory {
 interface UseAppointmentCategory {
     fetchAppointmentCategories: () => Promise<void>;
     appointmentCategories: AppointmentCategory[];
+    error: string | null;
 }
 
 export const useAppointmentCategory = (): UseAppointmentCategory => {
+    const [error, setError] = useState<string | null>(null);
     const [appointmentCategories, setAppointmentCategories] = useState<
         AppointmentCategory[]
     >([]);
@@ -22,26 +24,32 @@ export const useAppointmentCategory = (): UseAppointmentCategory => {
     const fetchAppointmentCategories = useCallback(async () => {
         try {
             incrementLoading();
-
-            const response = await fetch(
-                `${baseAPIUrl}/appointment-categories`
-            );
+            const response = await fetch(`${baseAPIUrl}/appointment-categories`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+    
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error("Unable to fetch appointment categories. Please check your connection or try again later.");
             }
+    
             const data: AppointmentCategory[] = await response.json();
+    
             // Ensure data is an array
             if (Array.isArray(data)) {
                 setAppointmentCategories(data);
             } else {
-                console.error("Expected an array but got:", data);
+                setError("An error occurred while processing the appointment categories.");
             }
-        } catch (error) {
-            console.error("Error fetching appointment categories:", error);
+        } catch (error: any) {
+            setError(error.message || "Unexpected error while fetching appointment categories.");
         } finally {
             decrementLoading();
         }
     }, []);
-
-    return { fetchAppointmentCategories, appointmentCategories };
+    
+    return { fetchAppointmentCategories, appointmentCategories, error };
 };

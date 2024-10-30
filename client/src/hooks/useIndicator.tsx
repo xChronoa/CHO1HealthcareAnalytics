@@ -27,15 +27,23 @@ export const useIndicator = () => {
             );
 
             if (!response.ok) {
-                throw new Error(
-                    `Failed to fetch Indicators: ${response.statusText}`
-                );
+                let errorMessage = "Unable to fetch indicators at this time.";
+    
+                if (response.status >= 500) {
+                    errorMessage = "Server error. Please try again later.";
+                } else if (response.status === 404) {
+                    errorMessage = "Service indicators not found.";
+                } else if (response.status === 401 || response.status === 403) {
+                    errorMessage = "You are not authorized to view this data.";
+                }
+    
+                throw new Error(errorMessage);
             }
 
             const data: Indicator[] = await response.json();
             setIndicators(data);
         } catch (err: any) {
-            setError(err.message);
+            setError(err.message || "Something went wrong. Please try again.");
         } finally {
             decrementLoading();
         }
