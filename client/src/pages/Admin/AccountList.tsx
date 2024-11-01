@@ -93,30 +93,32 @@ const AccountList: React.FC = () => {
                                                 {user.email}
                                             </td>
                                             <td className="px-4 py-2 font-semibold uppercase align-top">
-                                                {user.barangay_name}
+                                                {user.barangay_name || "n/a"}
                                             </td>
                                             <td className={`px-4 py-2 font-semibold uppercase align-top ${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>
                                                 {user.status}
                                             </td>
                                             <td className="flex items-center justify-center gap-2 px-4 py-2 font-semibold uppercase align-top">
-                                                <button
-                                                    onClick={() =>
-                                                        handleUpdateClick(user)
-                                                    }
-                                                    className="flex-1 p-2 text-white bg-blue-400 border-black rounded-lg shadow-md border-1 shadow-gray-400"
-                                                >
-                                                    Update
-                                                </button>
                                                 {user.role === "encoder" ? (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDisable(user)
-                                                        }
-                                                        className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
-                                                    >
-                                                        Disable
-                                                    </button>
-                                                ) : null}
+                                                    <>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleUpdateClick(user)
+                                                            }
+                                                            className="flex-1 p-2 text-white bg-blue-400 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                        >
+                                                            Update
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDisable(user)
+                                                            }
+                                                            className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                        >
+                                                            Disable
+                                                        </button>
+                                                    </>
+                                                ) : "-"}
                                             </td>
                                         </tr>
                                     ))
@@ -157,7 +159,7 @@ const AccountList: React.FC = () => {
                                             <span className="font-semibold">
                                                 Barangay:
                                             </span>
-                                            <span>{user.barangay_name}</span>
+                                            <span>{user.barangay_name || "n/a"}</span>
                                         </div>
                                         <div className="flex justify-between mb-2">
                                             <span className="font-semibold">
@@ -166,23 +168,25 @@ const AccountList: React.FC = () => {
                                             <span className={`${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>{user.status}</span>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={() =>
-                                                    handleUpdateClick(user)
-                                                }
-                                                className="flex-1 p-2 text-white bg-blue-400 border-black rounded-lg shadow-md border-1 shadow-gray-400"
-                                            >
-                                                Update
-                                            </button>
                                             {user.role === "encoder" ? (
-                                                <button
-                                                    onClick={() =>
-                                                        handleDisable(user)
-                                                    }
-                                                    className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
-                                                >
-                                                    Disable
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleUpdateClick(user)
+                                                        }
+                                                        className="flex-1 p-2 text-white bg-blue-400 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                    >
+                                                        Update
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDisable(user)
+                                                        }
+                                                        className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                    >
+                                                        Disable
+                                                    </button>
+                                                </>
                                             ) : null}
                                         </div>
                                     </div>
