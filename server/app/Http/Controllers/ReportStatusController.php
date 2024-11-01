@@ -59,6 +59,34 @@ class ReportStatusController extends Controller
         $m1Report = $validated['m1Report'] ?? [];
         $m2Report = $validated['m2Report'] ?? [];
 
+        // Check the status of m1ReportId if provided
+        if (isset($validated['m1ReportId'])) {
+            $m1ReportId = $validated['m1ReportId'];
+            $m1ReportSubmission = DB::table('report_submissions')
+                ->where('report_submission_id', $m1ReportId)
+                ->first();
+
+            if ($m1ReportSubmission) {
+                if (in_array($m1ReportSubmission->status, ['submitted', 'submitted late'])) {
+                    return response()->json(['error' => 'The report for this period has already been submitted.'], 400);
+                }
+            }
+        }
+
+        // Check the status of m2ReportId if provided
+        if (isset($validated['m2ReportId'])) {
+            $m2ReportId = $validated['m2ReportId'];
+            $m2ReportSubmission = DB::table('report_submissions')
+                ->where('report_submission_id', $m2ReportId)
+                ->first();
+
+            if ($m2ReportSubmission) {
+                if (in_array($m2ReportSubmission->status, ['submitted', 'submitted late'])) {
+                    return response()->json(['error' => 'The report for this period has already been submitted.'], 400);
+                }
+            }
+        }
+
         // Fetch all age categories to map names to IDs
         $ageCategoryMap = AgeCategory::pluck('age_category_id', 'age_category')->toArray();
 
