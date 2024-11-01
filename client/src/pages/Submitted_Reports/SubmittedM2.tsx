@@ -203,173 +203,195 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
 
     return (
         <>
-            <button
-                onClick={handlePrint}
-                className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-[1.9rem] py-2.5 text-center"
-            >
-                Download M2 Report
-            </button>
-            <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center">
-                <table className="border-collapse text-[9px] bg-white text-center table-fixed">
-                    <thead>
-                        <tr>
-                            <th className="px-2 border border-black">
-                                <div className="flex items-center justify-center gap-2 lg:gap-0">
-                                    <img
-                                        src={cho_logo}
-                                        alt="CHO Logo"
-                                        className="size-14 lg:scale-90"
-                                        loading="lazy"
-                                    />
-                                    <img
-                                        src={cabuyao_logo}
-                                        alt="Cabuyao Logo"
-                                        className="size-14 lg:scale-90"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            </th>
-                            <td colSpan={35} className="border border-black">
-                                <section className="flex flex-col items-center justify-center gap-2">
-                                    <div className="flex flex-col gap-2 text-xs text-left">
-                                        <p>
-                                            FHIS REPORT for MONTH:{" "}
-                                            <span className="font-bold underline uppercase">
-                                                {new Date(
-                                                    0,
-                                                    Number(selectedMonth) - 1
-                                                ).toLocaleString("default", {
-                                                    month: "long",
-                                                })}{" "}
-                                            </span>
-                                            YEAR:{" "}  
-                                            <span className="font-bold underline">
-                                                {selectedYear}
-                                            </span>
-                                        </p>
-                                        <p>
-                                            Barangay:{" "}
-                                            <span className="font-bold underline uppercase">
-                                                {barangayName !== null ? barangayName : user ? user?.barangay_name : ""}
-                                            </span>
-                                            , City of Cabuyao
-                                        </p>
-                                        <p>
-                                            Province:{" "}
-                                            <span className="font-bold underline uppercase">
-                                                Laguna
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div className="text-center">
-                                        <h1 className="text-lg font-bold uppercase">
-                                            Morbidity Disease Report
-                                        </h1>
-                                        <p className="italic text-gray-500">
-                                            For submission to PHO
-                                        </p>
-                                    </div>
-                                </section>
-                            </td>
-                            <th
-                                colSpan={4}
-                                className="text-center border border-black"
-                            >
-                                <p className="text-[.5rem] italic">
-                                    FHSIS v.2012
-                                </p>
-                                <h1 className="text-5xl font-extrabold">M2</h1>
-                                <h1 className="text-2xl font-extrabold">RHU</h1>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th
-                                className="font-extrabold uppercase border border-black text-md min-w-200"
-                                rowSpan={2}
-                            >
-                                Disease
-                            </th>
-                            <th
-                                className="font-extrabold uppercase border border-black"
-                                rowSpan={2}
-                            >
-                                ICD 10 Code
-                            </th>
-                            {ageGroups.map((ageGroup, index) => {
-                                // Determine the status of the current age group
-                                const isSeventyPlus = ageGroup === "70+";
-                                const isTotal = ageGroup === "Total";
-                                const isSpecialAgeGroup = [0, 1, 2].includes(
-                                    index
-                                );
+            {error ? (
+                <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <h1 className="font-bold text-center text-red-500">
+                        Error: {error}
+                    </h1>
+                </div>
+            ) : (
+                reports !== null ? (
+                    <>
+                        <button
+                            onClick={handlePrint}
+                            className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-[1.9rem] py-2.5 text-center"
+                        >
+                            Download M2 Report
+                        </button>
+                        <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center">
+                            <table className="border-collapse text-[9px] bg-white text-center table-fixed">
+                                <thead>
+                                    <tr>
+                                        <th className="px-2 border border-black">
+                                            <div className="flex items-center justify-center gap-2 lg:gap-0">
+                                                <img
+                                                    src={cho_logo}
+                                                    alt="CHO Logo"
+                                                    className="size-14 lg:scale-90"
+                                                    loading="lazy"
+                                                />
+                                                <img
+                                                    src={cabuyao_logo}
+                                                    alt="Cabuyao Logo"
+                                                    className="size-14 lg:scale-90"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        </th>
+                                        <td colSpan={35} className="border border-black">
+                                            <section className="flex flex-col items-center justify-center gap-2">
+                                                <div className="flex flex-col gap-2 text-xs text-left">
+                                                    <p>
+                                                        FHIS REPORT for MONTH:{" "}
+                                                        <span className="font-bold underline uppercase">
+                                                            {new Date(
+                                                                0,
+                                                                Number(selectedMonth) - 1
+                                                            ).toLocaleString("default", {
+                                                                month: "long",
+                                                            })}{" "}
+                                                        </span>
+                                                        YEAR:{" "}  
+                                                        <span className="font-bold underline">
+                                                            {selectedYear}
+                                                        </span>
+                                                    </p>
+                                                    <p>
+                                                        Barangay:{" "}
+                                                        <span className="font-bold underline uppercase">
+                                                            {barangayName !== null ? barangayName : user ? user?.barangay_name : ""}
+                                                        </span>
+                                                        , City of Cabuyao
+                                                    </p>
+                                                    <p>
+                                                        Province:{" "}
+                                                        <span className="font-bold underline uppercase">
+                                                            Laguna
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <h1 className="text-lg font-bold uppercase">
+                                                        Morbidity Disease Report
+                                                    </h1>
+                                                    <p className="italic text-gray-500">
+                                                        For submission to PHO
+                                                    </p>
+                                                </div>
+                                            </section>
+                                        </td>
+                                        <th
+                                            colSpan={4}
+                                            className="text-center border border-black"
+                                        >
+                                            <p className="text-[.5rem] italic">
+                                                FHSIS v.2012
+                                            </p>
+                                            <h1 className="text-5xl font-extrabold">M2</h1>
+                                            <h1 className="text-2xl font-extrabold">RHU</h1>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th
+                                            className="font-extrabold uppercase border border-black text-md min-w-200"
+                                            rowSpan={2}
+                                        >
+                                            Disease
+                                        </th>
+                                        <th
+                                            className="font-extrabold uppercase border border-black"
+                                            rowSpan={2}
+                                        >
+                                            ICD 10 Code
+                                        </th>
+                                        {ageGroups.map((ageGroup, index) => {
+                                            // Determine the status of the current age group
+                                            const isSeventyPlus = ageGroup === "70+";
+                                            const isTotal = ageGroup === "Total";
+                                            const isSpecialAgeGroup = [0, 1, 2].includes(
+                                                index
+                                            );
 
-                                // Define styles based on conditions
-                                const thStyle: React.CSSProperties = {
-                                    ...(isSeventyPlus && {
-                                        backgroundColor: "lightgray",
-                                    }),
-                                    ...(isSpecialAgeGroup && {
-                                        backgroundColor: "yellow",
-                                    }),
-                                };
+                                            // Define styles based on conditions
+                                            const thStyle: React.CSSProperties = {
+                                                ...(isSeventyPlus && {
+                                                    backgroundColor: "lightgray",
+                                                }),
+                                                ...(isSpecialAgeGroup && {
+                                                    backgroundColor: "yellow",
+                                                }),
+                                            };
 
-                                // Use a CSS class to apply text transformation for the total row
-                                const className = isTotal ? "uppercase" : "";
+                                            // Use a CSS class to apply text transformation for the total row
+                                            const className = isTotal ? "uppercase" : "";
 
-                                return (
-                                    <th
-                                        key={ageGroup}
-                                        className={`border border-black ${className}`}
-                                        colSpan={2}
-                                        style={thStyle}
-                                    >
-                                        {ageGroup}
-                                    </th>
-                                );
-                            })}
-                        </tr>
-                        <tr>
-                            {ageGroups.map((ageGroup) => (
-                                <React.Fragment key={ageGroup}>
-                                    <th
-                                        key={`${ageGroup}-M`}
-                                        className="border border-black"
-                                        style={{
-                                            borderRight: "2px dashed black",
-                                        }}
-                                    >
-                                        M
-                                    </th>
-                                    <th
-                                        key={`${ageGroup}-F`}
-                                        className="border border-black"
-                                    >
-                                        F
-                                    </th>
-                                </React.Fragment>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {reports &&
-                            Object.keys(reports.data.data).map(
-                                (disease, index) => {
-                                    const diseaseData =
-                                        reports.data.data[disease];
-                                    const diseaseCode =
-                                        diseaseData.disease_code;
+                                            return (
+                                                <th
+                                                    key={ageGroup}
+                                                    className={`border border-black ${className}`}
+                                                    colSpan={2}
+                                                    style={thStyle}
+                                                >
+                                                    {ageGroup}
+                                                </th>
+                                            );
+                                        })}
+                                    </tr>
+                                    <tr>
+                                        {ageGroups.map((ageGroup) => (
+                                            <React.Fragment key={ageGroup}>
+                                                <th
+                                                    key={`${ageGroup}-M`}
+                                                    className="border border-black"
+                                                    style={{
+                                                        borderRight: "2px dashed black",
+                                                    }}
+                                                >
+                                                    M
+                                                </th>
+                                                <th
+                                                    key={`${ageGroup}-F`}
+                                                    className="border border-black"
+                                                >
+                                                    F
+                                                </th>
+                                            </React.Fragment>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {reports &&
+                                        Object.keys(reports.data.data).map(
+                                            (disease, index) => {
+                                                const diseaseData =
+                                                    reports.data.data[disease];
+                                                const diseaseCode =
+                                                    diseaseData.disease_code;
 
-                                    return createTableRow(
-                                        disease,
-                                        diseaseCode,
-                                        diseaseData,
-                                        index
-                                    );
-                                }
-                            )}
-                    </tbody>
-                </table>
-            </div>
+                                                return createTableRow(
+                                                    disease,
+                                                    diseaseCode,
+                                                    diseaseData,
+                                                    index
+                                                );
+                                            }
+                                        )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                ) : (
+                    <div className="w-full p-12 mt-4 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                        <h1 className="text-center">
+                            No submitted reports were found for Barangay {barangayName} {" "}
+                            on the month of {" "} {new Date(0, Number(selectedMonth) - 1).toLocaleString(
+                                "default", {month: "long",}
+                            )} {" "} {selectedYear}
+                        </h1>
+                    </div>
+                )
+            )}
+            
         </>
     );
 };
