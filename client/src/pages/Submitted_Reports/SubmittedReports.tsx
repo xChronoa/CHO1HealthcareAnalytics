@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+// Custom Hook
+import { useReportStatus } from "../../hooks/useReportStatus";
+
+// Components
 import SubmittedM1 from "./SubmittedM1";
 import SubmittedM2 from "./SubmittedM2";
-import { useReportStatus } from "../../hooks/useReportStatus";
-import { useLocation } from "react-router-dom";
 
 const SubmittedReports: React.FC = () => {
     // State variables to manage section and selected date
@@ -35,17 +38,15 @@ const SubmittedReports: React.FC = () => {
         setSelectedDate(selectedDateValue);
     };
 
-    
-
     // Set the selected date to the latest date on mount
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (latestDate) {
             setSelectedDate(latestDate);
         }
     }, [latestDate]);
 
     // Update selected month and year when the selected date changes
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (selectedDate) {
             const [year, month] = selectedDate.split("-");
             setSelectedMonth(month);
@@ -54,7 +55,7 @@ const SubmittedReports: React.FC = () => {
     }, [selectedDate]);
 
     // Use location state to get the barangayId (if passed from previous view)
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (location.state && location.state.barangayId && location.state.barangayName) {
             setBarangayId(location.state.barangayId);
             setBarangayName(location.state.barangayName);
@@ -62,7 +63,7 @@ const SubmittedReports: React.FC = () => {
     }, [location.state]);
 
     // Fetch the earliest and latest report dates when the component mounts
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if(barangayId) {
             fetchEarliestAndLatestDates(barangayId);
         }
@@ -129,7 +130,11 @@ const SubmittedReports: React.FC = () => {
                         )
                     )
                 ) : (
-                    <div>No submitted reports.</div>
+                    <div className="w-full p-12 mt-4 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                        <h1 className="text-center">
+                            No submitted reports were found for Barangay {barangayName}. 
+                        </h1>
+                    </div>
                 )}
             </section>
         </div>
