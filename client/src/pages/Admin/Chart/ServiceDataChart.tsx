@@ -375,7 +375,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                     {/* Legend */}
                     {currentOption === "All" && (
-                        <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                        <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
                             <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                             <div className="flex flex-col-reverse items-center justify-end w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
@@ -483,7 +483,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 
                                 {/* Legend */}
                                 {currentSelectedOption === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
@@ -568,7 +568,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 
                                 {/* Legend */}
                                 {currentSelectedOption === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
@@ -656,7 +656,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                         {/* Legend */}
                         {currentSelectedOption === "All" && (
-                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                 <div className="w-full h-full p-2 pb-12 overflow-y-auto bg-gray-200 legend-list">
@@ -740,7 +740,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         
                         {/* Legend */}
                         {currentSelectedOption === "All" && (
-                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                 <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
@@ -824,6 +824,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             },
         },
     };
+
+    useEffect(() => {
+        decrementLoading();
+    }, [])
     
     return (
         <>
@@ -850,10 +854,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         ))}
                     </select>
                     
-                    <section className="flex flex-col items-center my-8 bg-almond" id="myChart" ref={chartRef}>
-                        <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-t-lg sm:text-lg sm:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
+                    <section className="flex flex-col items-center px-4 my-8 bg-almond" id="myChart" ref={chartRef}>
+                        <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg sm:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 
-                        <div className="flex flex-col items-center w-full gap-8 sm:w-9/12 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 chart-container">
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     serviceData.length > 0 ? (
