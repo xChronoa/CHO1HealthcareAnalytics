@@ -160,7 +160,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
                                 />
                             )}
                             
-                            <div className="flex-1 sm:w-2/3">
+                            <div className="flex-1 md:w-2/3">
                                 <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOption !== "All" ? "mr-8" : ""}`}>
                                     <h3 className="font-semibold text-center">Unmet Need for Modern Family Planning</h3>
                                     <select 
