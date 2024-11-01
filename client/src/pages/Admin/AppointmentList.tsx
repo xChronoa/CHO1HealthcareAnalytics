@@ -1,18 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppointmentCategory } from "../../hooks/useAppointmentCategory";
 import { useAppointment } from "../../hooks/useAppointment"; // Hook for fetching appointments
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
-import Loading from "../../components/Loading";
 
 const AppointmentList: React.FC = () => {
     const {
         fetchAppointmentCategories,
         appointmentCategories,
     } = useAppointmentCategory();
+
     const {
         fetchAppointmentsByCategory,
-        fetchPatientsAppointments,
         appointments,
+        fetchEarliestAndLatestAppointments,
         error,
         minDate,
         maxDate,
@@ -23,17 +22,17 @@ const AppointmentList: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<string>(maxDate || "");
 
     // Fetch appointment categories on component mount
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchAppointmentCategories();
     }, [fetchAppointmentCategories]);
 
-    // Fetch the initial data (date and/or other side effects) when the component mounts
-    useEffectAfterMount(() => {
-        if(!maxDate) {
-            fetchPatientsAppointments(); // Assume this handles side effects like setting state
-        }
+    // Get earliest and latest appointment dates
+    useEffect(() => {
+        fetchEarliestAndLatestAppointments();
+    }, [fetchEarliestAndLatestAppointments])
 
-        // Trigger fetching appointments by category if conditions are met
+    //  Get appointments
+    useEffect(() => {
         if (selectedDate && selectedAppointmentType) {
             fetchAppointmentsByCategory(selectedAppointmentType, selectedDate);
         }
@@ -41,11 +40,10 @@ const AppointmentList: React.FC = () => {
         selectedDate,
         selectedAppointmentType,
         fetchAppointmentsByCategory,
-        fetchPatientsAppointments,
     ]);
 
     // Update the selectedDate when maxDate changes (if needed)
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (maxDate) {
             setSelectedDate(maxDate);
         }

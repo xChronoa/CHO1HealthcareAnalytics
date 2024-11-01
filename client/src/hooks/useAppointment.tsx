@@ -266,6 +266,39 @@ export const useAppointment = () => {
         []
     );
 
+    // Fetch the earliest and latest appointment dates
+    const fetchEarliestAndLatestAppointments = useCallback(async () => {
+        incrementLoading();
+        setError(null);
+
+        try {
+            const response = await fetch(`${baseAPIUrl}/appointments/min-max`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch earliest and latest appointments. Please try again.");
+            }
+
+            const data = await response.json();
+
+            // Update state with the fetched dates
+            setMinDate(data.earliest_appointment_date || null);
+            setMaxDate(data.latest_appointment_date || null);
+        } catch (err: any) {
+            handleError(err.message || "An error occurred while fetching the earliest and latest appointments. Please try again.");
+            setError(err.message);
+        } finally {
+            decrementLoading();
+        }
+    }, []);
+
+
     // Return the states and functions for use in components
     return {
         appointments,
@@ -281,5 +314,6 @@ export const useAppointment = () => {
         createAppointment,
         updateAppointment,
         fetchAppointmentsByCategory,
+        fetchEarliestAndLatestAppointments
     };
 };
