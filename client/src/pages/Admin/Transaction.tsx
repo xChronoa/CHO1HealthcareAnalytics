@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import CreateReportSubmittal from "../../components/CreateReportSubmittal";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
-import Loading from "../../components/Loading";
 
 const Transaction: React.FC = () => {
     const {
