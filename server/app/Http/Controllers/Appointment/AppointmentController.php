@@ -181,7 +181,8 @@ class AppointmentController extends Controller
         return response()->json(null, 204);
     }
 
-    public function getCount() {
+    public function getCount()
+    {
         $appointmentCount = Appointment::all()->count();
         return response()->json(data: [$appointmentCount], status: 200);
     }
@@ -285,5 +286,38 @@ class AppointmentController extends Controller
         });
 
         return response()->json($data);
+    }
+
+    /**
+     * Retrieve the earliest and latest appointment dates from the database.
+     *
+     * This method queries the appointment records to find the minimum and maximum
+     * appointment dates, providing a summary of appointment scheduling timelines.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function fetchEarliestAndLatestAppointmentDates()
+    {
+        // Fetch the earliest appointment date
+        $earliestDate = Appointment::min('appointment_date');
+
+        // Fetch the latest appointment date
+        $latestDate = Appointment::max('appointment_date');
+
+        // Check if there are no appointment records found
+        if (is_null($earliestDate) && is_null($latestDate)) {
+            return response()->json([
+                'error' => 'No appointments found in the database.',
+            ], 404);
+        }
+
+        // Prepare the response data
+        $responseData = [
+            'earliest_appointment_date' => $earliestDate ?: null,
+            'latest_appointment_date' => $latestDate ?: null,
+        ];
+
+        // Return the earliest and latest appointment dates in a structured response
+        return response()->json($responseData, 200);
     }
 }
