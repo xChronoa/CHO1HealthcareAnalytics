@@ -5,11 +5,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Disease, useDisease } from "../../hooks/useDisease";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useAgeCategory } from "../../hooks/useAgeCategory";
-import Loading from "../../components/Loading";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
 import { InputValues } from "../../types/M2FormData";
 
@@ -27,8 +25,8 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
     const [incompleteDiseases, setIncompleteDiseases] = useState<string[]>([]);
     
     const [formData, setFormData] = useState<InputValues>(initializeFormData());
-    const { error: diseaseError, diseases, fetchDiseases } = useDisease();
-    const { error: ageCategoryError, ageCategories, fetchAgeCategories } = useAgeCategory();
+    const { diseases, fetchDiseases } = useDisease();
+    const { ageCategories, fetchAgeCategories } = useAgeCategory();
 
     // Initialize form data from local storage or default to an empty object
     function initializeFormData(): InputValues {
@@ -90,19 +88,19 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
 
 
     // Fetch initial data on component mount
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchAgeCategories();
         fetchDiseases();
     }, [fetchAgeCategories, fetchDiseases]);
 
     // Update local storage and data on formData change
-    useEffectAfterMount(() => {
+    useEffect(() => {
         setReportDatas('m2', formData);
         localStorage.setItem("m2formData", JSON.stringify(formData));
     }, [formData]);
 
     // Update incomplete diseases state
-    useEffectAfterMount(() => {
+    useEffect(() => {
         const newIncompleteDiseases = diseases
             .filter(disease => !isComplete(disease.disease_name))
             .map(disease => disease.disease_name);
@@ -111,7 +109,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
     }, [diseases, formData]);
 
     // Notify external system of incomplete diseases
-    useEffectAfterMount(() => {
+    useEffect(() => {
         onCheckIncomplete("M2", incompleteDiseases);
     }, [incompleteDiseases]);
 
