@@ -1,9 +1,9 @@
 import { useUser } from "../../hooks/useUser";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useNavigate } from "react-router-dom";
 import { User } from "../../types/User";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import { useEffect } from "react";
 
 const alert = withReactContent(Swal);
 
@@ -11,7 +11,7 @@ const AccountList: React.FC = () => {
     const { users, fetchUsers, disableUser } = useUser();
     const navigate = useNavigate();
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchUsers();
     }, [fetchUsers, disableUser]);
 
@@ -65,8 +65,8 @@ const AccountList: React.FC = () => {
                     <div className="dividing-line w-full h-[2px] bg-black"></div>
                 </header>
                 <section className="flex flex-col items-start">
-                    <div className="w-full p-4 overflow-x-auto rounded-lg shadow-md sm:py-4 table-container outline outline-1 shadow-black sm:outline-0 sm:shadow-transparent">
-                        <table className="hidden min-w-full text-center table-fixed sm:table">
+                    <div className="w-full p-4 overflow-x-auto sm:py-4 table-container ">
+                        <table className="hidden min-w-full text-xs text-center table-fixed lg:text-sm md:table">
                             {/* Table Header */}
                             <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
                                 <tr>
@@ -134,7 +134,7 @@ const AccountList: React.FC = () => {
                         </table>
 
                         {/* Mobile-friendly Card Layout */}
-                        <div className="block sm:hidden">
+                        <div className="block md:hidden">
                             {users ? (
                                 users.map((user) => (
                                     <div
