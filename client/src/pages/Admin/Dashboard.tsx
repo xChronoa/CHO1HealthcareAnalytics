@@ -1,5 +1,4 @@
-import { useRef, useState } from "react";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useRef, useState, useEffect } from "react";
 import { usePatient } from "../../hooks/usePatient";
 import { useAppointment } from "../../hooks/useAppointment";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
@@ -44,7 +43,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
     const { earliestDate, latestDate, fetchEarliestAndLatestDates } = useReportSubmissions();
 
     // Loading management
-    const { isLoading } = useLoading();
+    const { isLoading, incrementLoading } = useLoading();
 
     /**
      * 
@@ -52,31 +51,31 @@ const Dashboard: React.FC<DashboardProp> = () => {
      * 
      */
     // Fetch patient count, appointment count, and pending report count
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchPatientCount();
         fetchAppointmentCount();
         fetchPendingReportCount();
     }, [fetchPatientCount, fetchAppointmentCount, fetchPendingReportCount]);
 
     // Fetch barangays on mount
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchBarangays();
     }, []);
 
     // Set the selected barangay to the first one fetched
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (barangays.length > 0) {
             setSelectedBarangay(barangays[0].barangay_name);
         }
     }, [barangays]);
 
     // Fetch earliest and latest dates for reports
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchEarliestAndLatestDates();
     }, [fetchEarliestAndLatestDates]);
 
     // Set the max date and selected year based on latest date
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (latestDate) {
             const [year, month] = latestDate.split('-');
             const maxDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
@@ -86,13 +85,17 @@ const Dashboard: React.FC<DashboardProp> = () => {
     }, [latestDate]);
 
     // Set the min date based on earliest date
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (earliestDate) {
             const [year, month] = earliestDate.split('-');
             const minDateObj = new Date(Number(year), Number(month) - 1); // Month is zero-based
             setMinDate(minDateObj);
         }
     }, [earliestDate]);
+
+    useEffect(() => {
+        incrementLoading();
+    }, [section]);
 
     /**
      * 
@@ -119,7 +122,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
         setSelectedBarangay(event.target.value); // Update state with selected barangay name
     };
 
-
     /**
      * 
      * DOWNLOAD CHART
@@ -129,76 +131,202 @@ const Dashboard: React.FC<DashboardProp> = () => {
     const downloadChart = async () => {
         const input = chartRef.current;
 
-        if (!input) {
-            // Display toast notification for error
-            Swal.fire({
-                icon: "error",
-                title: "Oops!",
-                text: "We can't find the chart to download. Please refresh the page and try again.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-                background: "#f8d7da",
-                color: "#721c24",
-                customClass: {
-                    popup: "border border-danger",
+        if (input) {
+            // Retrieve and parse the morbidityChart data from localStorage
+            const morbidityChartData = JSON.parse(localStorage.getItem('morbidityChart') || 'null');
+
+            // Early return if no data is available
+            if (!morbidityChartData) return;
+
+            // Destructure and extract chart data more efficiently
+            const { 
+                male: { data: maleData, options: maleOptions } = {},
+                female: { data: femaleData, options: femaleOptions } = {} 
+            } = morbidityChartData || {};
+
+            // If you need stringified versions, do this only if necessary
+            const chartData = {
+                male: {
+                    data: JSON.stringify(maleData),
+                    options: JSON.stringify(maleOptions)
                 },
-            });
-            return;
+                female: {
+                    data: JSON.stringify(femaleData),
+                    options: JSON.stringify(femaleOptions)
+                }
+            };
+
+            // Open a new document
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>${morbidityChartData.title}</title>
+                            <script src="https://cdn.tailwindcss.com"></script>
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            <style>
+                                body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 472.1mm;orientation:landscape}body{visibility:visible}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important}.legend-container{height:100%!important}}
+                            </style>
+                        </head>
+                        <body>
+                            ${input.outerHTML}
+                            <script>
+                                const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+                                const maleCtx = document.getElementById('male-chart').getContext('2d');
+                                const femaleCtx = document.getElementById('female-chart').getContext('2d');
+            
+                                // Initialize the male chart
+                                new Chart(maleCtx, {
+                                    type: 'line',
+                                    data: ${chartData.male.data},
+                                    options: {
+                                        ...${chartData.male.options},
+                                        responsive: false,
+                                        scales: {
+                                            x: {
+                                                ...${chartData.male.options}.scales.x,
+                                                ticks: {
+                                                    callback: function(value) {
+                                                        return monthNames[Number(value) % 12];
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    maintainAspectRatio: true,
+                                });
+
+                                // Initialize the female chart
+                                new Chart(femaleCtx, {
+                                    type: 'line',
+                                    data: ${chartData.female.data},
+                                    options: {
+                                        ...${chartData.female.options},
+                                        responsive: false,
+                                        scales: {
+                                            x: {
+                                                ...${chartData.female.options}.scales.x,
+                                                ticks: {
+                                                    callback: function(value) {
+                                                        return monthNames[Number(value) % 12];
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    maintainAspectRatio: true,
+                                });
+                            </script>
+                        </body>
+                    </html>
+                `);
+    
+                printWindow.document.close();
+                printWindow.focus();
+
+                printWindow.onload = () => setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
+            }
         }
-
-        try {
-            const canvas = await html2canvas(input as HTMLElement);
-            const imgData = canvas.toDataURL("image/png");
-
-            // Create a PDF with the exact dimensions of the chart
-            const pdf = new jsPDF({
-                orientation: canvas.width > canvas.height ? "landscape" : "portrait",
-                unit: "px",
-                format: [canvas.width, canvas.height],
-            });
-
-            // Add the image to the PDF, fitting it exactly to the page
-            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-            pdf.save(`${section.toUpperCase()} - ${textRef.current ? textRef.current.textContent : ""} - Chart.pdf`);
-
-            // Show success toast notification
-            Swal.fire({
-                icon: "success",
-                title: "Download Successful!",
-                text: "Your chart has been downloaded successfully.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                background: "#fff",
-                color: "#155724",
-                customClass: {
-                    popup: "border border-success",
-                },
-            });
-        } catch (error) {
-            // Display toast notification indicating download failure
-            Swal.fire({
-                icon: "error",
-                title: "Download Failed",
-                text: "Something went wrong while generating the PDF. Please try again.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-                background: "#f8d7da",
-                color: "#721c24",
-                customClass: {
-                    popup: "border border-danger",
-                },
-            });
-        }
+        
+        // if (!input) {
+        //     Swal.fire({
+        //         icon: "error",
+        //         title: "Oops!",
+        //         text: "We can't find the chart to download. Please refresh the page and try again.",
+        //         toast: true,
+        //         position: "top-end",
+        //         showConfirmButton: false,
+        //         timer: 4000,
+        //         timerProgressBar: true,
+        //         background: "#f8d7da",
+        //         color: "#721c24",
+        //         customClass: {
+        //             popup: "border border-danger",
+        //         },
+        //     });
+        //     return;
+        // }
+    
+        // // Ask for confirmation before downloading
+        // const confirmation = await Swal.fire({
+        //     title: "Download Chart?",
+        //     text: "Would you like to download the chart as a PDF?",
+        //     icon: "question",
+        //     showCancelButton: true,
+        //     confirmButtonText: "Yes, download it!",
+        //     cancelButtonText: "No, cancel",
+        //     customClass: {
+        //         popup: "border border-primary",
+        //     },
+        // });
+    
+        // if (!confirmation.isConfirmed) {
+        //     // If user canceled, do nothing
+        //     return;
+        // }
+    
+        // try {
+        //     setIsPrinting(true);
+        //     const canvas = await html2canvas(input as HTMLElement);
+        //     const imgData = canvas.toDataURL("image/png");
+    
+        //     // Create a PDF with the exact dimensions of the chart
+        //     const pdf = new jsPDF({
+        //         orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+        //         unit: "px",
+        //         format: [canvas.width, canvas.height],
+        //     });
+    
+        //     // Add the image to the PDF, fitting it exactly to the page
+        //     pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+        //     pdf.save(`${section.toUpperCase()} - ${textRef.current ? textRef.current.textContent : ""} - Chart.pdf`);
+    
+        //     // Show success toast notification
+        //     Swal.fire({
+        //         icon: "success",
+        //         title: "Download Successful!",
+        //         text: "Your chart has been downloaded successfully.",
+        //         toast: true,
+        //         position: "top-end",
+        //         showConfirmButton: false,
+        //         timer: 3000,
+        //         timerProgressBar: true,
+        //         background: "#fff",
+        //         color: "#155724",
+        //         customClass: {
+        //             popup: "border border-success",
+        //         },
+        //     });
+        // } catch (error) {
+        //     Swal.fire({
+        //         icon: "error",
+        //         title: "Download Failed",
+        //         text: "Something went wrong while generating the PDF. Please try again.",
+        //         toast: true,
+        //         position: "top-end",
+        //         showConfirmButton: false,
+        //         timer: 4000,
+        //         timerProgressBar: true,
+        //         background: "#f8d7da",
+        //         color: "#721c24",
+        //         customClass: {
+        //             popup: "border border-danger",
+        //         },
+        //     });
+        // } finally {
+        //     setIsPrinting(false);
+        // }
     };
+
+
 
     /**
      * 
@@ -346,7 +474,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                     chartRef={chartRef}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
-                                    year={selectedYear} // Use selectedYear directly
+                                    year={selectedYear}
                                 />
                             )}
                             {section === "m2" && (
@@ -354,7 +482,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                     chartRef={chartRef}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
-                                    year={selectedYear} // Use selectedYear directly
+                                    year={selectedYear}
                                 />
                             )}
                         </>
