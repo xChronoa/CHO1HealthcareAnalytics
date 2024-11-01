@@ -41,7 +41,6 @@ export const useAppointment = () => {
 
     // Utility function for handling errors
     const handleError = (message: string) => {
-        console.error(message);
         setError(message);
     };
 
