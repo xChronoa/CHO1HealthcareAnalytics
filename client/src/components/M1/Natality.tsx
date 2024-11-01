@@ -1,4 +1,4 @@
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useEffect } from "react";
 import { useIndicator } from "../../hooks/useIndicator";
 import { ServiceProps } from "../../types/ServiceProps";
 import { getInputValue, handleInputChange } from "../../utils/serviceUtils";
@@ -13,7 +13,7 @@ export const Natality: React.FC<ServiceProps> = ({
         fetchIndicatorsByServiceName,
     } = useIndicator();
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchIndicatorsByServiceName("Part 2. Natality");
     }, []);
 

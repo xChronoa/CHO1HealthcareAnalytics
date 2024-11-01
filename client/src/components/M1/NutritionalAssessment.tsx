@@ -1,4 +1,4 @@
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useEffect } from "react";
 import { useIndicator } from "../../hooks/useIndicator";
 import { ServiceProps } from "../../types/ServiceProps";
 import { getInputValue, handleInputChange } from "../../utils/serviceUtils";
@@ -18,7 +18,7 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
     ];
 
     // Extract the ID if the indicator is found
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchIndicatorsByServiceName(
             "Nutritional Assessment of Children 0-59 mos. Old"
         );

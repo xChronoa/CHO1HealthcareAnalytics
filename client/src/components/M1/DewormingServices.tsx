@@ -1,4 +1,4 @@
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useEffect } from "react";
 import { useIndicator } from "../../hooks/useIndicator";
 import { ServiceProps } from "../../types/ServiceProps";
 import { getInputValue, handleInputChange } from "../../utils/serviceUtils";
@@ -18,7 +18,7 @@ export const DewormingServices: React.FC<ServiceProps> = ({
     ];
 
     // Extract the ID if the indicator is found
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchIndicatorsByServiceName(
             "Deworming Services for Infants, Children and Adolescents (Community Based)"
         );

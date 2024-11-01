@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { getInputValue, handleInputChange } from "../../utils/serviceUtils";
 import { ServiceProps } from "../../types/ServiceProps";
 import { InputField } from "../InputField";
@@ -30,7 +29,7 @@ export const TeenagePregnancy: React.FC<ServiceProps> = ({
     } = useServices();
 
     // Fetch the service by name and extract the ID
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchServiceByName("Teenage Pregnancy");
     }, []);
 

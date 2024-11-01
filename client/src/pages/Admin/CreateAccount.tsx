@@ -1,12 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBarangay } from "../../hooks/useBarangay";
 import { useUser } from "../../hooks/useUser";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
 import { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useLoading } from "../../context/LoadingContext";
 
 const CreateAccount: React.FC = () => {
@@ -68,7 +67,7 @@ const CreateAccount: React.FC = () => {
         }));
     };
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchBarangays();
     }, []);
 

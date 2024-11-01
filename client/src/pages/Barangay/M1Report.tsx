@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Report Components
 import { ModernWRA } from "../../components/M1/ModernWRA";
@@ -22,7 +22,6 @@ import {
     ServiceData,
     WRA,
 } from "../../types/M1FormData";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useServices } from "../../hooks/useServices";
 import { TeenagePregnancy } from "../../components/M1/TeenagePregnancy";
 import {
@@ -224,24 +223,24 @@ export const M1Report: React.FC<M1ReportProps> = ({
         };
     }
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchServices();
     }, [fetchServices]);
     
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (services.length > 0) {
             setReportDatas("m1", sortFormData(formData));
             localStorage.setItem("m1formData", JSON.stringify(formData));
         }
     }, [formData, services]); // Add services to the dependency array
     
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (services.length > 0) {
             setIncompleteSections(checkIncompleteSections(formData));
         }
     }, [formData, services]); // Ensure services is included in the dependencies
     
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (services.length > 0) {
             onCheckIncomplete("M1", incompleteSections);
         }

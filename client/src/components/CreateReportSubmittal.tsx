@@ -1,9 +1,8 @@
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReportSubmittalsData } from "../hooks/useReportSubmissions";
 import { useReportSubmissions } from "../hooks/useReportSubmissions";
-import useEffectAfterMount from "../hooks/useEffectAfterMount";
 import { useLoading } from "../context/LoadingContext";
 
 interface CreateReportSubmittalProps {
@@ -32,7 +31,7 @@ const CreateReportSubmittal: React.FC<CreateReportSubmittalProps> = ({
         due_date: formattedToday, // Initialize with today's date as a string
     });
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (formData.report_month && formData.report_year) {
             // Create a date for the first day of the selected month and year
             const firstDayOfMonth = new Date(

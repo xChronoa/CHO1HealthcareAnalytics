@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useReportStatus } from "../../hooks/useReportStatus";
-import Loading from "../../components/Loading";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import PendingReportNotice from "../../components/PendingReportNotice";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 
@@ -19,16 +17,16 @@ const History: React.FC = () => {
 
     const { latestDate: submissionLatestDate, fetchEarliestAndLatestDates: fetchDatesFromSubmissions } = useReportSubmissions();
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         // Fetch earliest and latest dates on component mount
         fetchDatesFromStatus();
     }, [fetchDatesFromStatus]);
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchDatesFromSubmissions();
     }, [fetchDatesFromSubmissions])
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         // Fetch report statuses whenever selectedDate changes
         if (selectedDate) {
             const [year, month] = selectedDate.split("-").map(Number);
@@ -36,7 +34,7 @@ const History: React.FC = () => {
         }
     }, [selectedDate, fetchReportStatuses]);
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if (latestDate) {
             setSelectedDate(latestDate);
         }
@@ -46,7 +44,7 @@ const History: React.FC = () => {
         setSelectedDate(event.target.value);
     };
 
-    useEffectAfterMount(() => {
+    useEffect(() => {
         if(submissionLatestDate) {
             setIsOpen(submissionLatestDate !== null);
         }
