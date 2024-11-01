@@ -301,7 +301,8 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     }, [selectedOptionMale, selectedOptionFemale, optionsMale, optionsFemale])
 
     return (
-        <>
+        <section className="flex flex-col items-center px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
+            <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green" ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -309,8 +310,8 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     </h1>
                 </div>
             ) : (
-                    <section className="flex flex-col items-center px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
-                        <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green" ref={textRef}>Morbidity Report</h1>
+                morbidityReports.length > 0 ? (
+                    <>
                         
                         <div className="flex flex-col items-center w-full gap-8 chart-container">
                             {/* Male Chart */}
@@ -429,9 +430,16 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                 )}
                             </div>
                         </div>
-                    </section>
+                    </>
+                ) : (
+                    <div className="w-9/12 p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                        <h1 className="text-center">
+                            No submitted reports were found for Barangay {barangay} for the year {year}. 
+                        </h1>
+                    </div>
+                )
             )}
-        </>
+        </section>
     );
 };
 
