@@ -33,6 +33,9 @@ const Dashboard: React.FC<DashboardProp> = () => {
     const chartRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLHeadingElement>(null);
 
+    // Section ref to check for changes
+    const prevSectionRef = useRef<string>(section);
+
     // Fetching counts from hooks
     const { fetchCount: fetchPatientCount, patientCount } = usePatient();
     const { fetchCount: fetchAppointmentCount, appointmentCount } = useAppointment();
@@ -93,8 +96,16 @@ const Dashboard: React.FC<DashboardProp> = () => {
         }
     }, [earliestDate]);
 
+    
+
     useEffect(() => {
-        incrementLoading();
+        // Check if the section has changed
+        if (prevSectionRef.current !== section) {
+            incrementLoading(); // Call incrementLoading only if section changed
+        }
+
+        // Update the ref with the current section value
+        prevSectionRef.current = section;
     }, [section]);
 
     /**
