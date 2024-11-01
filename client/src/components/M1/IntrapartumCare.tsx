@@ -1,4 +1,4 @@
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import { useEffect } from "react";
 import { useIndicator } from "../../hooks/useIndicator";
 import { ServiceProps } from "../../types/ServiceProps";
 import { getInputValue, handleInputChange } from "../../utils/serviceUtils";
@@ -22,7 +22,7 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
     ];
 
     // Extract the ID if the indicator is found
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchIndicatorsByServiceName(
             "B2. Intrapartum Care and Delivery Outcome"
         );
@@ -51,7 +51,7 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
 
     return (
         <>
-            <fieldset className="flex flex-col w-11/12 gap-4 p-4 border border-black rounded-md sm:w-fit">
+            <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md">
                 <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">
                     B2. Intrapartum Care and Delivery Outcome
                 </legend>
@@ -64,17 +64,17 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                 ) : (
                     <>
                         {/* Header Row */}
-                        <div className="grid items-center justify-center grid-cols-1 gap-4 mb-2 text-center sm:grid-cols-7 sm:gap-2">
+                        <div className="grid items-center justify-center grid-cols-1 gap-4 mb-2 text-center md:grid-cols-7 sm:gap-2">
                             <div className="font-semibold text-gray-700 border-b-2 border-black md:col-span-2">
                                 Indicator
                             </div>
-                            <div className="font-semibold text-gray-700 border-b-2 border-black">
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
                                 10 - 14 yo
                             </div>
-                            <div className="font-semibold text-gray-700 border-b-2 border-black">
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
                                 15 - 19 yo
                             </div>
-                            <div className="font-semibold text-gray-700 border-b-2 border-black">
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
                                 20 - 49 yo
                             </div>
                             <div className="font-semibold text-gray-700 border-b-2 border-black">
@@ -107,12 +107,12 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                             return (
                                 <div
                                     key={indicator.indicator_id}
-                                    className="grid grid-cols-1 gap-4 sm:grid-cols-7 sm:gap-2"
+                                    className="grid grid-cols-1 gap-4 md:grid-cols-7 sm:gap-2"
                                 >
                                     <label
-                                        className={`flex flex-col justify-center text-gray-700 w-full md:col-span-2 ${
+                                        className={`flex flex-col justify-center text-gray-700 w-full md:col-span-2 border-b-2 border-black ${
                                             indicator.parent_indicator_id
-                                                ? "indent-8"
+                                                ? "md:indent-8"
                                                 : ""
                                         }`}
                                     >
@@ -120,174 +120,206 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                     </label>
                                     {!indicator.parent_indicator_id || indicator.parent_indicator_id === 34 || indicator.parent_indicator_id === 37 ? (
                                         <>
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "10-14",
-                                                        undefined,
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "10-14",
-                                                        undefined,
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "15-19",
-                                                        undefined,
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "15-19",
-                                                        undefined,
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "20-49",
-                                                        undefined,
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "20-49",
-                                                        undefined,
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                            <div></div>
-                                            <input
-                                                type="text"
-                                                placeholder="Remarks"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "10-14",
-                                                        undefined,
-                                                        "remarks"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        "10-14",
-                                                        undefined,
-                                                        "remarks",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    10 - 14 yo
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    min="0"
+                                                    className="block w-full p-2 mt-1 border rounded-md"
+                                                    required
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '10-14',
+                                                            undefined,
+                                                            'value'
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '10-14',
+                                                            undefined,
+                                                            'value',
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    15 - 19 yo
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    min="0"
+                                                    className="block w-full p-2 mt-1 border rounded-md"
+                                                    required
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '15-19',
+                                                            undefined,
+                                                            'value'
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '15-19',
+                                                            undefined,
+                                                            'value',
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    20 - 49 yo
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    min="0"
+                                                    className="block w-full p-2 mt-1 border rounded-md"
+                                                    required
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '20-49',
+                                                            undefined,
+                                                            'value'
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            '20-49',
+                                                            undefined,
+                                                            'value',
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <div className="hidden md:block"/>
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    Remarks
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Remarks"
+                                                    className="w-full p-2 border rounded-md"
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            "10-14",
+                                                            undefined,
+                                                            "remarks"
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            "10-14",
+                                                            undefined,
+                                                            "remarks",
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
                                         </>
                                     ) : (
                                         <>
-                                            <div></div>
-                                            <div></div>
-                                            <div></div>
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "total",
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "total",
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-
-                                            <input
-                                                type="text"
-                                                placeholder="Remarks"
-                                                className="w-full p-2 border rounded-md"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "total",
-                                                        "remarks"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "total",
-                                                        "remarks",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
+                                            <div className="hidden md:block"/>
+                                            <div className="hidden md:block"/>
+                                            <div className="hidden md:block"/>
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    Total
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="0"
+                                                    min="0"
+                                                    className="w-full p-2 border rounded-md"
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            undefined,
+                                                            "total",
+                                                            "value"
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            undefined,
+                                                            "total",
+                                                            "value",
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <label className="block">
+                                                <span className="text-gray-700 md:hidden">
+                                                    Remarks
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Remarks"
+                                                    className="w-full p-2 border rounded-md"
+                                                    value={
+                                                        getInputValue(
+                                                            formData.servicedata,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            undefined,
+                                                            "total",
+                                                            "remarks"
+                                                        ) || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleInputChange(
+                                                            e,
+                                                            indicator.service_id,
+                                                            indicator.indicator_id,
+                                                            undefined,
+                                                            "total",
+                                                            "remarks",
+                                                            updateServiceData
+                                                        )
+                                                    }
+                                                />
+                                            </label>
                                         </>
                                     )}
                                 </div>

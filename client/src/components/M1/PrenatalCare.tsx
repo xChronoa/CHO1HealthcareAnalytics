@@ -1,5 +1,4 @@
-import React from 'react';
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
+import React, { useEffect } from 'react';
 import { useIndicator } from "../../hooks/useIndicator";
 import { getInputValue, handleInputChange } from '../../utils/serviceUtils';
 import { ServiceProps } from '../../types/ServiceProps';
@@ -22,7 +21,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
     );
 
     // Extract the ID if the indicator is found
-    useEffectAfterMount(() => {
+    useEffect(() => {
         fetchIndicatorsByServiceName("B1. Prenatal Care");
     }, []);
 
@@ -31,11 +30,11 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
         : null;
 
     return (
-        <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-fit">
+        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md">
             <legend className="text-lg font-semibold">
                 B1. Prenatal Care
             </legend>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-8 text-sm">
                 {error ? (
                     <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                         <h1 className="font-bold text-center text-red-500">
@@ -43,45 +42,57 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                         </h1>
                     </div>
                 ) : (
-                    indicators.map((indicator) => {
-                        // Determine if the current indicator should be indented
-                        if (indicator.indicator_id === parentIndicatorId) {
+                    <>
+                        {/* Header Row for Indicators */}
+                        <div className="hidden w-full md:grid md:grid-cols-4 md:gap-4">
+                            <span className="flex items-center justify-center text-sm font-bold text-center text-gray-700 border-b-2 border-black">
+                                Indicator
+                            </span>
+                            <span className="flex items-center justify-center text-sm font-bold text-center text-gray-700 border-b-2 border-black">
+                                10-14
+                            </span>
+                            <span className="flex items-center justify-center text-sm font-bold text-center text-gray-700 border-b-2 border-black">
+                                15-19
+                            </span>
+                            <span className="flex items-center justify-center text-sm font-bold text-center text-gray-700 border-b-2 border-black">
+                                20-49
+                            </span>
+                        </div>
+                        {indicators.map((indicator) => {
+                            // Determine if the current indicator should be indented
+                            if (indicator.indicator_id === parentIndicatorId) {
+                                return (
+                                    <label
+                                        key={indicator.indicator_id}
+                                        className={`flex flex-col justify-center font-semibold text-gray-700 w-full mt-4`}
+                                    >
+                                        {indicator.indicator_name}
+                                    </label>
+                                );
+                            }
+
+                            const isIndented =
+                                indicator.parent_indicator_id === parentIndicatorId;
+
                             return (
-                                <label
+                                <div
                                     key={indicator.indicator_id}
-                                    className={`flex flex-col justify-center font-semibold text-gray-700 w-full`}
-                                >
-                                    {indicator.indicator_name}
-                                </label>
-                            );
-                        }
-
-                        const isIndented =
-                            indicator.parent_indicator_id ===
-                            parentIndicatorId;
-
-                        return (
-                            <div
-                                key={indicator.indicator_id}
-                                className="flex flex-col gap-4 sm:flex-row"
-                            >
-                                <label
-                                    className={`flex flex-col justify-center text-gray-700 w-full sm:w-1/2 border-black border-b-2 ${
-                                        isIndented ? "indent-8" : ""
+                                    className={`grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 items-center ${
+                                        isIndented ? "md:indent-8" : ""
                                     }`}
                                 >
-                                    {indicator.indicator_name}
-                                </label>
-                                <div className="flex flex-col w-full gap-4 sm:flex-row sm:justify-evenly sm:w-3/4">
+                                    <label className="flex items-center justify-start w-full text-gray-700 border-b-2 border-black">
+                                        {indicator.indicator_name}
+                                    </label>
                                     <label className="block">
-                                        <span className="text-gray-700">
+                                        <span className="text-gray-700 md:hidden">
                                             10 - 14 yo
                                         </span>
                                         <input
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                            className="block w-full p-2 mt-1 border rounded-md"
                                             required
                                             value={
                                                 getInputValue(
@@ -107,14 +118,14 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                         />
                                     </label>
                                     <label className="block">
-                                        <span className="text-gray-700">
+                                        <span className="text-gray-700 md:hidden">
                                             15 - 19 yo
                                         </span>
                                         <input
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                            className="block w-full p-2 mt-1 border rounded-md"
                                             required
                                             value={
                                                 getInputValue(
@@ -140,14 +151,14 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                         />
                                     </label>
                                     <label className="block">
-                                        <span className="text-gray-700">
+                                        <span className="text-gray-700 md:hidden">
                                             20 - 49 yo
                                         </span>
                                         <input
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                            className="block w-full p-2 mt-1 border rounded-md"
                                             required
                                             value={
                                                 getInputValue(
@@ -173,9 +184,9 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                         />
                                     </label>
                                 </div>
-                            </div>
-                        );
-                    })
+                            );
+                        })}
+                    </>
                 )}
             </div>
         </fieldset>
