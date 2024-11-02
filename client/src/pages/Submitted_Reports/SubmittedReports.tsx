@@ -75,31 +75,31 @@ const SubmittedReports: React.FC = () => {
 
     return (
         <div className="flex flex-col items-center justify-center w-full px-2 py-12 sm:px-10">
-            <header className="w-full mb-4">
+            <header className="w-full">
                 <h1 className="mb-2 text-2xl font-bold">Submitted Reports</h1>
                 <div className="dividing-line w-full h-[2px] bg-black"></div>
             </header>
 
             {/* Toggle buttons for selecting report section and date input */}
-            <div className="flex flex-col items-center justify-between w-full gap-5 transition-all sm:flex-row toggle-sections">
-                <div className="order-3 tab-container sm:-order-none">
+            <div className="flex items-center justify-between w-full gap-5 py-6 text-xs transition-all sm:text-sm sm:flex-row toggle-sections">
+                <div className="tab-container">
                     <button
                         type="button"
                         onClick={() => handleToggle("m1")}
-                        className={`${getButtonClass("m1")} rounded-tl-lg rounded-bl-lg`}
+                        className={`${getButtonClass("m1")} rounded-l-lg`}
                     >
                         M1 Data
                     </button>
                     <button
                         type="button"
                         onClick={() => handleToggle("m2")}
-                        className={`${getButtonClass("m2")} rounded-tr-lg rounded-br-lg`}
+                        className={`${getButtonClass("m2")} rounded-r-lg`}
                     >
                         M2 Data
                     </button>
                 </div>
-                <div className="flex flex-col order-2 sm:-order-none justify-self-end">
-                    <label htmlFor="report-date" className="text-center text-gray-500 ">
+                <div className="relative flex flex-col order-2 sm:-order-none justify-self-end">
+                    <label htmlFor="report-date" className="absolute text-left text-gray-500 translate-x-5 -left-5 -top-5">
                         Report Date
                     </label>
                     <input
@@ -114,6 +114,8 @@ const SubmittedReports: React.FC = () => {
                     />
                 </div>
             </div>
+
+            <div className="dividing-line w-full h-[2px] bg-black"/>
 
             {/* Section to display submitted reports based on selected date and section */}
             <section className="flex flex-col items-center justify-center w-full report">
