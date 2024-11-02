@@ -665,7 +665,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== 1 ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
                             onClick={handlePreviousStep}
                             disabled={step === 1}
                         >
@@ -675,7 +675,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== totalSteps ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
                             onClick={handleNextStep}
                             disabled={step === totalSteps} // Adjust based on the max step
                         >
