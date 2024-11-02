@@ -30,7 +30,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
         : null;
 
     return (
-        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md">
+        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
             <legend className="text-lg font-semibold">
                 B1. Prenatal Care
             </legend>
@@ -92,7 +92,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md"
+                                            className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                             required
                                             value={
                                                 getInputValue(
@@ -125,7 +125,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md"
+                                            className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                             required
                                             value={
                                                 getInputValue(
@@ -158,7 +158,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                             type="number"
                                             placeholder="0"
                                             min="0"
-                                            className="block w-full p-2 mt-1 border rounded-md"
+                                            className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                             required
                                             value={
                                                 getInputValue(

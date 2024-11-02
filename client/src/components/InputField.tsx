@@ -20,8 +20,8 @@ export const InputField: React.FC<InputFieldProps> = ({
     onChange,
 }) => {
     return (
-        <label className="w-full block">
-            <span className="text-gray-700">{labelText}</span>
+        <label className="block w-full">
+            <span className="flex flex-col justify-center w-full text-gray-700 border-b-2 border-black lg:hidden">{labelText}</span>
             <input
                 type={type}
                 placeholder={placeholder}

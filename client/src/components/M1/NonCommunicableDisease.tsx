@@ -45,38 +45,56 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
 
     return (
         <>
-            <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-fit">
+            <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
                 <legend className="text-lg font-semibold">
                     Non-Communicable Disease Prevention and Control Services
                 </legend>
-                <div className="flex flex-col gap-12">
-                    {error ? (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
-                            <h1 className="font-bold text-center text-red-500">
-                                Error: {error}
-                            </h1>
+                {error ? (
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                        <h1 className="font-bold text-center text-red-500">
+                            Error: {error}
+                        </h1>
+                    </div>
+                ) : (
+                    <>
+                        {/* Header Row */}
+                        <div className="items-center justify-center hidden grid-cols-1 gap-4 mb-2 text-center md:grid md:grid-cols-6 sm:gap-2">
+                            <div className="font-semibold text-gray-700 border-b-2 border-black md:col-span-2">
+                                Indicator
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Male
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Female
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Total
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Remarks
+                            </div>
                         </div>
-                    ) : (
-                        indicators.map((indicator) => (
+                        {indicators.map((indicator) => (
                             <div
                                 key={indicator.indicator_id}
-                                className="flex flex-col gap-4 sm:flex-row"
+                                className="grid grid-cols-1 gap-4 md:grid-cols-6 sm:gap-2"
                             >
-                                <label className="flex flex-col justify-center w-full text-gray-700 border-b-2 border-black sm:w-1/2">
+                                <label className="flex flex-col justify-center w-full text-gray-700 border-b-2 border-black md:col-span-2">
                                     {indicator.indicator_name}
                                 </label>
-                                <div className="flex flex-col w-full sm:flex-row sm:justify-evenly sm:w-3/4 gap-">
-                                    {!categoryIndicatorIds.has(indicator.indicator_id) ? (
+
+                                {!categoryIndicatorIds.has(indicator.indicator_id) ? (
                                         <>
                                             <label className="block">
-                                                <span className="text-gray-700">
+                                                <span className="text-gray-700 md:hidden">
                                                     Male
                                                 </span>
                                                 <input
                                                     type="number"
                                                     placeholder="0"
                                                     min="0"
-                                                    className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     required
                                                     value={
                                                         getInputValue(
@@ -102,14 +120,14 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                 />
                                             </label>
                                             <label className="block">
-                                                <span className="text-gray-700">
+                                                <span className="text-gray-700 md:hidden">
                                                     Female
                                                 </span>
                                                 <input
                                                     type="number"
                                                     placeholder="0"
                                                     min="0"
-                                                    className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     required
                                                     value={
                                                         getInputValue(
@@ -134,15 +152,16 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                     }
                                                 />
                                             </label>
+                                            <div className="hidden md:block"/>
                                             <label className="block">
-                                                <span className="text-gray-700">
+                                                <span className="text-gray-700 md:hidden">
                                                     Remarks
                                                 </span>
                                                 <input
                                                     type="text"
                                                     min="0"
                                                     placeholder="Remarks"
-                                                    className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     value={
                                                         getInputValue(
                                                             formData.servicedata,
@@ -169,25 +188,17 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                         </>
                                     ) : (
                                         <>
-                                            <label className="hidden sm:block">
-                                                <span className="invisible pointer-events-none"></span>
-                                                <input
-                                                    type="text"
-                                                    min="0"
-                                                    className="invisible hidden w-full mt-1 pointer-events-none sm:block sm:w-24"
-                                                    disabled
-                                                    readOnly
-                                                />
-                                            </label>
+                                            <div className="hidden md:block"/>
+                                            <div className="hidden md:block"/>
                                             <label className="block">
-                                                <span className="text-gray-700">
+                                                <span className="text-gray-700 md:hidden">
                                                     Total
                                                 </span>
                                                 <input
                                                     type="number"
                                                     placeholder="0"
                                                     min="0"
-                                                    className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     required
                                                     value={
                                                         getInputValue(
@@ -213,14 +224,14 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                 />
                                             </label>
                                             <label className="block">
-                                                <span className="text-gray-700">
+                                                <span className="text-gray-700 md:hidden">
                                                     Remarks
                                                 </span>
                                                 <input
                                                     type="text"
                                                     min="0"
                                                     placeholder="Remarks"
-                                                    className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     value={
                                                         getInputValue(
                                                             formData.servicedata,
@@ -246,11 +257,10 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                             </label>
                                         </>
                                     )}
-                                </div>
                             </div>
-                        ))
-                    )}
-                </div>
+                        ))}
+                    </>
+                )}
             </fieldset>
         </>
     );

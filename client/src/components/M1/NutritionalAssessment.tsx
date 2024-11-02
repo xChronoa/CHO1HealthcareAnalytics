@@ -47,11 +47,10 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
 
     return (
         <>
-            <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-9/12">
+            <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
                 <legend className="text-lg font-semibold">
                     Nutritional Assessment of Children 0-59 mos. Old
                 </legend>
-                <div className="flex flex-col gap-4">
                     {error ? (
                         <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                             <h1 className="font-bold text-center text-red-500">
@@ -59,31 +58,46 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                             </h1>
                         </div>
                     ) : (
-                        indicators.map((indicator) => {
-                            return (
-                                <div
-                                    key={indicator.indicator_id}
-                                    className="flex flex-col gap-4 sm:flex-row"
-                                >
-                                    <label
-                                        className={`flex flex-col justify-center text-gray-700 w-full sm:w-1/2 border-black border-b-2 ${
-                                            indicator.parent_indicator_id
-                                                ? "indent-8"
-                                                : categoryIndicatorIds.has(indicator.indicator_id) ? "font-semibold" : ""
-                                        }`}
+                        <>
+                            {/* Header Row */}
+                            <div className="items-center justify-center hidden grid-cols-1 gap-4 mb-2 text-center md:grid md:grid-cols-5 sm:gap-2">
+                                <div className="font-semibold text-gray-700 border-b-2 border-black md:col-span-2">
+                                    Indicator
+                                </div>
+                                <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                    Male
+                                </div>
+                                <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                    Female
+                                </div>
+                                <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                    Remarks
+                                </div>
+                            </div>
+                            {indicators.map((indicator) => {
+                                return (
+                                    <div
+                                        key={indicator.indicator_id}
+                                        className="grid grid-cols-1 gap-4 md:grid-cols-5 sm:gap-2"
                                     >
-                                        {indicator.indicator_name}
-                                    </label>
-                                    <div className="flex flex-col w-full gap-4 sm:flex-row sm:justify-evenly sm:w-3/4">
+                                        <label
+                                            className={`flex flex-col justify-center text-gray-700 w-full md:col-span-2 border-black border-b-2 ${
+                                                indicator.parent_indicator_id
+                                                    ? "md:indent-8"
+                                                    : categoryIndicatorIds.has(indicator.indicator_id) ? "font-semibold" : ""
+                                            }`}
+                                        >
+                                            {indicator.indicator_name}
+                                        </label>
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Male
                                             </span>
                                             <input
                                                 type="number"
                                                 placeholder="0"
                                                 min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 required
                                                 value={
                                                     getInputValue(
@@ -109,14 +123,14 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Female
                                             </span>
                                             <input
                                                 type="number"
                                                 placeholder="0"
                                                 min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 required
                                                 value={
                                                     getInputValue(
@@ -142,13 +156,14 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Remarks
                                             </span>
                                             <input
                                                 type="text"
+                                                placeholder="Remarks"
                                                 min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 value={
                                                     getInputValue(
                                                         formData.servicedata,
@@ -173,11 +188,10 @@ export const NutritionalAssessment: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                     </div>
-                                </div>
-                            );
-                        })
+                                );
+                            })}
+                        </>
                     )}
-                </div>
             </fieldset>
         </>
     );

@@ -125,7 +125,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
             {ageCategories.map((category) => (
                 <fieldset
                     key={category}
-                    className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md"
+                    className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]"
                 >
                     <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">
                         User of Family Planning Method for {category} years old
@@ -184,7 +184,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                                                     type="number"
                                                     placeholder="0"
                                                     min="0"
-                                                    className="w-full p-2 border rounded-md"
+                                                    className="w-full p-2 border rounded-md shadow-md shadow-[#a3a19d]"
                                                     value={
                                                         getInputValue(
                                                             category,

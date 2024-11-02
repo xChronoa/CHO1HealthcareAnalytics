@@ -13,7 +13,7 @@ export const ModernWRA: React.FC<ModernWRAProps> = ({ data, updateData }) => {
     const ageCategories = ["10-14", "15-19", "20-49"];
 
     return (
-        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md">
+        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
             <legend className="text-lg font-semibold">Modern FP Unmet Need</legend>
             {/* Header Row for Indicators */}
             <div className="hidden w-full md:grid md:grid-cols-5 md:gap-4">
@@ -55,7 +55,7 @@ export const ModernWRA: React.FC<ModernWRAProps> = ({ data, updateData }) => {
                                         e.target.value
                                     )
                                 }
-                                className="block w-full p-2 mt-1 border rounded-md"
+                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                 required
                             />
                         </label>

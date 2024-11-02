@@ -46,20 +46,34 @@ export const DewormingServices: React.FC<ServiceProps> = ({
     );
 
     return (
-        <>
-            <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-9/12">
-                <legend className="text-lg font-semibold">
-                    Deworming Services for Infants, Children and Adolescents (Community Based)
-                </legend>
-                <div className="flex flex-col gap-4">
-                    {error ? (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
-                            <h1 className="font-bold text-center text-red-500">
-                                Error: {error}
-                            </h1>
+        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
+            <legend className="text-lg font-semibold">
+                Deworming Services for Infants, Children and Adolescents (Community Based)
+            </legend>
+                {error ? (
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                        <h1 className="font-bold text-center text-red-500">
+                            Error: {error}
+                        </h1>
+                    </div>
+                ) : (
+                    <>
+                        {/* Header Row */}
+                        <div className="items-center justify-center hidden grid-cols-1 gap-4 mb-2 text-center md:grid md:grid-cols-5 sm:gap-2">
+                            <div className="font-semibold text-gray-700 border-b-2 border-black md:col-span-2">
+                                Indicator
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Male
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Female
+                            </div>
+                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                                Remarks
+                            </div>
                         </div>
-                    ) : (
-                        indicators.map((indicator) => {
+                        {indicators.map((indicator) => {
                             if (
                                 categoryIndicatorIds.has(indicator.indicator_id)
                             ) {
@@ -76,27 +90,26 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                             return (
                                 <div
                                     key={indicator.indicator_id}
-                                    className="flex flex-col gap-4 sm:flex-row"
+                                    className="grid grid-cols-1 gap-4 md:grid-cols-5 sm:gap-2"
                                 >
                                     <label
-                                        className={`flex flex-col justify-center text-gray-700 w-full sm:w-1/2 ${
+                                        className={`flex flex-col justify-center text-gray-700 w-full md:col-span-2 border-b-2 border-black ${
                                             indicator.parent_indicator_id
-                                                ? "indent-8"
+                                                ? "md:indent-8"
                                                 : ""
                                         }`}
                                     >
                                         {indicator.indicator_name}
                                     </label>
-                                    <div className="flex flex-col w-full gap-4 sm:flex-row sm:justify-evenly sm:w-3/4">
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Male
                                             </span>
                                             <input
                                                 type="number"
                                                 placeholder="0"
                                                 min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 required
                                                 value={
                                                     getInputValue(
@@ -122,14 +135,14 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Female
                                             </span>
                                             <input
                                                 type="number"
                                                 placeholder="0"
                                                 min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 required
                                                 value={
                                                     getInputValue(
@@ -155,14 +168,14 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="text-gray-700">
+                                            <span className="text-gray-700 md:hidden">
                                                 Remarks
                                             </span>
                                             <input
                                                 type="text"
                                                 min="0"
                                                 placeholder="Remarks"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
+                                                className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
                                                 value={
                                                     getInputValue(
                                                         formData.servicedata,
@@ -186,13 +199,11 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                                                 }
                                             />
                                         </label>
-                                    </div>
                                 </div>
                             );
-                        })
-                    )}
-                </div>
-            </fieldset>
-        </>
+                        })}
+                    </>
+                )}
+        </fieldset>
     );
 };

@@ -46,153 +46,164 @@ export const SchoolBasedDeworming: React.FC<ServiceProps> = ({
     );
 
     return (
-        <>
-            <fieldset className="w-11/12 p-4 border border-black rounded-md sm:w-9/12">
-                <legend className="text-lg font-semibold">
-                    School-Based Deworming Services (Annual Reporting)
-                </legend>
-                <div className="flex flex-col gap-4">
-                    {error ? (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
-                            <h1 className="font-bold text-center text-red-500">
-                                Error: {error}
-                            </h1>
-                        </div>
-                    ) : (
-                        indicators.map((indicator) => {
-                            if (
-                                categoryIndicatorIds.has(indicator.indicator_id)
-                            ) {
-                                return (
-                                    <label
-                                        key={indicator.indicator_id}
-                                        className={`flex flex-col justify-center font-semibold text-gray-700 w-full`}
-                                    >
-                                        {indicator.indicator_name}
-                                    </label>
-                                );
-                            }
-
-                            return (
-                                <div
-                                    key={indicator.indicator_id}
-                                    className="flex flex-col gap-4 sm:flex-row"
-                                >
-                                    <label
-                                        className={`flex flex-col justify-center text-gray-700 w-full sm:w-1/2 ${
-                                            indicator.parent_indicator_id
-                                                ? "indent-8"
-                                                : ""
-                                        }`}
-                                    >
-                                        {indicator.indicator_name}
-                                    </label>
-                                    <div className="flex flex-col w-full gap-4 sm:flex-row sm:justify-evenly sm:w-3/4">
-                                        <label className="block">
-                                            <span className="text-gray-700">
-                                                Male
-                                            </span>
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
-                                                required
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "male",
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "male",
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                        </label>
-                                        <label className="block">
-                                            <span className="text-gray-700">
-                                                Female
-                                            </span>
-                                            <input
-                                                type="number"
-                                                placeholder="0"
-                                                min="0"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
-                                                required
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "female",
-                                                        "value"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "female",
-                                                        "value",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                        </label>
-                                        <label className="block">
-                                            <span className="text-gray-700">
-                                                Remarks
-                                            </span>
-                                            <input
-                                                type="text"
-                                                min="0"
-                                                placeholder="Remarks"
-                                                className="block w-full p-2 mt-1 border rounded-md sm:w-24"
-                                                value={
-                                                    getInputValue(
-                                                        formData.servicedata,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "male",
-                                                        "remarks"
-                                                    ) || ""
-                                                }
-                                                onChange={(e) =>
-                                                    handleInputChange(
-                                                        e,
-                                                        indicator.service_id,
-                                                        indicator.indicator_id,
-                                                        undefined,
-                                                        "male",
-                                                        "remarks",
-                                                        updateServiceData
-                                                    )
-                                                }
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
+        <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
+            <legend className="text-lg font-semibold">
+                School-Based Deworming Services (Annual Reporting)
+            </legend>
+            {error ? (
+                <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <h1 className="font-bold text-center text-red-500">
+                        Error: {error}
+                    </h1>
                 </div>
-            </fieldset>
-        </>
+            ) : (
+                <>
+                    {/* Header Row */}
+                    <div className="items-center justify-center hidden grid-cols-1 gap-4 mb-2 text-center md:grid md:grid-cols-5 sm:gap-2">
+                        <div className="font-semibold text-gray-700 border-b-2 border-black md:col-span-2">
+                            Indicator
+                        </div>
+                        <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                            Male
+                        </div>
+                        <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                            Female
+                        </div>
+                        <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                            Remarks
+                        </div>
+                    </div>
+                    {indicators.map((indicator) => {
+                        if (
+                            categoryIndicatorIds.has(indicator.indicator_id)
+                        ) {
+                            return (
+                                <label
+                                    key={indicator.indicator_id}
+                                    className={`flex flex-col justify-center font-semibold text-gray-700 w-full`}
+                                >
+                                    {indicator.indicator_name}
+                                </label>
+                            );
+                        }
+
+                        return (
+                            <div
+                                key={indicator.indicator_id}
+                                className="grid grid-cols-1 gap-4 md:grid-cols-5 sm:gap-2"
+                            >
+                                <label
+                                    className={`flex flex-col justify-center text-gray-700 w-full md:col-span-2 border-b-2 border-black ${
+                                        indicator.parent_indicator_id
+                                            ? "md:indent-8"
+                                            : ""
+                                    }`}
+                                >
+                                    {indicator.indicator_name}
+                                </label>
+                                <label className="block">
+                                    <span className="text-gray-700 md:hidden">
+                                        Male
+                                    </span>
+                                    <input
+                                        type="number"
+                                        placeholder="0"
+                                        min="0"
+                                        className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                        required
+                                        value={
+                                            getInputValue(
+                                                formData.servicedata,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "male",
+                                                "value"
+                                            ) || ""
+                                        }
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                e,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "male",
+                                                "value",
+                                                updateServiceData
+                                            )
+                                        }
+                                    />
+                                </label>
+                                <label className="block">
+                                    <span className="text-gray-700 md:hidden">
+                                        Female
+                                    </span>
+                                    <input
+                                        type="number"
+                                        placeholder="0"
+                                        min="0"
+                                        className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                        required
+                                        value={
+                                            getInputValue(
+                                                formData.servicedata,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "female",
+                                                "value"
+                                            ) || ""
+                                        }
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                e,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "female",
+                                                "value",
+                                                updateServiceData
+                                            )
+                                        }
+                                    />
+                                </label>
+                                <label className="block">
+                                    <span className="text-gray-700 md:hidden">
+                                        Remarks
+                                    </span>
+                                    <input
+                                        type="text"
+                                        min="0"
+                                        placeholder="Remarks"
+                                        className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                        value={
+                                            getInputValue(
+                                                formData.servicedata,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "male",
+                                                "remarks"
+                                            ) || ""
+                                        }
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                e,
+                                                indicator.service_id,
+                                                indicator.indicator_id,
+                                                undefined,
+                                                "male",
+                                                "remarks",
+                                                updateServiceData
+                                            )
+                                        }
+                                    />
+                                </label>
+                            </div>
+                        );
+                    })}
+                </>
+            )}
+        </fieldset>
     );
 };
