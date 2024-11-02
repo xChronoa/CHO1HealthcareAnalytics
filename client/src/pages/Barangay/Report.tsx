@@ -435,9 +435,17 @@ const Report: React.FC = () => {
                             <h1 className="mb-2 text-2xl font-bold">Report Submission</h1>
                             <div className="w-full h-[2px] bg-black"></div>
                         </header>
-                        <h1 className="text-lg font-semibold text-center">
-                            There are currently no pending reports.
-                        </h1>
+                        <div className="w-full p-12 bg-white rounded-lg border-[1px] gap-4 border-gray-400 no-submitted-report flex flex-col justify-center items-center">
+                            <span className="text-center">
+                                There are no pending reports awaiting action at the moment. <br />
+                            </span>
+                            <span className="text-center">
+                                All necessary submissions are up-to-date. <br />
+                            </span>
+                            <span className="text-center">
+                                Please check back later for any new reports that may need your attention. <br />
+                            </span>
+                        </div>
                     </div>
                 ) : (
                     <>
@@ -448,7 +456,7 @@ const Report: React.FC = () => {
                                     onClick={() => handleToggle("m1")}
                                     className={`${getButtonClass(
                                         "m1"
-                                    )} rounded-tl-lg rounded-bl-lg`}
+                                    )} rounded-l-lg`}
                                 >
                                     M1 Data
                                 </button>
@@ -457,7 +465,7 @@ const Report: React.FC = () => {
                                     onClick={() => handleToggle("m2")}
                                     className={`${getButtonClass(
                                         "m2"
-                                    )} rounded-tr-lg rounded-br-lg`}
+                                    )} rounded-r-lg`}
                                 >
                                     M2 Data
                                 </button>
@@ -474,7 +482,7 @@ const Report: React.FC = () => {
                                     onChange={handleDateChange}
                                     min={minDate}
                                     max={maxDate}
-                                    className="px-6 py-2 text-left rounded-lg"
+                                    className="px-6 py-2 text-left rounded-lg shadow-md shadow-[#a3a19d]"
                                 />
                             </div>
                         </div>
