@@ -82,7 +82,7 @@ const History: React.FC = () => {
                             max={latestDate}
                             onChange={handleDateChange}
                             value={selectedDate}
-                            className="px-2 py-1 border rounded-md"
+                            className="px-2 py-1 border rounded-md shadow-md shadow-gray-400 "
                         />
                     </div>
                     <div className="w-full table-container">
