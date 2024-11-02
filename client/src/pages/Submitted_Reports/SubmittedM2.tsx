@@ -180,6 +180,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                     <head>
                         <title>Barangay ${barangayName !== null ? barangayName : user ? user?.barangay_name : ""} - Morbidity Report - ${new Date(0, Number(selectedMonth) - 1).toLocaleString("default", { month: "long" })} ${selectedYear}</title>
                         <style>
+                        *{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}
                            *,body{margin:0;padding:0}@page{size:11in 8.5in}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center;padding:8px}@media print{body,table{visibility:visible}.bg-white,body{background-color:#fff}@page{size:landscape}table{width:100%;border-collapse:collapse;font-size:9px}.px-2{padding-left:.5rem;padding-right:.5rem}tr{page-break-inside:avoid}.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.underline{text-decoration:underline}.uppercase{text-transform:uppercase}.size-14{width:5rem;height:5rem}.font-bold{font-weight:700}.italic{font-style:italic}.text-gray-500{color:#6b7280}.text-lg{font-size:1.125rem}.text-5xl{font-size:3rem}.text-2xl{font-size:1.5rem}.size-16{width:64px;height:64px}.min-w-200{min-width:200px}.text-left{text-align:left}.gap-2{gap:.5rem}}
                         </style>
                     </head>
@@ -218,7 +219,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                         >
                             Download M2 Report
                         </button>
-                        <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center">
+                        <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto border-2 border-black rounded-lg 2xl:items-center 2xl:justify-center">
                             <table className="border-collapse text-[9px] bg-white text-center table-fixed">
                                 <thead>
                                     <tr>
@@ -381,9 +382,9 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                         </div>
                     </>
                 ) : (
-                    <div className="w-full p-12 mt-4 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 mt-4 bg-white rounded-lg border-[1px] border-gray-400 no-submitted-report ">
                         <h1 className="text-center">
-                            No submitted reports were found for Barangay {barangayName} {" "}
+                            No submitted reports were found for Barangay {barangayName || user?.barangay_name} {" "}
                             on the month of {" "} {new Date(0, Number(selectedMonth) - 1).toLocaleString(
                                 "default", {month: "long",}
                             )} {" "} {selectedYear}

@@ -292,6 +292,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                     <head>
                         <title>Barangay ${barangayName !== null ? barangayName : user ? user?.barangay_name : ""} - M1 Report - ${new Date(0, Number(selectedMonth) - 1).toLocaleString("default", { month: "long" })} ${selectedYear}</title>
                         <style>
+                            *{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}
                             *,body{margin:0;padding:0}@page{size:8.5in 13in;margin:2mm 7.5mm 2mm 7.5mm}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center}th{background-color:#f2f2f2}@media print{#header,.fp-one{width:100%}.bg-white,body{background-color:#fff}.py-12,.py-2{padding-top:.5rem}@page{size:portrait}body{visibility:visible}table{font-size:8px}.modern-wra p{margin-bottom:4px}#header tbody tr td div h1.text-6xl{font-size:4rem}#header tbody tr td div h1.text-3xl{font-size:2rem}#header tbody tr td div p{font-size:.5rem}#header{table-layout:auto}#printableTable{display:flex;justify-content:center;align-items:center}#header tbody tr td div div{flex-direction:row}.flex{display:flex}.flex-col{flex-direction:column}.gap-6{gap:.55rem}.py-12{padding-bottom:3rem}.overflow-x-auto{overflow-x:auto}.border-collapse{border-collapse:collapse}.text-\[9px\]{font-size:9px}.table-fixed{table-layout:fixed}.text-lg{font-size:.8rem;line-height:1.75rem}.px-2{padding-left:.5rem;padding-right:.5rem}.border-2{border-width:2px}.border-black{--tw-border-opacity:1;border-color:rgb(0 0 0 / var(--tw-border-opacity))}.items-center{align-items:center}.center-this,.justify-center{justify-content:center}.text-sm{font-size:.6rem;line-height:1.25rem}.gap-4{gap:1rem}.mb-2{margin-bottom:.5rem}.size-16{width:4rem;height:4rem}.italic{font-style:italic}.font-bold{font-weight:700}.text-left{text-align:left}.underline{text-decoration-line:underline}.uppercase{text-transform:uppercase}.text-6xl{font-size:3.75rem;line-height:1}.font-extrabold{font-weight:800}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-center{text-align:center}.text-nowrap{text-wrap:nowrap}.px-14{padding-left:3.5rem;padding-right:3.5rem}.font-medium{font-weight:500}.indent-4{text-indent:1rem}.py-2{padding-bottom:.5rem}.bg-black{background-color:#000}.text-white{color:#fff}.w-80{width:20rem}.pl-12{padding-left:3rem}.bg-d9d9d9{background-color:#d9d9d9}.bg-pink{background-color:#f9c}.min-w-44{min-width:8rem}.text-xs{font-size:.5rem;line-height:1rem}.min-w-40{min-width:2rem}.bg-gray{background-color:gray}.indent-sixteen{text-indent:-16px}.pl-5{padding-left:1.25rem}.max-w-24{max-width:7.5rem}.leading-rem{line-height:1.5rem}.border-r-2{border-right:2px solid #000}.flex-1{flex:1 1 0%}.p-0{padding:0}.pl-6{padding-left:1.5rem}}
                         </style>
                     </head>
@@ -330,7 +331,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         >
                             Download M1 Report
                         </button>
-                        <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center">
+                        <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto border-2 border-black rounded-lg xl:items-center 2xl:items-center 2xl:justify-center">
                             <table
                                 id="header"
                                 className="border-collapse text-[9px] bg-white text-center table-fixed text-lg"
@@ -458,7 +459,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                             </div>
 
                             {/* Family Planning One */}
-                            <div className="flex flex-row items-center lg:items-center lg:justify-center 2xl:flex 2xl:items-center 2xl:justify-center center-this fp-one">
+                            <div className="flex flex-row items-center 2xl:items-center 2xl:justify-center center-this fp-one">
                                 <table
                                     id="family-planning one"
                                     className="border-black border-collapse text-[9px] bg-white text-center table-fixed text-nowrap"
@@ -2262,16 +2263,16 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         </div>
                     </>
                 ) : (
-                    <div className="w-full p-12 mt-4 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 mt-4 bg-white rounded-lgno-submitted-report border-[1px] border-gray-400 rounded-lg">
                         <h1 className="text-center">
-                            No submitted reports were found for Barangay {barangayName} {" "}
+                            No submitted reports were found for Barangay {barangayName || user?.barangay_name} {" "}
                             on the month of {" "} {new Date(0, Number(selectedMonth) - 1).toLocaleString(
                                 "default", {month: "long",}
                             )} {" "} {selectedYear}
                         </h1>
                     </div>
                 )
-            )};
+            )}
         </>
     );
 };
