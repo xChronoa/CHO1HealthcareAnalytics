@@ -320,8 +320,8 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                             return (
                                 <div
                                     key={index}
-                                    className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                        ${currentSelectedOption === "All" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
+                                    className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
+                                        ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                                 >   
                                     {/* Resize Icon */}
                                     {currentSelectedOption !== "All" && (
@@ -333,9 +333,9 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                     )}              
                                     
                                     {/* Chart */}
-                                    <div className={`flex-1 sm:w-2/3`}>
+                                    <div className={`flex-1 xl:w-2/3`}>
                                         {/* Chart Title & Dropdown Option */}
-                                        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                                        <div className={`flex flex-col md:flex-row xl:flex-row items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                             <h3 className="font-semibold text-center">
                                                 User of Family Planning Method for {ageCategory} years old
                                             </h3>

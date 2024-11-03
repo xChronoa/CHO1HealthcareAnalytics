@@ -312,7 +312,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
     return (
         <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
-            <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg sm:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
+            <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg lg:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -322,25 +322,25 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className="flex flex-col items-center w-full gap-8 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 chart-container">
                             {/* Male Chart */}
                             <div 
-                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
-                                            ${selectedOptionMale === "All" ? "sm:w-full" : maximizedCharts.male ? "sm:w-full" : "sm:w-9/12"}`}
+                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
+                                            ${selectedOptionMale === "All" ? "xl:w-full" : maximizedCharts.male ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
                                 {selectedOptionMale !== "All" && 
                                     <FontAwesomeIcon
                                         icon={maximizedCharts.male ? faMinimize : faMaximize}
-                                        className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer resize-icon sm:block hover:text-green hover:scale-125"
+                                        className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer resize-icon xl:block hover:text-green hover:scale-125"
                                         onClick={() => toggleSize("male")}
                                     />
                                 }
 
                                 {/* Chart */}
-                                <div className={`flex-1 sm:w-2/3 chart-container`}>
+                                <div className={`flex-1 xl:w-2/3 chart-container`}>
                                     {/* Chart Title & Dropdown Option */}
-                                    <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionMale !== "All" ? "mr-8" : ""}`}>
+                                    <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionMale !== "All" ? "xl:mr-8" : ""}`}>
                                         <h3 className="font-semibold text-center">Male</h3>
                                         <select 
                                             value={selectedOptionMale} 
@@ -360,6 +360,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                         data={getChartData("male")}
                                         options={optionsMale}
                                         id="male-chart"
+                                        className="justify-self-center"
                                     />
                                 </div>
 
@@ -384,22 +385,22 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             
                             {/* Female Chart */}
                             <div 
-                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                            ${selectedOptionFemale === "All" ? "sm:w-full" : maximizedCharts.female ? "sm:w-full" : "sm:w-9/12"}`}
+                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
+                                            ${selectedOptionFemale === "All" ? "xl:w-full" : maximizedCharts.female ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
                                 {selectedOptionFemale !== "All" && 
                                     <FontAwesomeIcon
                                         icon={maximizedCharts.female ? faMinimize : faMaximize}
-                                        className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer sm:block hover:text-green hover:scale-125 resize-icon"
+                                        className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer xl:block hover:text-green hover:scale-125 resize-icon"
                                         onClick={() => toggleSize("female")}
                                     />
                                 }
 
                                 {/* Chart */}
-                                <div className={`flex-1 sm:w-2/3 chart-container`}>
+                                <div className={`flex-1 xl:w-2/3 chart-container`}>
                                     {/* Chart Title & Dropdown Option */}
-                                    <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionFemale !== "All" ? "mr-8" : ""}`}>
+                                    <div className={`flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptionFemale !== "All" ? "xl:mr-8" : ""}`}>
                                         <h3 className="font-semibold text-center">Female</h3>
                                         <select 
                                             value={selectedOptionFemale} 
