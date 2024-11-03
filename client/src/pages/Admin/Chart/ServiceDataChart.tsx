@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -47,12 +47,14 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 }) => {
     const [serviceData, setServiceData] = useState<ServiceData[]>([]);
     const [selectedService, setSelectedService] = useState<string>("Modern FP Unmet Need");
-    const { incrementLoading, decrementLoading } = useLoading();
+    const { incrementLoading, decrementLoading, isLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [services, setServices] = useState<string[]>([]);
     
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
     const [maximizedCharts, setMaximizedCharts] = useState<{ [key: string]: boolean }>({});
+    
+    const reportNull = useRef<HTMLDivElement>(null);
 
     const capitalize = (text: string) =>
         text
@@ -330,7 +332,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     {currentOption !== "All" && (
                         <FontAwesomeIcon
                             icon={isMaximized ? faMinimize : faMaximize}
-                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                             onClick={() => toggleSize(chartId)}
                         />
                     )}
@@ -338,7 +340,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     {/* Chart */}
                     <div className={`flex-1 lg:w-2/3`}>
                         {/* Chart Title & Dropdown Option */}
-                        <div className={`flex flex-col items-center justify-between gap-4 px-4 mb-8 ${selectedOptions["Teenage Pregnancy"] !== "All" ? "mr-8" : ""}`}>
+                        <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${selectedOptions["Teenage Pregnancy"] !== "All" ? "mr-8" : ""}`}>
                             <h3 className="mb-2 font-medium text-center">Teenage Pregnancy</h3>
                             <select 
                                 value={selectedOptions["Teenage Pregnancy"]} 
@@ -375,21 +377,25 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                     {/* Legend */}
                     {currentOption === "All" && (
-                        <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
+                        <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden border-r h-full xl:max-w-xs">
                             <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                            <div className="flex flex-col-reverse items-center justify-end w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
+                            {/* Parent */}
+                            <div className="flex flex-col-reverse w-full p-2 overflow-y-auto bg-gray-200 h-fit legend-list max-h-fit">
+                                {/* Child */}
                                 {fullDatasets.map((dataset, index) => (
-                                    <div key={index} className="flex items-center justify-start w-1/2 gap-2 mb-2 lg:w-full lg:justify-start text">
-                                        <span className="w-12 h-4 rounded-sm" style={{backgroundColor: dataset.backgroundColor}}></span>
-                                        <span className="text-sm text-nowrap">
-                                        {dataset.label === "12 and below"
-                                            ? "12 years old and below"
-                                            : dataset.label === "20 and above"
-                                                ? "20 years old and below"
-                                                : `${dataset.label} years old`
-                                        } 
-                                        </span>
+                                    <div key={index} className="flex items-center justify-center w-full h-auto mb-2">
+                                        <div className="flex items-center justify-start gap-2 w-52">
+                                            <span className="w-12 h-4 rounded-sm shrink-0" style={{backgroundColor: dataset.backgroundColor}}></span>
+                                            <span className="text-sm whitespace-nowrap">
+                                                {dataset.label === "12 and below"
+                                                    ? "12 years old and below"
+                                                    : dataset.label === "20 and above"
+                                                        ? "20 years old and below"
+                                                        : `${dataset.label} years old`
+                                                }
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -439,14 +445,14 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 {currentSelectedOption !== "All" && (
                                     <FontAwesomeIcon
                                         icon={isMaximized ? faMinimize : faMaximize}
-                                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                         onClick={() => toggleSize(chartId)}
                                     />
                                 )}
                                 {/* Chart */}
                                 <div className={`flex-1 xl:w-2/3`}>
                                     {/* Chart Title & Dropdown Option */}
-                                    <div className={`flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                                    <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                         <h3 className="mb-2 font-semibold text-center">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                                         <select 
                                             value={currentSelectedOption} 
@@ -524,14 +530,14 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 {currentSelectedOption !== "All" && (
                                     <FontAwesomeIcon
                                         icon={isMaximized ? faMinimize : faMaximize}
-                                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                        className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                         onClick={() => toggleSize(chartId)}
                                     />
                                 )}
                                 {/* Chart */}
                                 <div className={`flex-1 xl:w-2/3`}>
                                     {/* Chart Title & Dropdown Option */}
-                                    <div className={`flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                                    <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                         <h3 className="mb-2 font-semibold text-center">{capitalize(valueType || "Unknown Value Type")}</h3>
                                         <select 
                                             value={currentSelectedOption} 
@@ -612,14 +618,14 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         {currentSelectedOption !== "All" && (
                             <FontAwesomeIcon
                                 icon={isMaximized ? faMinimize : faMaximize}
-                                className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                 onClick={() => toggleSize(chartId)}
                             />
                         )}
                         {/* Chart */}
                         <div className={`flex-1 xl:w-2/3`}>
                             {/* Chart Title & Dropdown Option */}
-                            <div className={`flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                            <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                 <h3 className="mb-2 font-semibold text-center">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
                                 <select 
                                     value={currentSelectedOption} 
@@ -696,14 +702,14 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         {currentSelectedOption !== "All" && (
                             <FontAwesomeIcon
                                 icon={isMaximized ? faMinimize : faMaximize}
-                                className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                 onClick={() => toggleSize(chartId)}
                             />
                         )}
                         {/* Chart */}
                         <div className={`flex-1 lg:w-2/3`}>
                             {/* Chart Title & Dropdown Option */}
-                            <div className={`flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                            <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                 <h3 className="mb-2 font-semibold text-center">{capitalize(valueType || "Unknown Value Type")}</h3>
                                 <select 
                                     value={currentSelectedOption} 
@@ -828,6 +834,125 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
     useEffect(() => {
         decrementLoading();
     }, [])
+
+    useEffect(() => {
+        if(selectedService !== "Modern FP Unmet Need" && selectedService !== "Family Planning" && options) {
+            if(selectedService === "Teenage Pregnancy") {
+                const ageCategories = Array.from(
+                    new Set(filteredData.map((data) => data.age_category))
+                );
+    
+                // Generate full datasets for dropdown options
+                const fullDatasets = ageCategories.map((ageCategory) => {
+                    const validAgeCategory = ageCategory || "Unknown Age Category";
+                    return {
+                        label: validAgeCategory,
+                        data: filteredData
+                            .filter((data) => data.age_category === validAgeCategory)
+                            .map((data) => data.value),
+                        borderColor: ageCategoryColors[validAgeCategory] || "#000000",
+                        backgroundColor: ageCategoryColors[validAgeCategory] || "#000000",
+                    };
+                });
+    
+                // Ensure selectedOptions is initialized properly
+                const currentOption = selectedOptions["Teenage Pregnancy"] || "All"; // Default to "All" if not defined
+    
+                // Filtered datasets for display based on selected option
+                const datasets = fullDatasets.filter((dataset) => {
+                    return currentOption === "All" || dataset.label === currentOption;
+                }).map((dataset) => {
+                    // Adjusted label
+                    const adjustedLabel = dataset.label === "12 and below" 
+                        ? "12 years old and below" 
+                        : dataset.label === "20 and above" 
+                            ? "20 years old and above" 
+                            : `${dataset.label} years old`;
+    
+                    // Structure the dataset in the required format
+                    return {
+                        label: adjustedLabel,
+                        data: filteredData
+                            .filter((data) => data.age_category === dataset.label) // Filter based on the label
+                            .map((data) => data.value),
+                        borderColor: dataset.borderColor,
+                        backgroundColor: dataset.backgroundColor,
+                    };
+                });
+
+                const serviceDataChart = {
+                    title: `Barangay ${barangay} - ${selectedService} Planning Chart - ${year}`,
+                    "Teenage Pregnancy": {
+                        data: { labels: labels, datasets: datasets  },
+                        options: options,        // Female chart options object
+                        selectedOption: selectedOptions["Teenage Pregnancy"] || "All",
+                    }
+                };
+        
+                const charts = {
+                    serviceDataChart: serviceDataChart,
+                }
+                
+                // Store the data in localStorage
+                localStorage.setItem('charts', JSON.stringify(charts));
+            } else {
+                const serviceDataChart = {
+                    title: `Barangay ${barangay} - ${selectedService} Planning Chart - ${year}`,
+                    "10-14": {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption("10-14", null, selectedOptions["10-14"] || "All")},
+                        options: options,
+                        selectedOption: selectedOptions["10-14"] || "All",
+                    },
+                    "15-19": {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption("15-19", null, selectedOptions["15-19"] || "All")},
+                        options: options,
+                        selectedOption: selectedOptions["15-19"] || "All",
+                    },
+                    "20-49": {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption("20-49", null, selectedOptions["20-49"] || "All")},
+                        options: options,
+                        selectedOption: selectedOptions["20-49"] || "All",
+                    },
+                    male: {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "male", selectedOptions["male"] || "All")}, // Function that returns the data for male chart
+                        options: options,         // Male chart options object
+                        selectedOption: selectedOptions['male'] || "All",
+                    },
+                    female: {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "female", selectedOptions["female"] || "All")}, // Function that returns the data for female chart
+                        options: options,        // Female chart options object
+                        selectedOption: selectedOptions['female'] || "All",
+                    },
+                    total: {
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "total", selectedOptions["total"] || "All")}, // Function that returns the data for female chart
+                        options: options,        // Female chart options object
+                        selectedOption: selectedOptions['total'] || "All",
+                    },
+                };
+        
+                const charts = {
+                    serviceDataChart: serviceDataChart,
+                }
+                
+                // Store the data in localStorage
+                localStorage.setItem('charts', JSON.stringify(charts));
+            }
+        }
+    }, [selectedService, selectedOptions, options, serviceData]);
+
+    useEffect(() => {
+        if (chartRef.current) {
+            if(!isLoading) {
+                const isSubmitted = (() => {
+                if (selectedService === "Family Planning" || selectedService === "Modern FP Unmet Need") {
+                    return reportNull.current === null ? 'true' : 'false';
+                }
+                    return serviceData.length > 0 ? 'true' : 'false';
+                })();
+                chartRef.current.dataset.isSubmitted = isSubmitted;
+            }
+        }
+    }, [chartRef, selectedService, serviceData, barangay, year, isLoading]);
     
     return (
         <>
@@ -854,10 +979,12 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         ))}
                     </select>
                     
-                    <section className="flex flex-col items-center px-4 my-8 bg-almond" id="myChart" ref={chartRef}>
+                    <section 
+                        className="flex flex-col items-center my-8 bg-almond" id="myChart" ref={chartRef}
+                    >
                         <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg sm:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 
-                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 md:px-8 chart-container">
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     serviceData.length > 0 ? (
@@ -870,10 +997,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         </div>
                                     )
                                 ) : (
-                                    <ModernWRAChart barangay={barangay} year={year} />
+                                    <ModernWRAChart barangay={barangay} year={year} reportNull={reportNull}/>
                                 )
                             ) : (
-                                <FamilyPlanningChart barangay={barangay} year={year}/>
+                                <FamilyPlanningChart barangay={barangay} year={year} reportNull={reportNull}/>
                             )}
                         </div>
                     </section>

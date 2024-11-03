@@ -278,10 +278,6 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     }, [fetchMorbidityReports, barangay, year]);
 
     useEffect(() => {
-        decrementLoading();
-    }, [])
-
-    useEffect(() => {
         if(optionsMale && optionsFemale) {
             const morbidityChartData = {
                 title: `Barangay ${barangay} - Morbidity Report Chart - ${year}`,
@@ -294,15 +290,29 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     options: optionsFemale        // Female chart options object
                 }
             };
+
+            const charts = {
+                morbidityChartData: morbidityChartData,
+            }
             
             // Store the data in localStorage
-            localStorage.setItem('morbidityChart', JSON.stringify(morbidityChartData));
+            localStorage.setItem('charts', JSON.stringify(charts));
         }
-    }, [selectedOptionMale, selectedOptionFemale, optionsMale, optionsFemale])
+    }, [selectedOptionMale, selectedOptionFemale, optionsMale, optionsFemale, morbidityReports]);
+
+    useEffect(() => {
+        if (chartRef.current) {
+            chartRef.current.dataset.isSubmitted = morbidityReports.length > 0 ? 'true' : 'false';
+        }
+    }, [chartRef, morbidityReports, barangay, year]);
+
+    useEffect(() => {
+        decrementLoading();
+    }, []);
 
     return (
-        <section className="flex flex-col items-center px-4 py-8 bg-almond" id="myChart" ref={chartRef}>
-            <h1 id="chart-title" className="self-center w-9/12 p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green" ref={textRef}>Morbidity Report</h1>
+        <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
+            <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg sm:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -312,8 +322,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        
-                        <div className="flex flex-col items-center w-full gap-8 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 md:px-8 chart-container">
                             {/* Male Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
@@ -432,7 +441,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                         </div>
                     </>
                 ) : (
-                    <div className="w-9/12 p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md sm:w-9/12 no-submitted-report shadow-gray-400">
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>
