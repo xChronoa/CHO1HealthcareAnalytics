@@ -325,8 +325,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
             return (
                 <div 
-                    className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg lg:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
-                        ${currentOption === "All" ? "lg:w-full" : isMaximized ? "lg:w-full" : "lg:w-9/12"}`}
+                    className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
+                        ${currentOption === "All" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
                 >
                     {/* Resize Icon */}
                     {currentOption !== "All" && (
@@ -338,9 +338,9 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     )}
 
                     {/* Chart */}
-                    <div className={`flex-1 lg:w-2/3`}>
+                    <div className={`flex-1 sm:w-2/3`}>
                         {/* Chart Title & Dropdown Option */}
-                        <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${selectedOptions["Teenage Pregnancy"] !== "All" ? "mr-8" : ""}`}>
+                        <div className={`title-menu flex flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOptions["Teenage Pregnancy"] !== "All" ? "mr-8" : ""}`}>
                             <h3 className="mb-2 font-medium text-center">Teenage Pregnancy</h3>
                             <select 
                                 value={selectedOptions["Teenage Pregnancy"]} 
@@ -438,8 +438,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                         return (
                             <div key={ageCategory} 
-                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg lg:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
+                                ${currentSelectedOption === "All" ? "lg:w-full" : isMaximized ? "lg:w-full" : "lg:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
                                 {currentSelectedOption !== "All" && (
@@ -450,7 +450,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     />
                                 )}
                                 {/* Chart */}
-                                <div className={`flex-1 xl:w-2/3`}>
+                                <div className={`flex-1 lg:w-2/3`}>
                                     {/* Chart Title & Dropdown Option */}
                                     <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                         <h3 className="mb-2 font-semibold text-center">{"Age Range: " + ageCategory || "Unknown Age Category"}</h3>
@@ -489,10 +489,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 
                                 {/* Legend */}
                                 {currentSelectedOption === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                        <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -523,8 +523,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                         return (
                             <div key={valueType} 
-                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg lg:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
+                                ${currentSelectedOption === "All" ? "lg:w-full" : isMaximized ? "lg:w-full" : "lg:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
                                 {currentSelectedOption !== "All" && (
@@ -535,7 +535,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     />
                                 )}
                                 {/* Chart */}
-                                <div className={`flex-1 xl:w-2/3`}>
+                                <div className={`flex-1 lg:w-2/3`}>
                                     {/* Chart Title & Dropdown Option */}
                                     <div className={`title-menu flex flex-col items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                         <h3 className="mb-2 font-semibold text-center">{capitalize(valueType || "Unknown Value Type")}</h3>
@@ -574,10 +574,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 
                                 {/* Legend */}
                                 {currentSelectedOption === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                        <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
                                             {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -662,10 +662,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
                         {/* Legend */}
                         {currentSelectedOption === "All" && (
-                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
+                            <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                <div className="w-full h-full p-2 pb-12 overflow-y-auto bg-gray-200 legend-list">
+                                <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
                                             <span className="inline-block w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -746,10 +746,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         
                         {/* Legend */}
                         {currentSelectedOption === "All" && (
-                            <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem] xl:max-w-xs">
+                            <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list">
+                                <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
                                     {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
                                             <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -984,7 +984,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     >
                         <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg sm:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 
-                        <div className="flex flex-col items-center w-full gap-8 md:px-8 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 chart-container">
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     serviceData.length > 0 ? (

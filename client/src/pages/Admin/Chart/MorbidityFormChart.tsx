@@ -322,7 +322,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className="flex flex-col items-center w-full gap-8 md:px-8 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 chart-container">
                             {/* Male Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
@@ -365,10 +365,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
                                 {/* Legend */}
                                 {selectedOptionMale === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${getChartData("male").datasets.length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                        <div className="w-full h-full p-2 pb-10 overflow-y-auto bg-gray-200 legend-list">
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${getChartData("male").datasets.length > 10 ? "pb-10" : null}`}>
                                             {getChartData("male").datasets.map((dataset, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
                                                     <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
@@ -424,10 +424,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
                                 {/* Legend */}
                                 {selectedOptionFemale === "All" && (
-                                    <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden h-56 border-r md:h-80 xl:h-[28rem] lg:h-[25rem]">
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${getChartData("female").datasets.length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
-                                        <div className="w-full h-full p-2 pb-10 overflow-y-auto bg-gray-200 legend-list">
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${getChartData("female").datasets.length > 10 ? "pb-10" : null}`}>
                                             {getChartData("female").datasets.map((dataset, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
                                                     <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
