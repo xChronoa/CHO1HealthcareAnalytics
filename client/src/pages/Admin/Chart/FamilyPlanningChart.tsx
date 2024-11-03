@@ -41,11 +41,13 @@ interface FamilyPlanningReport {
 interface FamilyPlanningChartProps {
     barangay: string;
     year: String | null;
+    reportNull: React.RefObject<HTMLDivElement>;
 }
 
 const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
     barangay,
-    year
+    year,
+    reportNull
 }) => {
     // State declarations
     const [data, setData] = useState<FamilyPlanningReport[]>([]);
@@ -211,10 +213,10 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
     const options = {
         responsive: true,
         plugins: {
-            title: {
-                display: true,
-                text: 'Family Planning Report'
-            },
+            // title: {
+            //     display: true,
+            //     text: 'Family Planning Report'
+            // },
             tooltip: {
                 callbacks: {
                     title: (tooltipItems: any) => {
@@ -264,6 +266,37 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
         }));
     };
 
+    useEffect(() => {
+        if (options) {
+            const fpChartData = {
+                title: `Barangay ${barangay} - Family Planning Chart - ${year}`,
+                "10-14": {
+                    data: chartData(data.filter(entry => entry.age_category === "10-14"), selectedOptions["10-14"] || "All"),
+                    options: options,
+                    selectedOption: selectedOptions["10-14"] || "All",
+                },
+                "15-19": {
+                    data: chartData(data.filter(entry => entry.age_category === "15-19"), selectedOptions["15-19"] || "All"),
+                    options: options,
+                    selectedOption: selectedOptions["15-19"] || "All",
+                },
+                "20-49": {
+                    data: chartData(data.filter(entry => entry.age_category === "20-49"), selectedOptions["20-49"] || "All"),
+                    options: options,
+                    selectedOption: selectedOptions["20-49"] || "All",
+                },
+            };
+    
+            const charts = {
+                fpChartData: fpChartData,
+            }
+            
+            // Store the data in localStorage
+            localStorage.setItem('charts', JSON.stringify(charts));
+        }
+    }, [selectedOptions, options, data, barangay, year]);
+    
+
     return (
         <>
             {error ? (
@@ -294,7 +327,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                     {currentSelectedOption !== "All" && (
                                         <FontAwesomeIcon
                                             icon={isMaximized ? faMinimize : faMaximize}
-                                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                            className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                             onClick={() => toggleSize(index)}
                                         />
                                     )}              
@@ -302,7 +335,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                     {/* Chart */}
                                     <div className={`flex-1 lg:w-2/3`}>
                                         {/* Chart Title & Dropdown Option */}
-                                        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-4 mb-8${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                                        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                             <h3 className="font-semibold text-center">
                                                 User of Family Planning Method for {ageCategory} years old
                                             </h3>
@@ -392,7 +425,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                         })}
                     </>
                 ) : (
-                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400" ref={reportNull}>
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>

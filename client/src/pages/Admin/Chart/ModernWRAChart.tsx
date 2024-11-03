@@ -27,9 +27,14 @@ ChartJS.register(
 interface ModernWRAProps {
     barangay: string;
     year: String | null;
+    reportNull: React.RefObject<HTMLDivElement>;
 }
 
-const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
+const ModernWRAChart: React.FC<ModernWRAProps> = ({ 
+    barangay, 
+    year, 
+    reportNull 
+}) => {
     const { wraData, error, fetchWra } = useWra();
     const [isMaximized, setIsMaximized] = useState<boolean>(false);
     const [selectedOption, setSelectedOption] = useState("All");
@@ -137,6 +142,23 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
 
     const toggleSize = () => setIsMaximized(prev => !prev);
 
+    useEffect(() => {
+        if(options) {
+            const wraChartData = {
+                title: `Barangay ${barangay} - Modern WRA Chart - ${year}`,
+                data: chartData(), // Function that returns the data for male chart
+                options: options         // Male chart options object
+            };
+
+            const charts = {
+                wraChartData: wraChartData,
+            }
+            
+            // Store the data in localStorage
+            localStorage.setItem('charts', JSON.stringify(charts));
+        }
+    }, [selectedOption, options, wraData, barangay, year])
+
     return (
         <>
             {error ? (
@@ -160,7 +182,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
                                 />
                             )}
                             
-                            <div className="flex-1 md:w-2/3">
+                            <div className="flex-1 md:w-2/3 chart-container">
                                 <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 px-4 mb-8 ${selectedOption !== "All" ? "mr-8" : ""}`}>
                                     <h3 className="font-semibold text-center">Unmet Need for Modern Family Planning</h3>
                                     <select 
@@ -180,6 +202,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
                                 <Line
                                     data={chartData()}
                                     options={options}
+                                    id="wra-chart"
                                 />
                             </div>
         
@@ -199,7 +222,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({ barangay, year }) => {
                         </>
                     </div>
                 ) : ( 
-                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400" ref={reportNull}>
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>
