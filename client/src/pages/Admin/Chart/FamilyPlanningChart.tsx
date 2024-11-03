@@ -335,7 +335,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                     {/* Chart */}
                                     <div className={`flex-1 xl:w-2/3`}>
                                         {/* Chart Title & Dropdown Option */}
-                                        <div className={`flex flex-col md:flex-row xl:flex-row items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
+                                        <div className={`flex print:flex-row flex-col md:flex-row xl:flex-row items-center justify-between gap-4 px-4 mb-8 ${currentSelectedOption !== "All" ? "mr-8" : ""}`}>
                                             <h3 className="font-semibold text-center">
                                                 User of Family Planning Method for {ageCategory} years old
                                             </h3>

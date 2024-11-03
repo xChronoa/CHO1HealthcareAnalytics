@@ -984,7 +984,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     >
                         <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg lg:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 
-                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 print:w-full lg:w-9/12 chart-container">
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     serviceData.length > 0 ? (

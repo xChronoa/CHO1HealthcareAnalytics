@@ -322,10 +322,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 chart-container">
+                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 print:w-full chart-container">
                             {/* Male Chart */}
                             <div 
-                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
+                                className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md print:w-full shadow-[#a3a19d] 
                                             ${selectedOptionMale === "All" ? "xl:w-full" : maximizedCharts.male ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
