@@ -181,7 +181,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                 <script src="https://cdn.tailwindcss.com"></script>
                                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                                 <style>
-                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 463.7mm;orientation:landscape}body{visibility:visible;background-color:#fff}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;padding-left:2rem!important;padding-right:2rem!important;margin-top:0;margin-bottom:0}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important}}
+                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 463.7mm;orientation:landscape}body{visibility:visible;background-color:#fff}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;padding-left:2rem!important;padding-right:2rem!important;margin-top:0;margin-bottom:0}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important}.legend-list{padding-bottom:0!important}}
                                 </style>
                             </head>
                             <body>
@@ -440,67 +440,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                 <script src="https://cdn.tailwindcss.com"></script>
                                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                                 <style>
-                                    body {
-                                        visibility: hidden;
-                                        background-color: gray;
-                                    }
-                                    @media print {
-                                    #chart-title,
-                                    .chart {
-                                        width: 100% !important;
-                                    }
-                                    * {
-                                        -webkit-print-color-adjust: exact;
-                                        color-adjust: exact;
-                                        print-color-adjust: exact;
-                                    }
-                                    @page {
-                                        margin: 0;
-                                        size: 400mm ${pageHeight};
-                                        orientation: landscape;
-                                    }
-                                    body {
-                                        visibility: visible;
-                                        background-color: white;
-                                    }
-                                    .bg-almond {
-                                        background-color: #f8e9d3;
-                                    }
-                                    .bg-green {
-                                        background-color: green;
-                                    }
-                                    .resize-icon {
-                                        display: none !important;
-                                    }
-                                    #myChart {
-                                        page-break-inside: avoid;
-                                        break-inside: avoid;
-                                        padding-top: 2rem;
-                                        padding-bottom: 2rem;
-                                        margin-top: 0;
-                                        margin-bottom: 0;
-                                        padding-left: 2rem !important;
-                                        padding-right: 2rem !important;
-                                    }
-                                    .chart-container canvas {
-                                        width: 100% !important;
-                                        height: 90% !important;
-                                    }
-                                    .chart {
-                                        height: 788px !important;
-                                        flex-direction: row !important;
-                                    }
-                                    .legend-container {
-                                        height: fit-content !important;
-                                        max-width: 20rem !important;
-                                    }
-                                    .legend-list {
-                                        padding-bottom: 0 !important;
-                                    }
-                                    .title-menu {
-                                        flex-direction: row !important;
-                                    }
-                                    }
+                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm ${pageHeight};orientation:landscape}body{visibility:visible;background-color:white}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;margin-top:0;margin-bottom:0;padding-left:2rem!important;padding-right:2rem!important}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important;max-width:20rem!important}.legend-list{padding-bottom:0!important}.title-menu{flex-direction:row!important}}
                                 </style>
                             </head>
                             <body>
@@ -609,7 +549,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                         setTimeout(() => {
                                             window.print();
                                             window.close();
-                                        }, 500);
+                                        }, 2000);
                                     };
                                 </script>
                             </body>
