@@ -4,9 +4,6 @@ import { useAppointment } from "../../hooks/useAppointment";
 import { useReportSubmissions } from "../../hooks/useReportSubmissions";
 import ServiceDataChart from "./Chart/ServiceDataChart";
 import MorbidityFormChart from "./Chart/MorbidityFormChart";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import Swal from "sweetalert2";
 import { useBarangay } from "../../hooks/useBarangay";
 import { useLoading } from "../../context/LoadingContext";
 import DatePicker from "react-datepicker";
@@ -143,201 +140,488 @@ const Dashboard: React.FC<DashboardProp> = () => {
         const input = chartRef.current;
 
         if (input) {
+            const chartsData = JSON.parse(localStorage.getItem('charts') || 'null');
+
             // Retrieve and parse the morbidityChart data from localStorage
-            const morbidityChartData = JSON.parse(localStorage.getItem('morbidityChart') || 'null');
+            const morbidityChartData = chartsData.morbidityChartData;
+            const wraChartData = chartsData.wraChartData;
+            const fpChartData = chartsData.fpChartData;
+            const serviceDataChart = chartsData.serviceDataChart;
 
             // Early return if no data is available
-            if (!morbidityChartData) return;
+            if (morbidityChartData) {
+                // Destructure and extract chart data more efficiently
+                const { 
+                    male: { data: maleData, options: maleOptions } = {},
+                    female: { data: femaleData, options: femaleOptions } = {} 
+                } = morbidityChartData || {};
 
-            // Destructure and extract chart data more efficiently
-            const { 
-                male: { data: maleData, options: maleOptions } = {},
-                female: { data: femaleData, options: femaleOptions } = {} 
-            } = morbidityChartData || {};
+                // If you need stringified versions, do this only if necessary
+                const chartData = {
+                    male: {
+                        data: JSON.stringify(maleData),
+                        options: JSON.stringify(maleOptions)
+                    },
+                    female: {
+                        data: JSON.stringify(femaleData),
+                        options: JSON.stringify(femaleOptions)
+                    }
+                };
 
-            // If you need stringified versions, do this only if necessary
-            const chartData = {
-                male: {
-                    data: JSON.stringify(maleData),
-                    options: JSON.stringify(maleOptions)
-                },
-                female: {
-                    data: JSON.stringify(femaleData),
-                    options: JSON.stringify(femaleOptions)
+                // Open a new document
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>${morbidityChartData.title}</title>
+                                <script src="https://cdn.tailwindcss.com"></script>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                <style>
+                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 463.7mm;orientation:landscape}body{visibility:visible;background-color:#fff}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;padding-left:2rem!important;padding-right:2rem!important;margin-top:0;margin-bottom:0}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important}}
+                                </style>
+                            </head>
+                            <body>
+                                ${input.outerHTML}
+                                <script>
+                                    const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+                                    const maleCtx = document.getElementById('male-chart').getContext('2d');
+                                    const femaleCtx = document.getElementById('female-chart').getContext('2d');
+                
+                                    // Initialize the male chart
+                                    new Chart(maleCtx, {
+                                        type: 'line',
+                                        data: ${chartData.male.data},
+                                        options: {
+                                            ...${chartData.male.options},
+                                            responsive: false,
+                                            scales: {
+                                                x: {
+                                                    ...${chartData.male.options}.scales.x,
+                                                    ticks: {
+                                                        callback: function(value) {
+                                                            return monthNames[Number(value) % 12];
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        maintainAspectRatio: true,
+                                    });
+
+                                    // Initialize the female chart
+                                    new Chart(femaleCtx, {
+                                        type: 'line',
+                                        data: ${chartData.female.data},
+                                        options: {
+                                            ...${chartData.female.options},
+                                            responsive: false,
+                                            scales: {
+                                                x: {
+                                                    ...${chartData.female.options}.scales.x,
+                                                    ticks: {
+                                                        callback: function(value) {
+                                                            return monthNames[Number(value) % 12];
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        maintainAspectRatio: true,
+                                    });
+
+                                    window.addEventListener('resize', function () {
+                                        Chart.helpers.each(Chart.instances, function(instance){
+                                            instance.resize();
+                                        })
+                                    });
+
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                            window.close();
+                                        }, 2000);
+                                    };
+                                </script>
+                            </body>
+                        </html>
+                    `);
+        
+                    printWindow.document.close();
+                    printWindow.focus();
                 }
             };
 
-            // Open a new document
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>${morbidityChartData.title}</title>
-                            <script src="https://cdn.tailwindcss.com"></script>
-                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                            <style>
-                                body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 472.1mm;orientation:landscape}body{visibility:visible}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important}.legend-container{height:100%!important}}
-                            </style>
-                        </head>
-                        <body>
-                            ${input.outerHTML}
-                            <script>
-                                const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+            if(wraChartData) {
+                // Destructure and extract chart data more efficiently
+                const { 
+                    title, 
+                    data, 
+                    options 
+                } = wraChartData || {}; // Optional chaining to safely access properties
 
-                                const maleCtx = document.getElementById('male-chart').getContext('2d');
-                                const femaleCtx = document.getElementById('female-chart').getContext('2d');
+                // If you need a stringified version of the WRA chart data, do this only if necessary
+                const chartData = {
+                    title: title, // Keep title as is (usually not stringified)
+                    data: JSON.stringify(data), // Stringify the data
+                    options: JSON.stringify(options) // Stringify the options
+                };
+
+                // Open a new document
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                            <head>
+                                <meta charset="UTF-8" />
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                                <title>${wraChartData.title}</title>
+                                <script src="https://cdn.tailwindcss.com"></script>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                <style>
+                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 236.84mm;orientation:landscape}body{visibility:visible;background-color:#fff}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;margin-top:0;margin-bottom:0}#myChart{padding-left:2rem!important;padding-right:2rem!important}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important}}
+                                </style>
+                            </head>
+                            <body>
+                                ${input.outerHTML}
+                                <script>
+                                    const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+                                    const wraCtx = document.getElementById('wra-chart').getContext('2d');
+
+                                    // Initialize the male chart
+                                    const chart = new Chart(wraCtx, {
+                                        type: 'line',
+                                        data: ${chartData.data},
+                                        options: {
+                                            ...${chartData.options},
+                                            responsive: false,
+                                            scales: {
+                                                x: {
+                                                    ...${chartData.options}.scales.x,
+                                                    ticks: {
+                                                        callback: function(value) {
+                                                            return monthNames[Number(value) % 12];
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        maintainAspectRatio: true,
+                                    });
+
+                                    window.addEventListener('resize', function () {
+                                        Chart.helpers.each(Chart.instances, function(instance){
+                                            instance.resize();
+                                        })
+                                    });
+
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                            window.close();
+                                        }, 2000);
+                                    };
+                                </script>
+                            </body>
+                        </html>
+                    `);
+        
+                    printWindow.document.close();
+                    printWindow.focus();
+                }
+            }
             
-                                // Initialize the male chart
-                                new Chart(maleCtx, {
-                                    type: 'line',
-                                    data: ${chartData.male.data},
-                                    options: {
-                                        ...${chartData.male.options},
-                                        responsive: false,
-                                        scales: {
-                                            x: {
-                                                ...${chartData.male.options}.scales.x,
-                                                ticks: {
-                                                    callback: function(value) {
-                                                        return monthNames[Number(value) % 12];
+            if (fpChartData) {
+                // Open a new document
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                            <head>
+                                <meta charset="UTF-8" />
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                                <title>${fpChartData.title}</title>
+                                <script src="https://cdn.tailwindcss.com"></script>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                <style>
+                                    body{visibility:hidden;background-color:gray}@media print{#chart-title,.chart{width:100%!important}*{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}@page{margin:0;size:400mm 671.1mm;orientation:landscape}body{visibility:visible;background-color:#fff}.bg-almond{background-color:#f8e9d3}.bg-green{background-color:green}.resize-icon{display:none!important}#myChart{page-break-inside:avoid;break-inside:avoid;padding-top:2rem;padding-bottom:2rem;margin-top:0;margin-bottom:0}#myChart{padding-left:2rem!important;padding-right:2rem!important}.chart-container canvas{width:100%!important;height:90%!important}.chart{height:788px!important;flex-direction:row!important}.legend-container{height:fit-content!important}}
+                                </style>
+                            </head>
+                            <body>
+                                ${input.outerHTML}
+                                <script>
+                                    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+                                    const canvasElements = document.querySelectorAll('.chart-container canvas'); // Select canvas elements
+                                    const ageCategories = Object.keys(${JSON.stringify(fpChartData)}).filter(key => key !== 'title'); // Dynamically get age categories
+
+                                    ageCategories.forEach((ageCategory, index) => {
+                                        const ageCategoryData = ${JSON.stringify(fpChartData)}[ageCategory]; // Get data for current age category
+
+                                        if (ageCategoryData) {
+                                            const ctx = canvasElements[index].getContext('2d'); // Get context for the canvas
+                                            
+                                            // Initialize the chart
+                                            const chart = new Chart(ctx, {
+                                                type: 'line',
+                                                data: ageCategoryData.data,
+                                                options: {
+                                                    ...ageCategoryData.options,
+                                                    responsive: false,
+                                                    scales: {
+                                                        x: {
+                                                            ...ageCategoryData.options.scales.x,
+                                                            ticks: {
+                                                                callback: function(value) {
+                                                                    return monthNames[Number(value) % 12];
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                    plugins: {
+                                                        ...ageCategoryData.options.plugins, // Include other plugins options if any
+                                                        legend: {
+                                                            display: ageCategoryData.selectedOption !== "All", // Hide legend if "All" is selected
+                                                        },
                                                     },
                                                 },
-                                            },
-                                        },
-                                    },
-                                    maintainAspectRatio: true,
-                                });
+                                                maintainAspectRatio: true,
+                                            });
+                                        }
+                                    });
 
-                                // Initialize the female chart
-                                new Chart(femaleCtx, {
-                                    type: 'line',
-                                    data: ${chartData.female.data},
-                                    options: {
-                                        ...${chartData.female.options},
-                                        responsive: false,
-                                        scales: {
-                                            x: {
-                                                ...${chartData.female.options}.scales.x,
-                                                ticks: {
-                                                    callback: function(value) {
-                                                        return monthNames[Number(value) % 12];
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                    maintainAspectRatio: true,
-                                });
-                            </script>
-                        </body>
-                    </html>
-                `);
-    
-                printWindow.document.close();
-                printWindow.focus();
+                                    window.addEventListener('resize', function () {
+                                        Chart.helpers.each(Chart.instances, function(instance){
+                                            instance.resize();
+                                        });
+                                    });
 
-                printWindow.onload = () => setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 500);
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                            window.close();
+                                        }, 2000);
+                                    };
+                                </script>
+                            </body>
+                        </html>
+                    `);
+                    
+                    printWindow.document.close();
+                    printWindow.focus();
+                }
+            }
+
+            if(serviceDataChart) {
+                // Count how many keys don't have datasets
+                const nonEmptyDatasetCount = Object.keys(serviceDataChart)
+                    .filter(key => key !== 'title' && serviceDataChart[key].data.datasets && serviceDataChart[key].data.datasets.length > 0)
+                    .length;
+
+                const pageHeight = nonEmptyDatasetCount === 4 ? "888.1mm" : ["236.84mm", "453.8mm", "671.1mm"][Math.min(nonEmptyDatasetCount - 1, 2)];
+
+                // Open a new document
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html lang="en">
+                            <head>
+                                <meta charset="UTF-8" />
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                                <title>${serviceDataChart.title}</title>
+                                <script src="https://cdn.tailwindcss.com"></script>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                                <style>
+                                    body {
+                                        visibility: hidden;
+                                        background-color: gray;
+                                    }
+                                    @media print {
+                                    #chart-title,
+                                    .chart {
+                                        width: 100% !important;
+                                    }
+                                    * {
+                                        -webkit-print-color-adjust: exact;
+                                        color-adjust: exact;
+                                        print-color-adjust: exact;
+                                    }
+                                    @page {
+                                        margin: 0;
+                                        size: 400mm ${pageHeight};
+                                        orientation: landscape;
+                                    }
+                                    body {
+                                        visibility: visible;
+                                        background-color: white;
+                                    }
+                                    .bg-almond {
+                                        background-color: #f8e9d3;
+                                    }
+                                    .bg-green {
+                                        background-color: green;
+                                    }
+                                    .resize-icon {
+                                        display: none !important;
+                                    }
+                                    #myChart {
+                                        page-break-inside: avoid;
+                                        break-inside: avoid;
+                                        padding-top: 2rem;
+                                        padding-bottom: 2rem;
+                                        margin-top: 0;
+                                        margin-bottom: 0;
+                                        padding-left: 2rem !important;
+                                        padding-right: 2rem !important;
+                                    }
+                                    .chart-container canvas {
+                                        width: 100% !important;
+                                        height: 90% !important;
+                                    }
+                                    .chart {
+                                        height: 788px !important;
+                                        flex-direction: row !important;
+                                    }
+                                    .legend-container {
+                                        height: fit-content !important;
+                                        max-width: 20rem !important;
+                                    }
+                                    .legend-list {
+                                        padding-bottom: 0 !important;
+                                    }
+                                    .title-menu {
+                                        flex-direction: row !important;
+                                    }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                ${input.outerHTML}
+                                <script>
+                                    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                                    
+                                    const chartsData = ${JSON.stringify(serviceDataChart)};
+                                    const canvasElements = document.querySelectorAll('.chart-container canvas');
+
+                                    const valueTypes = ["male", "female", "total"];
+                                    const ageCategories = ["10-14", "15-19", "20-49", "Teenage Pregnancy"];
+
+                                    let indexCounter = 0; // Initialize an index counter
+
+                                    // Create charts for age categories
+                                    ageCategories.forEach(ageCategory => {
+                                        if (chartsData[ageCategory]) {
+                                            const ageCategoryData = chartsData[ageCategory];
+                                            // Check if the data for "Teenage Pregnancy" is empty or if it has no datasets
+                                            const isEmpty = Object.keys(ageCategoryData).length === 0 || (ageCategoryData.data && ageCategoryData.data.datasets.length === 0);
+                                            if (!isEmpty) {
+                                                const ctx = canvasElements[indexCounter]; // Use indexCounter to map canvas
+                                                if (ctx) {
+                                                    // Initialize the chart for ageCategory
+                                                    new Chart(ctx.getContext('2d'), {
+                                                        type: 'line',
+                                                        data: ageCategoryData.data,
+                                                        options: {
+                                                            ...ageCategoryData.options,
+                                                            responsive: false,
+                                                            scales: {
+                                                                x: ageCategoryData.options.scales ? {
+                                                                    ...ageCategoryData.options.scales.x,
+                                                                    ticks: {
+                                                                        callback: function(value) {
+                                                                            return monthNames[Number(value) % 12];
+                                                                        },
+                                                                    },
+                                                                } : undefined, // Handle cases where scales might be undefined
+                                                            },
+                                                            plugins: {
+                                                                ...ageCategoryData.options.plugins,
+                                                                legend: {
+                                                                    display: ageCategoryData.selectedOption !== "All",
+                                                                },
+                                                            },
+                                                        },
+                                                        maintainAspectRatio: true,
+                                                    });
+                                                    indexCounter++; // Increment counter after chart creation
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    // Create charts for value types
+                                    valueTypes.forEach(valueType => {
+                                        if (chartsData[valueType]) {
+                                            const valueTypeData = chartsData[valueType];
+                                            const isEmpty = Object.keys(valueTypeData).length === 0 || (valueTypeData.data && valueTypeData.data.datasets.length === 0);
+
+                                            // Check if the datasets array is empty
+                                            if (!isEmpty) {
+                                                const ctx = canvasElements[indexCounter]; // Use indexCounter to map canvas
+                                                if (ctx) {
+                                                    // Initialize the chart for valueType
+                                                    new Chart(ctx.getContext('2d'), {
+                                                        type: 'line',
+                                                        data: valueTypeData.data,
+                                                        options: {
+                                                            ...valueTypeData.options,
+                                                            responsive: false,
+                                                            scales: {
+                                                                x: valueTypeData.options.scales ? {
+                                                                    ...valueTypeData.options.scales.x,
+                                                                    ticks: {
+                                                                        callback: function(value) {
+                                                                            return monthNames[Number(value) % 12];
+                                                                        },
+                                                                    },
+                                                                } : undefined, // Handle cases where scales might be undefined
+                                                            },
+                                                            plugins: {
+                                                                ...valueTypeData.options.plugins,
+                                                                legend: {
+                                                                    display: valueTypeData.selectedOption !== "All",
+                                                                },
+                                                            },
+                                                        },
+                                                        maintainAspectRatio: true,
+                                                    });
+                                                    indexCounter++; // Increment counter after chart creation
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    window.addEventListener('resize', function () {
+                                        Chart.helpers.each(Chart.instances, function(instance){
+                                            instance.resize();
+                                        });
+                                    });
+
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                            window.close();
+                                        }, 500);
+                                    };
+                                </script>
+                            </body>
+                        </html>
+                    `);
+                    
+                    printWindow.document.close();
+                    printWindow.focus();
+                }
             }
         }
-        
-        // if (!input) {
-        //     Swal.fire({
-        //         icon: "error",
-        //         title: "Oops!",
-        //         text: "We can't find the chart to download. Please refresh the page and try again.",
-        //         toast: true,
-        //         position: "top-end",
-        //         showConfirmButton: false,
-        //         timer: 4000,
-        //         timerProgressBar: true,
-        //         background: "#f8d7da",
-        //         color: "#721c24",
-        //         customClass: {
-        //             popup: "border border-danger",
-        //         },
-        //     });
-        //     return;
-        // }
-    
-        // // Ask for confirmation before downloading
-        // const confirmation = await Swal.fire({
-        //     title: "Download Chart?",
-        //     text: "Would you like to download the chart as a PDF?",
-        //     icon: "question",
-        //     showCancelButton: true,
-        //     confirmButtonText: "Yes, download it!",
-        //     cancelButtonText: "No, cancel",
-        //     customClass: {
-        //         popup: "border border-primary",
-        //     },
-        // });
-    
-        // if (!confirmation.isConfirmed) {
-        //     // If user canceled, do nothing
-        //     return;
-        // }
-    
-        // try {
-        //     setIsPrinting(true);
-        //     const canvas = await html2canvas(input as HTMLElement);
-        //     const imgData = canvas.toDataURL("image/png");
-    
-        //     // Create a PDF with the exact dimensions of the chart
-        //     const pdf = new jsPDF({
-        //         orientation: canvas.width > canvas.height ? "landscape" : "portrait",
-        //         unit: "px",
-        //         format: [canvas.width, canvas.height],
-        //     });
-    
-        //     // Add the image to the PDF, fitting it exactly to the page
-        //     pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-        //     pdf.save(`${section.toUpperCase()} - ${textRef.current ? textRef.current.textContent : ""} - Chart.pdf`);
-    
-        //     // Show success toast notification
-        //     Swal.fire({
-        //         icon: "success",
-        //         title: "Download Successful!",
-        //         text: "Your chart has been downloaded successfully.",
-        //         toast: true,
-        //         position: "top-end",
-        //         showConfirmButton: false,
-        //         timer: 3000,
-        //         timerProgressBar: true,
-        //         background: "#fff",
-        //         color: "#155724",
-        //         customClass: {
-        //             popup: "border border-success",
-        //         },
-        //     });
-        // } catch (error) {
-        //     Swal.fire({
-        //         icon: "error",
-        //         title: "Download Failed",
-        //         text: "Something went wrong while generating the PDF. Please try again.",
-        //         toast: true,
-        //         position: "top-end",
-        //         showConfirmButton: false,
-        //         timer: 4000,
-        //         timerProgressBar: true,
-        //         background: "#f8d7da",
-        //         color: "#721c24",
-        //         customClass: {
-        //             popup: "border border-danger",
-        //         },
-        //     });
-        // } finally {
-        //     setIsPrinting(false);
-        // }
     };
-
-
 
     /**
      * 
@@ -351,6 +635,35 @@ const Dashboard: React.FC<DashboardProp> = () => {
                 ? "bg-green text-white"
                 : "bg-slate-200 text-black"
         }`;
+
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+    const [currentRef, setCurrentRef] = useState(chartRef.current?.dataset.isSubmitted);
+
+    useEffect(() => {
+        if (!isLoading && chartRef.current) {
+            const currentIsSubmitted = chartRef.current.dataset.isSubmitted;
+            
+            // Only proceed if the current value is different from the previous value
+            if (currentIsSubmitted !== currentRef) {
+                setCurrentRef(currentIsSubmitted); // Update the ref to the current value
+
+                const checkNoSubmittedReport = () => {
+                    if (chartRef.current) {
+                        const hasNoSubmittedReport = chartRef.current.dataset.isSubmitted === 'false';
+                        setIsButtonDisabled(hasNoSubmittedReport);
+                    }
+                };
+
+                const observer = new MutationObserver(checkNoSubmittedReport);
+                checkNoSubmittedReport(); // Initial check
+                observer.observe(chartRef.current, { attributes: true, childList: true, subtree: true });
+
+                return () => {
+                    observer.disconnect();
+                };
+            }
+        }
+    }, [chartRef.current?.dataset.isSubmitted, isLoading]); // Depend on dataset.isSubmitted and isLoading
 
     return (
         <>
@@ -467,9 +780,12 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             <div className="z-20 flex items-center justify-center flex-1 xl:flex-0 download">
                                 <button
                                     onClick={downloadChart}
-                                    className="transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-white inline-flex justify-center items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-4 py-2.5 text-center text-nowrap flex-1"
+                                    className={`transition-all self-end my-4 shadow-md shadow-[#a3a19d] text-white inline-flex justify-center items-center font-medium rounded-lg px-4 py-2.5 text-center text-nowrap flex-1
+                                    ${!isButtonDisabled ? "bg-green hover:bg-[#009900] focus:ring-4 focus:ring-blue-300 focus:outline-none" : "bg-gray-400 cursor-not-allowed opacity-50"}
+                                    `}
+                                    disabled={isButtonDisabled}
                                 >
-                                    Download Charts 
+                                    Download Charts
                                 </button>
                             </div>
                         </div>
