@@ -555,7 +555,7 @@ const Appointment: React.FC = () => {
                             type="button"
                             onClick={requestOtp}
                             disabled={!formData.phone_number || isPending || resendCountdown > 0}
-                            className={`px-4 py-2 text-white transition-all rounded  ${!formData.phone_number || isPending || resendCountdown > 0 ? "bg-[#3d8c40]" : "bg-green hover:opacity-90"}`}
+                            className={`px-4 py-2 text-white transition-all rounded  ${!formData.phone_number || isPending || resendCountdown > 0 ? "bg-[#3d8c40] cursor-not-allowed" : "bg-green hover:opacity-90"}`}
                         >
                             {resendCountdown > 0 
                                 ? `Resend OTP in ${resendCountdown}`
@@ -639,7 +639,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <button
-                        className={`p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-xl ${isLoading ? "bg-[#3d8c40]" : "bg-green hover:opacity-90"}`}
+                        className={`p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-xl ${isLoading ? "bg-[#3d8c40] cursor-not-allowed" : "bg-green hover:opacity-90"}`}
                         type="submit"
                         disabled={isLoading}
                     >
