@@ -42,7 +42,7 @@ use App\Http\Controllers\AgeCategoryController;
  * Public Routes
  */
 Route::post('login', [UserController::class, 'login'])->name('login');
-Route::get('appointment-categories', [AppointmentCategoryController::class, 'index']);
+Route::post('appointment-categories', [AppointmentCategoryController::class, 'index']);
 Route::post('appointments', [AppointmentController::class, 'store']);
 
 /**
