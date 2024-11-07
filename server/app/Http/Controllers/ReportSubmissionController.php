@@ -7,6 +7,7 @@ use App\Models\ReportSubmission;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
 
 class ReportSubmissionController extends Controller
 {
@@ -176,8 +177,12 @@ class ReportSubmissionController extends Controller
                 }
             }
 
+            // Trigger the command to send pending report notices
+            
             // Commit transaction
             DB::commit();
+
+            Artisan::call('app:send-pending-report-notice', ['--send' => true]);
 
             return response()->json(['success' => 'Report templates and submissions created successfully.']);
         } catch (\Exception $e) {
@@ -291,7 +296,7 @@ class ReportSubmissionController extends Controller
             'report_year' => 'required|integer|digits:4',
             'report_month' => 'required|integer|between:1,12',
             'barangay_id' => 'nullable|integer|exists:barangays,barangay_id',
-            'status' => 'nullable|string|in:all,pending,submitted',
+            'status' => 'nullable|string|in:all,pending,submitted,submitted late',
         ]);
 
         if ($validator->fails()) {
@@ -313,7 +318,9 @@ class ReportSubmissionController extends Controller
                     'barangays.barangay_id',
                     'barangays.barangay_name',
                     'report_submissions.status',
-                    'report_statuses.submitted_at'
+                    'report_submissions.due_at', // Select due_at from report_submissions
+                    'report_statuses.submitted_at',
+                    DB::raw('DATEDIFF(report_statuses.submitted_at, report_submissions.due_at) as tardy_days')
                 )
                 ->distinct();
 
@@ -324,6 +331,12 @@ class ReportSubmissionController extends Controller
                 } else {
                     $query->where('report_submissions.status', $status);
                 }
+            }
+
+            // Only include tardy days if the status is "submitted late"
+            if ($status === 'submitted late') {
+                $query->whereNotNull('report_statuses.submitted_at')
+                    ->whereRaw('report_statuses.submitted_at > report_submissions.due_at');
             }
 
             // Fetch the results
