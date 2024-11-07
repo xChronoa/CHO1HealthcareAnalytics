@@ -1,16 +1,21 @@
 import { useCallback, useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
-import { useLoading } from "../context/LoadingContext";
 
-interface AppointmentCategory {
+interface Category {
     appointment_category_id: number;
     appointment_category_name: string;
 }
 
+interface AppointmentCategory {
+    category: Category;
+    available_slots: number;
+}
+
 interface UseAppointmentCategory {
-    fetchAppointmentCategories: () => Promise<void>;
+    fetchAppointmentCategories: (date?: String) => Promise<void>;
     appointmentCategories: AppointmentCategory[];
     error: string | null;
+    loading: boolean;
 }
 
 export const useAppointmentCategory = (): UseAppointmentCategory => {
@@ -19,16 +24,19 @@ export const useAppointmentCategory = (): UseAppointmentCategory => {
         AppointmentCategory[]
     >([]);
 
-    const { incrementLoading, decrementLoading } = useLoading();
+    // const { incrementLoading, decrementLoading } = useLoading();
+    const [loading, setLoading] = useState(false);
 
-    const fetchAppointmentCategories = useCallback(async () => {
+    const fetchAppointmentCategories = useCallback(async (selectedDate?: String) => {
         try {
-            incrementLoading();
+            setLoading(true);
             const response = await fetch(`${baseAPIUrl}/appointment-categories`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
+                body: JSON.stringify({ selected_date: selectedDate }),
                 credentials: "include",
             });
     
@@ -47,9 +55,9 @@ export const useAppointmentCategory = (): UseAppointmentCategory => {
         } catch (error: any) {
             setError(error.message || "Unexpected error while fetching appointment categories.");
         } finally {
-            decrementLoading();
+            setLoading(false);
         }
     }, []);
     
-    return { fetchAppointmentCategories, appointmentCategories, error };
+    return { fetchAppointmentCategories, appointmentCategories, error, loading };
 };
