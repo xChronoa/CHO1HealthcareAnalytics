@@ -8,6 +8,7 @@ import { useBarangay } from "../../hooks/useBarangay";
 import { useUser } from "../../hooks/useUser";
 import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useLoading } from "../../context/LoadingContext";
+import Swal from "sweetalert2";
 
 const UpdateAccount: React.FC = () => {
     const location = useLocation();
@@ -45,8 +46,28 @@ const UpdateAccount: React.FC = () => {
         setShowPassword(!showPassword);
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Are you sure you want to update this account?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes, update it!",
+            cancelButtonText: "No, cancel!",
+            customClass: {
+                popup: "w-fit",
+                title: "text-lg",
+                confirmButton:
+                    "transition-all bg-blue-400 text-white px-4 py-2 rounded-md hover:opacity-75",
+                cancelButton:
+                    "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+            },
+            buttonsStyling: false,
+        });
+
+        if (!result.isConfirmed) return false;
 
         if (user === null) return;
 
@@ -85,7 +106,10 @@ const UpdateAccount: React.FC = () => {
                     <div className="w-full h-[2px] bg-black"></div>
                 </header>
                 <div className="flex items-center justify-center flex-1 w-full">
-                    <form className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1">
+                    <form 
+                        className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
+                        onSubmit={handleSubmit}
+                    >
                         <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
                             Update Account
                         </h2>
@@ -170,7 +194,6 @@ const UpdateAccount: React.FC = () => {
                                     type={showPassword ? "text" : "password"}
                                     name="password"
                                     id="password"
-                                    required
                                     value={user.password || ""}
                                     onChange={handleChange}
                                     placeholder="Password"
@@ -239,7 +262,6 @@ const UpdateAccount: React.FC = () => {
                         <button
                             className="w-full p-2 my-5 font-bold text-white uppercase transition-all bg-blue-400 rounded-lg shadow-lg shadow-gray-400 hover:opacity-75"
                             type="submit"
-                            onClick={handleSubmit}
                         >
                             {redirecting
                                 ? "Redirecting..."

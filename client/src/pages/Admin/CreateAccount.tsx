@@ -7,6 +7,7 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons/faCircleInfo";
 import { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../../context/LoadingContext";
+import Swal from "sweetalert2";
 
 const CreateAccount: React.FC = () => {
     const { createUser, success, errorMessage } = useUser();
@@ -35,8 +36,28 @@ const CreateAccount: React.FC = () => {
         setShowPassword(!showPassword);
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Are you sure you want to create this account?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes, create it!",
+            cancelButtonText: "No, cancel!",
+            customClass: {
+                popup: "w-fit",
+                title: "text-lg",
+                confirmButton:
+                    "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                cancelButton:
+                    "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+            },
+            buttonsStyling: false,
+        });
+
+        if (!result.isConfirmed) return false;
 
         if (user === null) return;
 
@@ -78,7 +99,10 @@ const CreateAccount: React.FC = () => {
                 <div className="w-full h-[2px] bg-black"></div>
             </header>
             <div className="flex items-center justify-center flex-1 w-full">
-                <form className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1">
+                <form 
+                    className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
+                    onSubmit={handleSubmit}
+                >
                     <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
                         Create Account
                     </h2>
@@ -190,9 +214,9 @@ const CreateAccount: React.FC = () => {
                             className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
                             name="barangay_name"
                             id="barangay_name"
-                            required
                             value={user.barangay_name}
                             onChange={handleChange}
+                            required
                         >
                             {/* Can be replaced with the barangay values from the database */}
                             <option hidden>Select Barangay</option>
@@ -214,7 +238,6 @@ const CreateAccount: React.FC = () => {
                     <button
                         className="w-full p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg shadow-gray-400 bg-green hover:opacity-75"
                         type="submit"
-                        onClick={handleSubmit}
                         disabled={redirecting}
                     >
                         {redirecting
