@@ -51,6 +51,19 @@ const Transaction: React.FC = () => {
         setTab(tabName);
     };
 
+    const formatDateForDisplay = (dateStr: string) => {
+        const [year, month, day] = dateStr.split("-");
+        return new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day)
+        ).toLocaleDateString("en-PH", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
+
     return (
         <>
             <div className="w-11/12 py-16">
@@ -79,24 +92,33 @@ const Transaction: React.FC = () => {
                     <div className="dividing-line w-full h-[2px] bg-black" />
                 </header>
                 <section className="flex flex-col items-start">
-                    <div className="flex flex-row flex-wrap items-center justify-start w-full gap-6 mb-6 sm:justify-between md:gap-0 md:flex-row filter">
-                        {/* Filter by month and year */}
-                        <div className="flex flex-row items-center justify-center gap-5">
-                            <label htmlFor="month-from">From:</label>
-                            <input
-                                type="month"
-                                name="month-from"
-                                id="month-from"
-                                min={earliestDate}
-                                max={latestDate}
-                                value={selectedDate}
-                                onChange={handleDateChange}
-                                className="p-1 text-center rounded-lg"
-                            />
+                    <div className="flex flex-row flex-wrap items-center justify-start w-full gap-6 mb-6 sm:justify-between lg:gap-0 md:flex-row filter">
+                        <div className="flex flex-row gap-8 wrap-dates">
+                            {/* Filter by month and year */}
+                            <div className="flex flex-row items-center justify-center gap-2 text-xs sm:gap-5 sm:text-sm">
+                                <label htmlFor="month-from">From:</label>
+                                <input
+                                    type="month"
+                                    name="month-from"
+                                    id="month-from"
+                                    min={earliestDate}
+                                    max={latestDate}
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
+                                    className="p-[.45rem] text-center rounded-lg shadow-md shadow-gray-400"
+                                />
+                            </div>
+
+                            <div className="flex flex-row items-center justify-center gap-2 text-xs pointer-events-none sm:gap-5 sm:text-sm">
+                                <label htmlFor="due-date">Due:</label>
+                                <span className="p-2 bg-white rounded-lg shadow-md shadow-gray-400">
+                                    {submissions.length > 0 ? formatDateForDisplay(submissions[0].due_at) : "mm/dd/yyyy"}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Tabs */}
-                        <div className="flex flex-row justify-between w-full text-sm font-medium text-center text-gray-500 sm:w-fit sm:flex-wrap">
+                        <div className="flex flex-row justify-between w-full text-sm font-medium text-center text-gray-500 lg:w-fit sm:flex-wrap">
                             <button
                                 type="button"
                                 onClick={() => toggleTab("all")}
@@ -133,7 +155,7 @@ const Transaction: React.FC = () => {
                         </div>
                     </div>
                     <div className="w-full table-container">
-                        <table className="w-full text-center">
+                        <table className="w-full text-xs text-center sm:text-sm md:text-base">
                             {/* Table Header */}
                             <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
                                 <tr>
@@ -176,8 +198,28 @@ const Transaction: React.FC = () => {
                                                 {submission.barangay_name ||
                                                     "N/A"}
                                             </td>
-                                            <td className="px-4 py-2 font-semibold uppercase">
-                                                {submission.due_date}
+                                            <td className={`flex flex-col sm:flex-row justify-center items-center gap-2 px-4 py-2 text-nowrap font-semibold uppercase ${submission.status === "pending" ? "text-red-500" : "text-green"}`}>
+                                                <>
+                                                {(() => {
+                                                    if (submission.submitted_at) {
+                                                        // Format the date if `submitted_at` exists
+                                                        const formattedDate = new Date(submission.submitted_at).toLocaleDateString("en-US", {
+                                                            month: "long",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        });
+                                                        return formattedDate;
+                                                    } else {
+                                                        // Show placeholder if `submitted_at` is missing
+                                                        return "Not Submitted";
+                                                    }
+                                                })()}
+                                                <span className="text-xs italic text-nowrap sm:text-wrap">
+                                                    {submission.status === "submitted late" && submission.tardy_days > 0 
+                                                        ? ` (${submission.tardy_days} days late)` 
+                                                        : ""}
+                                                </span>
+                                                </>
                                             </td>
                                             <td className={`px-4 py-2 font-semibold uppercase ${submission.status === "pending" ? "text-red-500" : "text-green"} `}>
                                                 {submission.status}
