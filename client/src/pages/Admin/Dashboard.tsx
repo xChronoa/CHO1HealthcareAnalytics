@@ -152,8 +152,8 @@ const Dashboard: React.FC<DashboardProp> = () => {
             if (morbidityChartData) {
                 // Destructure and extract chart data more efficiently
                 const { 
-                    male: { data: maleData, options: maleOptions } = {},
-                    female: { data: femaleData, options: femaleOptions } = {} 
+                    male: { data: maleData = [], options: maleOptions = {} } = {},
+                    female: { data: femaleData = [], options: femaleOptions = {} } = {} 
                 } = morbidityChartData || {};
 
                 // If you need stringified versions, do this only if necessary
