@@ -39,7 +39,9 @@ export interface ReportSubmission {
     report_submission_id: number;
     report_year: number;
     report_month: number;
-    due_date: string;
+    submitted_at: string;
+    due_at: string;
+    tardy_days: number;
     report_type: string;
     status: string;
     barangay_name?: string;
