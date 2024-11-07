@@ -261,34 +261,38 @@ const Appointment: React.FC = () => {
             }));
             showSuccessAlert();
         } catch (error) {
-            setGeneralError("An error occurred while submitting the form. Please try again later.");
-            showErrorAlert();
+            handleErrorResponse(error as Response | Error);
         } finally {
             decrementLoading();
         }
     };
     
-    // Helper function to handle error responses
-    const handleErrorResponse = async (response: Response) => {
-        const data = await response.json();
-    
-        switch (response.status) {
-            case 409:
-                setGeneralError("You already have an appointment on this date.");
-                break;
-            case 422: // Unprocessable Entity
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    setGeneralError("Invalid data provided. Please check your inputs.");
-                }
-                break;
-            default:
-                setGeneralError("An unexpected error occurred. Please try again later.");
-                break;
+    // Helper function to handle error responses and network errors
+    const handleErrorResponse = async (error: Response | Error) => {
+        setGeneralError(null);
+
+        if (error instanceof Response) {
+            const data = await error.json();
+
+            switch (error.status) {
+                case 409:
+                    setGeneralError("You already have an appointment on this date.");
+                    break;
+                case 422:
+                    if (data.errors) {
+                        setErrors(data.errors);
+                    } else {
+                        setGeneralError("Invalid data provided. Please check your inputs.");
+                    }
+                    break;
+                default:
+                    setGeneralError("An unexpected error occurred. Please try again later.");
+                    break;
+            }
+        } else {
+            setGeneralError("A network error occurred. Please check your connection and try again.");
         }
-    
-        showErrorAlert();
+        showErrorAlert(generalError || "An error occured. Please try again.");
     };
 
     const showSuccessAlert = () => {
@@ -300,10 +304,10 @@ const Appointment: React.FC = () => {
         }).then(() => navigate("/appointment/confirmation"));
     };
 
-    const showErrorAlert = () => {
+    const showErrorAlert = (message: string) => {
         Swal.fire({
             title: "Error",
-            text: "An error occurred while submitting the form. Please try again later.",
+            text: message,
             icon: "error",
             confirmButtonText: "OK",
         });
@@ -321,15 +325,15 @@ const Appointment: React.FC = () => {
                     break;
                 case "auth/too-many-requests":
                     setGeneralError("Too many requests. Please try again later.");
-                    showErrorAlert();
+                    showErrorAlert(generalError || "Too many requests. Please try again later.");
                     break;
                 default:
                     setGeneralError("Failed to send OTP. Please try again.");
-                    showErrorAlert();
+                    showErrorAlert(generalError || "Failed to send OTP. Please try again.");
             }
         } else {
             setGeneralError("An unknown error occurred. Please try again.");
-            showErrorAlert();
+            showErrorAlert(generalError || "An unknown error occurred. Please try again.");
         }
     };
 
