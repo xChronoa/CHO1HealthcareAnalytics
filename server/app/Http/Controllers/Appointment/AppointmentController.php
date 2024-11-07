@@ -52,17 +52,31 @@ class AppointmentController extends Controller
         DB::beginTransaction();
 
         try {
-            // Check if a patient with the same name and email exists
-            $patient = Patient::firstOrCreate([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-            ], [
-                'sex' => $request->sex,
-                'birthdate' => $request->birthdate,
-                'address' => $request->address,
-                'phone_number' => $request->phone_number,
-            ]);
+            // Check if a patient with the same email exists, if so, update details, otherwise create
+            $patient = Patient::where('email', $request->email)->first();
+
+            if ($patient) {
+                // Update the existing patient details
+                $patient->update([
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'sex' => $request->sex,
+                    'birthdate' => $request->birthdate,
+                    'address' => $request->address,
+                    'phone_number' => $request->phone_number,
+                ]);
+            } else {
+                // Create a new patient if none exists with the same email
+                $patient = Patient::create([
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                    'email' => $request->email,
+                    'sex' => $request->sex,
+                    'birthdate' => $request->birthdate,
+                    'address' => $request->address,
+                    'phone_number' => $request->phone_number,
+                ]);
+            }
 
             // Check if the patient already has an appointment on the same date
             $existingAppointment = Appointment::where('patient_id', $patient->patient_id)
@@ -76,6 +90,37 @@ class AppointmentController extends Controller
             // Retrieve the appointment_category_id using the appointment_category_name
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
             $appointmentCategoryId = $appointmentCategory->appointment_category_id;
+
+            // Define the slot limits and allowed days for each category (use your logic to determine available slots)
+            $slotsPerCategory = [
+                'Maternal Health' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
+                'Animal Bite Vaccination' => ['days' => ['Monday', 'Thursday'], 'slots' => 70],
+                'General Checkup' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+                'Baby Vaccine' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+                'TB Dots' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+            ];
+
+            // Parse the selected date and determine the day of the week
+            $date = new \DateTime($request->appointment_date);
+            $dayOfWeek = $date->format('l'); // For example, "Monday"
+
+            // Check if the appointment category allows appointments on this day
+            if (!in_array($dayOfWeek, $slotsPerCategory[$appointmentCategory->appointment_category_name]['days'] ?? [])) {
+                return response()->json(['error' => 'Appointments are not available on this day for the selected category.'], 400);
+            }
+
+            // Count existing appointments on the selected date for the category
+            $appointmentsCount = Appointment::where('appointment_category_id', $appointmentCategoryId)
+                ->whereDate('appointment_date', $request->appointment_date)
+                ->count();
+
+            // Calculate the available slots
+            $totalSlots = $slotsPerCategory[$appointmentCategory->appointment_category_name]['slots'];
+            $availableSlots = $totalSlots - $appointmentsCount;
+
+            if ($availableSlots <= 0) {
+                return response()->json(['error' => 'No available slots for the selected category on this date. Please choose another date or category.'], 400);
+            }
 
             // Check for the highest queue_number for the given appointment_date
             $maxQueueNumber = Appointment::whereDate('appointment_date', $request->appointment_date)
@@ -261,7 +306,7 @@ class AppointmentController extends Controller
                 $appointmentsQuery->whereDate('appointment_date', $date);
             }
 
-            $appointments = $appointmentsQuery->get();
+            $appointments = $appointmentsQuery->orderBy("queue_number")->get();
         }
 
         // Format the data to include patient details and appointment details
@@ -279,9 +324,11 @@ class AppointmentController extends Controller
                 ],
                 'appointment_date' => $appointment->appointment_date,
                 'appointment_category' => [
-                    'appointment_category_id' => $appointment->category->appointment_category_id,
-                    'appointment_category_name' => $appointment->category->appointment_category_name,
+                    'id' => $appointment->category->appointment_category_id,
+                    'name' => $appointment->category->appointment_category_name,
                 ],
+                'patient_note' => $appointment->patient_note,
+                'queue_number' => $appointment->queue_number,
             ];
         });
 
