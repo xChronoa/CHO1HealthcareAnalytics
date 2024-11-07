@@ -32,7 +32,7 @@ interface FormData {
 
 const Appointment: React.FC = () => {
     const { isLoading, incrementLoading, decrementLoading } = useLoading();
-    const { fetchAppointmentCategories, appointmentCategories } = useAppointmentCategory();
+    const { loading, fetchAppointmentCategories, appointmentCategories } = useAppointmentCategory();
     const [formData, setFormData] = useState<FormData>({
         first_name: "",
         last_name: "",
@@ -109,14 +109,27 @@ const Appointment: React.FC = () => {
             "first_name", "last_name", "sex", "birthdate", "address", "appointment_date",
             "appointment_category_name", "email", "phone_number", "otp", "terms"
         ];
-
+    
+        const minDate = new Date(); // Current date and time
+        minDate.setHours(0, 0, 0, 0); // Reset to the start of the day (midnight)
+    
         requiredFields.forEach((field) => {
             const value = formData[field];
             if (!value || (typeof value === "string" && value.trim() === "")) {
                 errors[field] = field === "terms" ? "You must accept the terms and conditions." : "This field cannot be empty.";
             }
         });
-
+    
+        // Ensure the appointment_date is in the correct format for comparison
+        const appointmentDate = new Date(formData.appointment_date);
+        
+        // If appointment_date is not a valid date object
+        if (isNaN(appointmentDate.getTime())) {
+            errors["appointment_date"] = "Invalid appointment date.";
+        } else if (appointmentDate <= minDate) {
+            errors["appointment_date"] = "Appointment date must be later than today's date.";
+        }
+    
         return errors;
     };
 
@@ -191,6 +204,24 @@ const Appointment: React.FC = () => {
         event.preventDefault();
         setErrors({});
         setGeneralError(null);
+
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Are you sure you want to book this appointment?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, book it!",
+            cancelButtonText: "No, cancel!",
+            customClass: {
+                confirmButton:
+                    "bg-green text-white px-4 py-2 rounded-md hover:bg-[#3d8c40]",
+                cancelButton:
+                    "bg-white  border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+            },
+            buttonsStyling: false,
+        });
+
+        if (!result.isConfirmed) return;
     
         // Validate form data
         const validationErrors = validateForm();
@@ -206,7 +237,6 @@ const Appointment: React.FC = () => {
             // Verify OTP
             const isOtpValid = await verifyOTP();
             if (!isOtpValid) return;
-    
     
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
@@ -227,7 +257,7 @@ const Appointment: React.FC = () => {
             const result = await response.json();
             sessionStorage.setItem("appointmentDetails", JSON.stringify({
                 ...formData,
-                queue_number: result.queue_number,
+                queue_number: result.appointment.queue_number,
             }));
             showSuccessAlert();
         } catch (error) {
@@ -303,10 +333,6 @@ const Appointment: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        fetchAppointmentCategories();
-    }, [fetchAppointmentCategories]);
-
     const [minDate, setMinDate] = useState<string>("");
 
     useEffect(() => {
@@ -318,7 +344,11 @@ const Appointment: React.FC = () => {
         const dd = String(tomorrow.getDate()).padStart(2, "0");
         setMinDate(`${yyyy}-${mm}-${dd}`);
     }, []);
-    
+
+    useEffect(() => {
+        fetchAppointmentCategories(formData.appointment_date);
+    }, [formData.appointment_date])
+
     return (
         <>
             <div className="flex flex-col items-center justify-center gap-2 my-5 title">
@@ -423,6 +453,11 @@ const Appointment: React.FC = () => {
                                 <label htmlFor="female">Female</label>
                             </div>
                         </div>
+                        {errors.sex && (
+                            <span className="text-red-600">
+                                {errors.sex}
+                            </span>
+                        )}
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
@@ -488,22 +523,35 @@ const Appointment: React.FC = () => {
                             Appointment Type:
                         </label>
                         <select
-                            className="p-2 w-full border-gray-300 rounded-md border-[1px]"
+                            className={`p-2 w-full border-gray-300 rounded-md border-[1px] ${formData.appointment_date === "" ? "cursor-not-allowed" : ""}`}
                             name="appointment_category_name"
                             id="appointment_category_name"
                             value={formData.appointment_category_name}
                             onChange={handleChange}
                             required
-                        >
-                            <option hidden>Select Type</option>
-                            {appointmentCategories.map((category) => (
-                                <option
-                                    key={category.appointment_category_id}
-                                    value={category.appointment_category_name}
-                                >
-                                    {category.appointment_category_name}
-                                </option>
-                            ))}
+                            disabled={formData.appointment_date === "" || loading}
+                        >   
+                            {loading ? (
+                                <option disabled>Loading...</option>
+                            ) : (
+                                formData.appointment_date !== "" ? (
+                                    <>
+                                        <option hidden>Select Type</option>
+                                        {appointmentCategories.map(({ category, available_slots }) => (
+                                            <option
+                                                key={category.appointment_category_id}
+                                                value={category.appointment_category_name}
+                                                disabled={available_slots <= 0}
+                                            >
+                                                {category.appointment_category_name} 
+                                                {available_slots != null ? ` (${available_slots} slots)` : ''}
+                                            </option>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <option hidden>Select appointment date first</option>
+                                )
+                            )}
                         </select>
                         {errors.appointment_category_name && (
                             <span className="text-red-600">
@@ -537,6 +585,7 @@ const Appointment: React.FC = () => {
                             onChange={handlePhoneNumberChange}
                             id="phone_number"
                             className="w-full border-gray-300 rounded-md border-[1px] pl-2"
+                            placeholder="09123456789"
                             required
                         />
                         {errors.phone_number && (
@@ -602,7 +651,7 @@ const Appointment: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="flex flex-row items-center justify-center my-2 terms">
+                    <div className="flex flex-col items-center justify-center my-2 terms">
                         <div className="flex flex-row w-full gap-5 wrap md:w-3/4">
                             <input
                                 className="scale-150"
