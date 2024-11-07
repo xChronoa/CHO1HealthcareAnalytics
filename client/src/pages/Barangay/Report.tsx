@@ -249,6 +249,26 @@ const Report: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        const result = await Swal.fire({
+            title: "Are you sure you want to submit this report?",
+            text: "You won't be able to modify this upon submission.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Yes, submit it!",
+            cancelButtonText: "No, I want to review it!",
+            customClass: {
+                popup: "w-fit",
+                title: "text-lg",
+                confirmButton:
+                    "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                cancelButton:
+                    "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+            },
+            buttonsStyling: false,
+        });
+
+        if (!result.isConfirmed) return false;
+
         // Check if either report has been submitted for the selected date
         const selectedDateReports = [
             ...m1Reports.filter(report => report.report_submission_id === m1ReportId),
