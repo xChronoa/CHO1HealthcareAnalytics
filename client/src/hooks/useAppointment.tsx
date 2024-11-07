@@ -166,7 +166,7 @@ export const useAppointment = () => {
         async (newAppointment: Partial<Appointment>) => {
             incrementLoading();
             setError(null);
-
+    
             try {
                 const response = await fetch(`${baseAPIUrl}/appointments/`, {
                     method: "POST",
@@ -177,13 +177,21 @@ export const useAppointment = () => {
                     body: JSON.stringify(newAppointment),
                     credentials: "include",
                 });
-
+    
                 if (!response.ok) {
+                    const errorData = await response.json();
+                    
+                    // Check if the error is related to available slots
+                    if (errorData.error && errorData.error === 'No available slots for the selected category on this date. Please choose another date or category.') {
+                        throw new Error("No available slots for the selected category on this date. Please choose another date or category.");
+                    }
+                    
                     throw new Error("Failed to create appointment. Please check your data.");
                 }
-
+    
                 const data: Appointment = await response.json();
                 setAppointments((prev) => [...prev, data]);
+    
             } catch (err: any) {
                 handleError(err.message || "An error occurred while creating the appointment. Please try again.");
             } finally {
