@@ -6,22 +6,73 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment\AppointmentCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Response;
+use App\Models\Appointment\Appointment;
+use Symfony\Component\HttpFoundation\Response;
 
 class AppointmentCategoryController extends Controller
 {
     /**
-     * Display a listing of the appointment categories.
+     * Display a listing of the appointment categories with available slots based on the selected date.
      *
+     * @param Request $request
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        // Fetch all appointment categories
-        $appointmentCategories = AppointmentCategory::all();
+        // Retrieve the selected_date from the query parameter in "YYYY-MM-DD" format
+        $selectedDate = $request->input('selected_date');
 
-        // Return the data as a JSON response
-        return response($appointmentCategories);
+        // Define the slot limits and allowed days for each category
+        $slotsPerCategory = [
+            'Maternal Health' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
+            'Animal Bite Vaccination' => ['days' => ['Monday', 'Thursday'], 'slots' => 70],
+            'General Checkup' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+            'Baby Vaccine' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+            'TB Dots' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+        ];
+
+        // Fetch appointment categories and calculate available slots if a date is provided
+        $appointmentCategories = AppointmentCategory::all()->map(function ($category) use ($slotsPerCategory, $selectedDate) {
+            $categoryName = $category->appointment_category_name;
+
+            // If selected_date is null, return category info without calculating slots
+            if (is_null($selectedDate)) {
+                return [
+                    'category' => $category,
+                    'available_slots' => null,
+                ];
+            }
+
+            // Parse the selected date and determine the day of the week
+            $date = new \DateTime($selectedDate);
+            $dayOfWeek = $date->format('l'); // For example, "Monday"
+
+            // Check if appointments are allowed on this day for the category
+            if (in_array($dayOfWeek, $slotsPerCategory[$categoryName]['days'] ?? [])) {
+                // Total slots defined for the category
+                $totalSlots = $slotsPerCategory[$categoryName]['slots'];
+
+                // Count existing appointments on the selected date for the category
+                $appointmentsCount = Appointment::where('appointment_category_id', $category->appointment_category_id)
+                    ->whereDate('appointment_date', $selectedDate)
+                    ->count();
+
+                // Calculate available slots
+                $availableSlots = $totalSlots - $appointmentsCount;
+            } else {
+                // No slots available if the day does not match allowed days for the category
+                $availableSlots = 0;
+            }
+
+            // Return the category with calculated available slots for the selected date
+            return [
+                'category' => $category,
+                'available_slots' => $availableSlots,
+            ];
+        });
+
+        // Return data as JSON
+        return response()->json($appointmentCategories);
     }
 
     /**
