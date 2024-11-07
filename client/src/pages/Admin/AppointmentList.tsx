@@ -57,6 +57,14 @@ const AppointmentList: React.FC = () => {
         setSelectedDate(event.target.value);
     };
 
+    // Determine grid columns based on number of appointments
+    const getGridClass = (count: number) => {
+        if (count === 1) return "grid-cols-1";
+        if (count === 2) return "grid-cols-1 md:grid-cols-2";
+        if (count === 3) return "grid-cols-1 md:grid-cols-2";
+        return "grid-cols-1 md:grid-cols-2";
+    };
+
     return (
         <>
             <div className="w-11/12 py-16">
@@ -105,7 +113,7 @@ const AppointmentList: React.FC = () => {
                                 onChange={handleChange}
                             >
                                 <option value="All">All</option>
-                                {appointmentCategories.map((category) => (
+                                {appointmentCategories.map(({ category }) => (
                                     <option
                                         key={category.appointment_category_id}
                                         value={
@@ -119,117 +127,56 @@ const AppointmentList: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="w-full p-4 overflow-x-auto rounded-lg shadow-md sm:py-4 table-container outline outline-1 shadow-black sm:outline-0 sm:shadow-transparent">
-                        <table className="hidden w-full text-center md:table md:w-full">
-                            {/* Table Header */}
-                            <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
-                                <tr>
-                                    <th className="px-4 py-2 rounded-tl-[16px] rounded-bl-[16px]">
-                                        Name
-                                    </th>
-                                    <th className="px-4 py-2">Sex</th>
-                                    <th className="px-4 py-2">Birthdate</th>
-                                    <th className="px-4 py-2">Address</th>
-                                    <th className="px-4 py-2">Email</th>
-                                    <th className="px-4 py-2 rounded-tr-[16px] rounded-br-[16px]">
-                                        Phone#
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {error ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-2 text-center text-red-500"
-                                        >
-                                            Error loading appointments: {error}
-                                        </td>
-                                    </tr>
-                                ) : appointments.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-4 py-2 text-center"
-                                        >
-                                            No appointments found for the
-                                            selected category.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    appointments.map((appointment) => (
-                                        <tr
-                                            key={appointment.patient.patient_id}
-                                        >
-                                            <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.first_name}{" "}
-                                                {appointment.patient.last_name}
-                                            </td>
-                                            <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.sex}
-                                            </td>
-                                            <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.birthdate}
-                                            </td>
-                                            <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.address}
-                                            </td>
-                                            <td className="px-4 py-2 font-semibold">
-                                                {appointment.patient.email}
-                                            </td>
-                                            <td className="px-4 py-2 font-semibold">
-                                                {
-                                                    appointment.patient
-                                                        .phone_number
-                                                }
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-
-                        <div className="md:hidden">
+                    <div className="w-full text-xs rounded-lg sm:text-sm md:text-base sm:py-4 table-container ">
+                        <div className={`grid gap-6 ${appointments?.length ? getGridClass(appointments.length) : 'grid-cols-1'}`}>
                             {error ? (
-                                <p className="text-center text-red-500">
-                                    Error loading appointments: {error}
-                                </p>
+                                <div className="text-center text-red-500 col-span-full">
+                                Error loading appointments: {error}
+                                </div>
                             ) : appointments.length === 0 ? (
-                                <p className="text-center text-gray-600">
-                                    No appointments found for the selected
-                                    category.
-                                </p>
+                                <div className="w-full p-12 bg-white rounded-lg shadow-md col-span-full">
+                                <h1 className="text-center">
+                                    No appointments found for the selected category.
+                                </h1>
+                                </div>
                             ) : (
                                 appointments.map((appointment) => (
-                                    <div
-                                        key={appointment.patient.patient_id}
-                                        className="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-md"
-                                    >
-                                        <h2 className="mb-2 text-lg font-semibold text-gray-800">
-                                            {appointment.patient.first_name}{" "}
-                                            {appointment.patient.last_name}
-                                        </h2>
-                                        <p className="text-sm text-gray-600">
-                                            <strong>Sex:</strong>{" "}
-                                            {appointment.patient.sex}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <strong>Birthdate:</strong>{" "}
-                                            {appointment.patient.birthdate}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <strong>Address:</strong>{" "}
-                                            {appointment.patient.address}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <strong>Email:</strong>{" "}
-                                            {appointment.patient.email}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <strong>Phone#:</strong>{" "}
-                                            {appointment.patient.phone_number}
-                                        </p>
+                                <div
+                                    key={appointment.patient.patient_id}
+                                    className="grid grid-cols-1 p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
+                                >
+                                    <h3 className="mb-4 text-lg font-bold">
+                                    {appointment.patient.first_name} {appointment.patient.last_name}
+                                    </h3>
+                                    <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
+                                        <span className="font-semibold">Queue Number:</span>
+                                        <span>{appointment.queue_number}</span>
+
+                                        <span className="font-semibold">Sex:</span>
+                                        <span>{appointment.patient.sex}</span>
+
+                                        <span className="font-semibold">Birthdate:</span>
+                                        <span>{appointment.patient.birthdate}</span>
+
+                                        <span className="font-semibold">Address:</span>
+                                        <span className="break-words">{appointment.patient.address}</span>
+
+                                        <span className="font-semibold">Email:</span>
+                                        <span className="break-words">{appointment.patient.email}</span>
+
+                                        <span className="font-semibold">Phone#:</span>
+                                        <span>{appointment.patient.phone_number}</span>
+
+                                        <span className="font-semibold">Patient Note:</span>
+                                        <span className="break-words">{appointment.patient_note || "None"}</span>
+                                        {selectedAppointmentType.toLowerCase() === "all" ? (
+                                            <>
+                                                <span className="font-semibold text-nowrap">Appointment Type:</span>
+                                                <span className="break-words">{appointment.appointment_category.name || "None"}</span>
+                                            </>
+                                        ) : ( null )}
                                     </div>
+                                </div>
                                 ))
                             )}
                         </div>
