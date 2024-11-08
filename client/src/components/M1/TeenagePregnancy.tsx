@@ -41,7 +41,8 @@ export const TeenagePregnancy: React.FC<ServiceProps> = ({
 
     return (
         <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
-            <legend className="text-lg font-semibold">Teenage Pregnancy</legend>
+            <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">
+Teenage Pregnancy</legend>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">

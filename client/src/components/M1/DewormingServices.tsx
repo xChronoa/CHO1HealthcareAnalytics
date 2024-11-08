@@ -47,7 +47,8 @@ export const DewormingServices: React.FC<ServiceProps> = ({
 
     return (
         <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
-            <legend className="text-lg font-semibold">
+            <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">
+
                 Deworming Services for Infants, Children and Adolescents (Community Based)
             </legend>
                 {error ? (
