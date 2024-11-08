@@ -109,7 +109,7 @@ const SubmittedReports: React.FC = () => {
                         onChange={handleDateChange}
                         min={earliestDate}
                         max={latestDate}
-                        className="px-6 py-2 text-left rounded-lg shadow-md shadow-[#a3a19d]"
+                        className={`px-6 py-2 text-left rounded-lg shadow-md shadow-[#a3a19d] ${latestDate === null ? "bg-white cursor-not-allowed" : ""}`}
                         disabled={latestDate === null}
                     />
                 </div>
