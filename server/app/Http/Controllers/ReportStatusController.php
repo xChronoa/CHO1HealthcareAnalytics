@@ -105,6 +105,7 @@ class ReportStatusController extends Controller
                     'status' => 'approved',
                     'submitted_at' => now(),
                     'admin_note' => null,
+                    'projected_population' => $m1Report["projectedPopulation"] ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -117,6 +118,7 @@ class ReportStatusController extends Controller
                     'status' => 'approved',
                     'submitted_at' => now(),
                     'admin_note' => null,
+                    'projected_population' => $m1Report["projectedPopulation"] ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -246,10 +248,19 @@ class ReportStatusController extends Controller
 
             return response()->json(['message' => 'Data processed successfully.', 'sent-data' => $request->all()], 201);
         } catch (\Exception $e) {
+            // Log the error details for debugging purposes
+            Log::error('Error in report submission: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'exception' => $e
+            ]);
+
             // Rollback transaction on error
             DB::rollBack();
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            // Return a generic user-friendly error message
+            return response()->json([
+                'error' => 'An unexpected error occurred while processing the report. Please try again later. If the issue persists, contact support.',
+            ], 500);
         }
     }
 
@@ -333,7 +344,8 @@ class ReportStatusController extends Controller
                     'report_submission_templates.report_month',
                     'barangays.barangay_id',
                     'barangays.barangay_name',
-                    'report_statuses.submitted_at'
+                    'report_statuses.submitted_at',
+                    'report_statuses.projected_population'
                 )
                 ->join('report_submissions', 'report_statuses.report_submission_id', '=', 'report_submissions.report_submission_id')
                 ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
