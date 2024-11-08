@@ -38,7 +38,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = memo(
             >
                 <FontAwesomeIcon icon={icon} className="justify-self-start" />
                 <h3
-                    className={`flex-1 text-nowrap text-justify transition-transform text-sm sm:text-base ${
+                    className={`flex-1 text-nowrap text-justify transition-transform text-xs sm:text-sm md:text-base ${
                         isMinimized
                             ? "absolute -translate-x-full opacity-0"
                             : "translate-x-0 opacity-100"
