@@ -23,6 +23,12 @@ body {
 
 @media (max-width: 768px) {
     .incomplete-section.alert {
+        width: 90% !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .incomplete-section.alert {
         width: 100% !important;
     }
 }
