@@ -83,7 +83,16 @@ const UpdateAccount: React.FC = () => {
                     barangay_name: "",
                     status: "",
                 });
-                navigate("/admin/manage/accounts");
+
+                Swal.fire({
+                    title: "Account Updated!",
+                    text: "The account details were successfully updated.",
+                    icon: "success",
+                    confirmButtonText: "Go to Accounts List",
+                    customClass: {
+                        confirmButton: "transition-all bg-blue-400 text-white px-4 py-2 rounded-md hover:opacity-75",
+                    }
+                }).then(() => navigate("/admin/manage/accounts"));
             }
         }
     };

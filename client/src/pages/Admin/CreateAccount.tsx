@@ -65,7 +65,7 @@ const CreateAccount: React.FC = () => {
 
         if (createSuccess) {
             if (!isLoading) {
-                setRedirecting(true);
+
                 setUser({
                     username: "",
                     password: "",
@@ -73,7 +73,30 @@ const CreateAccount: React.FC = () => {
                     role: "encoder",
                     barangay_name: "",
                 });
-                navigate("/admin/manage/accounts");
+                
+                Swal.fire({
+                    title: "Account Created Successfully!",
+                    html: "<p class='text-center break-words'>The new account has been created. Would you like to return to the accounts list or stay on this page?</p>",
+                    icon: "success",
+                    showCancelButton: true,
+                    confirmButtonText: "Go to Accounts List",
+                    cancelButtonText: "Stay Here",
+                    customClass: {
+                        title: "text-lg",
+                        confirmButton:
+                        "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                        cancelButton:
+                        "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+                    },
+                    buttonsStyling: false,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        setRedirecting(true);
+                        navigate("/admin/manage/accounts")
+                    } else {
+                        setRedirecting(false);
+                    }
+                });
             }
         }
     };
@@ -236,9 +259,9 @@ const CreateAccount: React.FC = () => {
                     </div>
 
                     <button
-                        className="w-full p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg shadow-gray-400 bg-green hover:opacity-75"
+                        className={`w-full p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg shadow-gray-400 bg-green hover:opacity-75 ${redirecting || isLoading ? "cursor-not-allowed" : ""}`}
                         type="submit"
-                        disabled={redirecting}
+                        disabled={redirecting || isLoading}
                     >
                         {redirecting
                             ? "Redirecting..."
