@@ -442,7 +442,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                         </div>
                     </>
                 ) : (
-                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md sm:w-9/12 no-submitted-report shadow-gray-400">
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md lg:w-9/12 no-submitted-report shadow-gray-400">
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>
