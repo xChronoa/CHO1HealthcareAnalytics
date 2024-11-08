@@ -23,6 +23,7 @@ class StoreDataRequest extends FormRequest
     {
         return [
             // Validation rules for m1Report
+            'm1Report.projectedPopulation' => "nullable|integer",
             'm1Report.familyplanning.*.age_category' => 'required|string|exists:age_categories,age_category',
             'm1Report.familyplanning.*.fp_method_id' => 'required|integer|exists:family_planning_methods,method_id',
             'm1Report.familyplanning.*.current_users_beginning_month' => 'required|integer',
