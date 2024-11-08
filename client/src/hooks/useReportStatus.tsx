@@ -21,6 +21,7 @@ interface ReportStatus {
     barangay_id: number;
     barangay_name: string;
     submitted_at: string;
+    projected_population: number;
 }
 
 export const useReportStatus = (): UseReportStatus => {
