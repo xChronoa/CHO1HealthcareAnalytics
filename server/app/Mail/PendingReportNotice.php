@@ -45,7 +45,7 @@ class PendingReportNotice extends Mailable
 
     public function build()
     {
-        return $this->from("noreply@cho1.com", "Cabuyao City Health Office 1 - Health Center")
+        return $this->from("cabuyao-cho1@cho1.site", "Cabuyao City Health Office 1 - Health Center")
                     ->subject("Cabuyao City Health Office 1 - Pending Report")
                     ->view('pending_report_notification')
                     ->with([

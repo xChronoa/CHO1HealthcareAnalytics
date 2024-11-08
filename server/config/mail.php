@@ -49,6 +49,15 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'mailjet' => [
+            'transport' => 'smtp',
+            'host' => 'in-v3.mailjet.com',
+            'port' => 587,
+            'encryption' => 'tls',
+            'username' => env('1b2abd1b6f769a50d4afc60b93ff70f4'),
+            'password' => env('dd5416d1ccbaa6cb35f6cb27daf2ce63'),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
