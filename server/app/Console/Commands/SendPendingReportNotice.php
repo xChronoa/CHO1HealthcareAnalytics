@@ -58,16 +58,21 @@ class SendPendingReportNotice extends Command
 
             // Collect unique report periods with their due dates and barangay name for this barangay
             $uniqueReports = $reportsToSend->unique(function ($report) {
-                return $report->report_period . '-' . $report->due_at;
+                // Create a report period with "Month Year" format (e.g., "January 2024")
+                return $report->reportTemplate->report_month . '-' . $report->reportTemplate->report_year . '-' . $report->due_at;
             })->map(function ($report) {
                 $dueDate = Carbon::parse($report->due_at);
                 $daysLeft = Carbon::today()->diffInDays($dueDate, false); // Negative if overdue
 
+                // Create the report_period as "Month Year"
+                // Convert report_month (1-12) to the actual month name
+                $reportPeriod = Carbon::createFromDate($report->reportTemplate->report_year, $report->reportTemplate->report_month, 1)->format('F Y');
+
                 return [
-                    'report_period' => $report->report_period,
+                    'report_period' => $reportPeriod, // Now in "Month Year" format
                     'due_date' => $dueDate->format('F j, Y'),
                     'barangay_name' => $report->barangay->barangay_name,
-                    'days_left' => $daysLeft
+                    'days_left' => $daysLeft,
                 ];
             });
 
