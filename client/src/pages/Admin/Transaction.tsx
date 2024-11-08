@@ -184,11 +184,12 @@ const Transaction: React.FC = () => {
                                     </tr>
                                 ) : submissions.length === 0 ? (
                                     <tr>
-                                        <td
-                                            colSpan={3}
-                                            className="px-4 py-2 font-semibold uppercase"
-                                        >
-                                            No data available
+                                        <td colSpan={3}>
+                                            <div className="w-full p-12 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                                                <h1 className="text-center">
+                                                    No submissions have been made for any barangays yet.
+                                                </h1>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : (
