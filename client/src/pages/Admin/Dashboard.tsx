@@ -22,7 +22,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
     // State for selected barangay and year
     const [section, setSection] = useState<string>("m1");
     const [selectedBarangay, setSelectedBarangay] = useState<string>(''); 
-    const [selectedYear, setSelectedYear] = useState<string | null>(null);
+    const [selectedYear, setSelectedYear] = useState<string | null>(new Date().getFullYear().toString());
     const [maxDate, setMaxDate] = useState<Date | undefined>(undefined);
     const [minDate, setMinDate] = useState<Date | undefined>(undefined);
 
