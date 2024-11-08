@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class ReportSubmissionController extends Controller
 {
@@ -178,7 +179,7 @@ class ReportSubmissionController extends Controller
             }
 
             // Trigger the command to send pending report notices
-            
+
             // Commit transaction
             DB::commit();
 
@@ -378,39 +379,58 @@ class ReportSubmissionController extends Controller
 
     /**
      * Fetch report submissions for the authenticated user's barangay.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function fetchReportSubmissionsForBarangay()
     {
-        // Step 1: Retrieve the barangay_id of the authenticated user
-        $barangayId = DB::table('users')
-            ->where('user_id', Auth::id())
-            ->value('barangay_id');
+        try {
+            // Step 1: Retrieve the barangay_id of the authenticated user
+            $barangayId = DB::table('users')
+                ->where('user_id', Auth::id())
+                ->value('barangay_id');
 
-        if (!$barangayId) {
+            // If barangay_id is not found, return a 404 error
+            if (!$barangayId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sorry, we could not find the barangay associated with your account. Please contact support if this is an error.',
+                ], 404);
+            }
+
+            // Step 2: Fetch report submissions filtered by barangay_id and status "pending"
+            $reportSubmissions = DB::table('report_submissions as rs')
+                ->join('report_submission_templates as rst', 'rs.report_submission_template_id', '=', 'rst.report_submission_template_id')
+                ->where('rs.barangay_id', $barangayId) // Filter by barangay_id
+                ->where('rs.status', 'pending') // Filter by "pending" status
+                ->select(
+                    'rs.report_submission_id',
+                    'rs.status',
+                    'rst.report_type',
+                    DB::raw("CONCAT(rst.report_month, '-', rst.report_year) as report_month_year")
+                )
+                ->orderBy('rst.report_year', 'desc')
+                ->orderBy('rst.report_month', 'desc')
+                ->get()
+                ->groupBy('report_type'); // Separate into m1 and m2 groups
+
+            // Return the data with a 200 success status
+            return response()->json([
+                'success' => true,
+                'data' => $reportSubmissions,
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the exception for debugging purposes
+            Log::error('Error fetching report submissions for barangay: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'exception' => $e,
+            ]);
+
+            // Return a generic error response to the user without exposing sensitive information
             return response()->json([
                 'success' => false,
-                'message' => 'Barangay not found for the user.',
-            ], 404);
+                'message' => 'An unexpected error occurred while fetching the report submissions. Please try again later.',
+            ], 500);
         }
-
-        // Step 2: Fetch report submissions filtered by barangay_id
-        $reportSubmissions = DB::table('report_submissions as rs')
-            ->join('report_submission_templates as rst', 'rs.report_submission_template_id', '=', 'rst.report_submission_template_id')
-            ->where('rs.barangay_id', $barangayId) // Filter by barangay_id
-            ->select(
-                'rs.report_submission_id',
-                'rs.status',
-                'rst.report_type',
-                DB::raw("CONCAT(rst.report_month, '-', rst.report_year) as report_month_year")
-            )
-            ->orderBy('rst.report_year', 'desc')
-            ->orderBy('rst.report_month', 'desc')
-            ->get()
-            ->groupBy('report_type'); // Separate into m1 and m2 groups
-
-        return response()->json([
-            'success' => true,
-            'data' => $reportSubmissions,
-        ]);
     }
 }
