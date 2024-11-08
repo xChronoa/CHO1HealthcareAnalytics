@@ -41,6 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
                 collapseSidebar={collapseSidebar}
                 type={sidebarConfig.type}
                 barangay={user?.barangay_name}
+                username={user?.username}
             />
             <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
             <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && isCollapsed ? "lg:pl-64" : "lg:pl-14"} bg-almond min-h-screen`}>
