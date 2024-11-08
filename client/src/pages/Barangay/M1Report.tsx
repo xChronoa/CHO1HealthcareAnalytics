@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Report Components
 import { ModernWRA } from "../../components/M1/ModernWRA";
@@ -30,6 +30,7 @@ import {
     updateServiceData,
 } from "../../utils/m1FormDataUtils";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
+import { useLoading } from "../../context/LoadingContext";
 
 interface M1ReportProps {
     setReportDatas: (type: "m1" | "m2", data: any) => void;
@@ -42,10 +43,14 @@ export const M1Report: React.FC<M1ReportProps> = ({
 }) => {
     const storedData = localStorage.getItem("m1formData");
     const { services, fetchServices } = useServices();
+    const { isLoading } = useLoading();
+
+    const topRef = useRef<HTMLDivElement>(null);
 
     const initialFormData: FormData = storedData
         ? JSON.parse(storedData)
         : {
+              projectedPopulation: undefined,
               wra: [],
               familyplanning: [],
               servicedata: [],
@@ -68,6 +73,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
             const newStep = Math.min(prevStep + 1, totalSteps);
             localStorage.setItem("step", JSON.stringify(newStep));
+
             return newStep;
         }); // Adjust max step count here
     };
@@ -76,6 +82,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
         setStep((prevStep) => {
             const newStep = Math.max(prevStep - 1, 1);
             localStorage.setItem("step", JSON.stringify(newStep));
+            
             return newStep;
         }); // Start from step 1
     };
@@ -134,6 +141,10 @@ export const M1Report: React.FC<M1ReportProps> = ({
     // Check for incomplete sections
     const checkIncompleteSections = (formData: FormData) => {
         const incompleteSections: string[] = [];
+
+        if (formData.projectedPopulation === null || formData.projectedPopulation === undefined) {
+            incompleteSections.push("Projected Population");
+        }
 
         // Check WRA section
         if (formData.wra.length !== 3 || !isWRAComplete(formData.wra)) {
@@ -217,6 +228,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
         // Sort the arrays in place
         return {
+            projectedPopulation: data.projectedPopulation,
             wra: data.wra.sort(compareWRA),
             familyplanning: data.familyplanning.sort(compareFamilyPlanning),
             servicedata: data.servicedata.sort(compareServiceData),
@@ -246,10 +258,22 @@ export const M1Report: React.FC<M1ReportProps> = ({
         }
     }, [incompleteSections, services]); // Add services to the dependency array
 
+    // useEffect to handle scroll only after loading is complete
+    useEffect(() => {
+        if (!isLoading && topRef.current) {
+            topRef.current.scrollIntoView({
+                behavior: "smooth", // Smooth scroll
+                block: "start",     // Align to the top
+            });
+
+            topRef.current.focus();
+        }
+    }, [isLoading]); // This effect runs when isLoading changes
+
     return (
         <>
             <div className="w-11/12 py-16">
-                <header className="w-full mb-4">
+                <header className="w-full mb-4" ref={topRef}>
                     <h1 className="mb-2 text-2xl font-bold">M1 Report</h1>
                     <div className="dividing-line w-full h-[2px] bg-black"></div>
                 </header>
@@ -296,20 +320,88 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     </div>
                 </div>
 
+                {/* Navigation Buttons */}
+                <div
+                    className={`w-full navigation-buttons flex ${
+                        step !== 1 ? "justify-between" : "justify-end"
+                    } mt-6 sticky`}
+                >
+                    {step !== 1 ? (
+                        <button
+                            type="button"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            onClick={handlePreviousStep}
+                            disabled={step === 1}
+                        >
+                            Previous
+                        </button>
+                    ) : null}
+                    
+                    {/* Input to type the step number */}
+                    <input
+                        type="number"
+                        min={1}
+                        max={totalSteps}
+                        value={step}
+                        onChange={(e) => {
+                            const typedStep = parseInt(e.target.value, 10);
+
+                            // Only update if within valid range
+                            if (typedStep >= 1 && typedStep <= totalSteps) {
+                                setStep(typedStep);
+                                localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                            }
+                        }}
+                        className="w-16 px-2 py-1 mx-2 text-center border border-gray-300 rounded"
+                        placeholder="Step"
+                    />
+                    
+                    {step !== totalSteps ? (
+                        <button
+                            type="button"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            onClick={handleNextStep}
+                            disabled={step === totalSteps} // Adjust based on the max step
+                        >
+                            Next
+                        </button>
+                    ) : null}
+                </div>
+
                 {/* Input Fields */}
                 <section className="flex flex-col items-center justify-center gap-5">
                     {(step || 0) === 1 && (
-                        <ModernWRA
-                            data={formData.wra}
-                            updateData={(ageCategory, field, value) =>
-                                updateWRAData(
-                                    setFormData,
-                                    ageCategory,
-                                    field,
-                                    value
-                                )
-                            }
-                        />
+                        <>
+                            <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
+                                <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">Projected Population of the Year</legend>
+                                <input
+                                    type="number"
+                                    placeholder="0"
+                                    min="0"
+                                    value={formData.projectedPopulation ?? ""}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            projectedPopulation: e.target.value === "" ? undefined : Number(e.target.value),
+                                        }))
+                                    }
+                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                    pattern="\d+"
+                                    required
+                                />
+                            </fieldset>
+                            <ModernWRA
+                                data={formData.wra}
+                                updateData={(ageCategory, field, value) =>
+                                    updateWRAData(
+                                        setFormData,
+                                        ageCategory,
+                                        field,
+                                        value
+                                    )
+                                }
+                            />
+                        </>
                     )}
                     {step === 2 && (
                         <FamilyPlanning
@@ -672,6 +764,26 @@ export const M1Report: React.FC<M1ReportProps> = ({
                             Previous
                         </button>
                     ) : null}
+
+                    {/* Input to type the step number */}
+                    <input
+                        type="number"
+                        min={1}
+                        max={totalSteps}
+                        value={step}
+                        onChange={(e) => {
+                            const typedStep = parseInt(e.target.value, 10);
+
+                            // Only update if within valid range
+                            if (typedStep >= 1 && typedStep <= totalSteps) {
+                                setStep(typedStep);
+                                localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                            }
+                        }}
+                        className="w-16 px-2 py-1 mx-2 text-center border border-gray-300 rounded"
+                        placeholder="Step"
+                    />
+                    
                     {step !== totalSteps ? (
                         <button
                             type="button"
