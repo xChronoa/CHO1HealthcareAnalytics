@@ -237,6 +237,33 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                                         />
                                     </div>
                                 ))}
+
+                                {/* Calculate and display Total */}
+                                <div className="grid items-center grid-cols-3 gap-2 mb-2 font-bold border-black border-y-2">
+                                    <span className="w-full font-bold uppercase">Total:</span>
+                                    <span className="w-full px-2 py-1 mx-1 my-1">
+                                        {ageCategories.reduce((sum, category) => {
+                                            const maleValue =
+                                                parseInt(
+                                                    String(
+                                                        formData[disease.disease_name]?.[category.age_category]?.M ?? 0
+                                                    )
+                                                );
+                                            return sum + maleValue;
+                                        }, 0)}
+                                    </span>
+                                    <span className="w-full px-2 py-1 mx-1 my-1">
+                                        {ageCategories.reduce((sum, category) => {
+                                            const femaleValue =
+                                                parseInt(
+                                                    String(
+                                                        formData[disease.disease_name]?.[category.age_category]?.F ?? 0
+                                                    )
+                                                );
+                                            return sum + femaleValue;
+                                        }, 0)}
+                                    </span>
+                                </div>
                             </div>
                         )}
                     </div>
