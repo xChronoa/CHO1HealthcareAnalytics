@@ -1,4 +1,5 @@
 interface FormData {
+    projectedPopulation: number | undefined;
     wra: WRA[];
     familyplanning: FamilyPlanningEntry[];
     servicedata: ServiceData[];
