@@ -345,26 +345,37 @@ class AppointmentController extends Controller
      */
     public function fetchEarliestAndLatestAppointmentDates()
     {
-        // Fetch the earliest appointment date
-        $earliestDate = Appointment::min('appointment_date');
+        try {
+            // Fetch the earliest and latest appointment dates in one query to improve performance
+            $dates = Appointment::selectRaw('min(appointment_date) as earliest_appointment_date, max(appointment_date) as latest_appointment_date')->first();
 
-        // Fetch the latest appointment date
-        $latestDate = Appointment::max('appointment_date');
+            // Prepare the response data
+            $responseData = [];
 
-        // Check if there are no appointment records found
-        if (is_null($earliestDate) && is_null($latestDate)) {
+            // Check if the earliest and latest dates are present and add them to the response
+            if (!is_null($dates->earliest_appointment_date)) {
+                $responseData['earliest_appointment_date'] = $dates->earliest_appointment_date;
+            }
+
+            if (!is_null($dates->latest_appointment_date)) {
+                $responseData['latest_appointment_date'] = $dates->latest_appointment_date;
+            }
+
+            // If no dates were found, return an empty object
+            if (empty($responseData)) {
+                return response()->json([], 200); // No data but valid response
+            }
+
+            // Return the response with appointment dates
+            return response()->json($responseData, 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging purposes in production
+            Log::error('Error fetching earliest and latest appointment dates: ' . $e->getMessage());
+
+            // Return a generic error response with status 500 (Internal Server Error)
             return response()->json([
-                'error' => 'No appointments found in the database.',
-            ], 404);
+                'error' => 'Something went wrong while fetching the appointment dates.',
+            ], 500);
         }
-
-        // Prepare the response data
-        $responseData = [
-            'earliest_appointment_date' => $earliestDate ?: null,
-            'latest_appointment_date' => $latestDate ?: null,
-        ];
-
-        // Return the earliest and latest appointment dates in a structured response
-        return response()->json($responseData, 200);
     }
 }
