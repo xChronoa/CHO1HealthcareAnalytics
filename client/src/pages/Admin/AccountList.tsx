@@ -86,19 +86,19 @@ const AccountList: React.FC = () => {
                                 {users ? (
                                     users.map((user) => (
                                         <tr key={user.user_id}>
-                                            <td className="px-4 py-2 font-semibold uppercase align-top">
+                                            <td className="px-4 py-2 font-semibold uppercase align-center">
                                                 {user.username}
                                             </td>
-                                            <td className="px-4 py-2 font-semibold uppercase align-top">
+                                            <td className="px-4 py-2 font-semibold uppercase align-center">
                                                 {user.email}
                                             </td>
-                                            <td className="px-4 py-2 font-semibold uppercase align-top">
+                                            <td className="px-4 py-2 font-semibold uppercase align-center">
                                                 {user.barangay_name || "n/a"}
                                             </td>
-                                            <td className={`px-4 py-2 font-semibold uppercase align-top ${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>
+                                            <td className={`px-4 py-2 font-semibold uppercase align-center ${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>
                                                 {user.status}
                                             </td>
-                                            <td className="flex items-center justify-center gap-2 px-4 py-2 font-semibold uppercase align-top">
+                                            <td className="flex items-center justify-center gap-2 px-4 py-2 font-semibold uppercase align-center">
                                                 {user.role === "encoder" ? (
                                                     <>
                                                         <button
