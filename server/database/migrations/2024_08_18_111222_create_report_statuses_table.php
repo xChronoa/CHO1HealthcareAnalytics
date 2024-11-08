@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'overdue', 'for verification', 'approved', 'rejected']);
             $table->timestamp('submitted_at')->nullable();
             $table->text('admin_note')->nullable();
+            $table->integer("projected_population")->nullable();
             $table->timestamps();
         });
     }
