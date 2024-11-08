@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { baseAPIUrl } from "../../config/apiConfig";
 import { useAuth } from "../../context/AuthContext";
 import { useLoading } from "../../context/LoadingContext";
+import { useReportStatus } from "../../hooks/useReportStatus";
 
 interface SubmittedM1Props {
     barangayId: number | null,
@@ -87,6 +88,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
     const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
+    const { statuses, fetchReportStatuses } = useReportStatus();
 
     const fetchServiceDataReports = useCallback(
         async (selectedMonth: string, selectedYear: string) => {
@@ -203,14 +205,14 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
         []
     );
 
-
     useEffect(() => {
         if (selectedMonth && selectedYear) {
             fetchServiceDataReports(selectedMonth, selectedYear);
             fetchFamilyPlanningReports(selectedMonth, selectedYear);
             fetchModernWRAReports(selectedMonth, selectedYear);
+            fetchReportStatuses(Number(selectedYear), Number(selectedMonth));
         }
-    }, [fetchServiceDataReports, fetchFamilyPlanningReports, fetchModernWRAReports, selectedMonth, selectedYear]);
+    }, [fetchServiceDataReports, fetchFamilyPlanningReports, fetchModernWRAReports, fetchReportStatuses, selectedMonth, selectedYear]);
 
     // Function to get the age category value for a dynamic service name
     const getAgeCategoryValue = (
@@ -293,7 +295,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         <title>Barangay ${barangayName !== null ? barangayName : user ? user?.barangay_name : ""} - M1 Report - ${new Date(0, Number(selectedMonth) - 1).toLocaleString("default", { month: "long" })} ${selectedYear}</title>
                         <style>
                             *{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}
-                            *,body{margin:0;padding:0}@page{size:8.5in 13in;margin:2mm 7.5mm 2mm 7.5mm}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center}th{background-color:#f2f2f2}@media print{#header,.fp-one{width:100%}.bg-white,body{background-color:#fff}.py-12,.py-2{padding-top:.5rem}@page{size:portrait}body{visibility:visible}table{font-size:8px}.modern-wra p{margin-bottom:4px}#header tbody tr td div h1.text-6xl{font-size:4rem}#header tbody tr td div h1.text-3xl{font-size:2rem}#header tbody tr td div p{font-size:.5rem}#header{table-layout:auto}#printableTable{display:flex;justify-content:center;align-items:center}#header tbody tr td div div{flex-direction:row}.flex{display:flex}.flex-col{flex-direction:column}.gap-6{gap:.55rem}.py-12{padding-bottom:3rem}.overflow-x-auto{overflow-x:auto}.border-collapse{border-collapse:collapse}.text-\[9px\]{font-size:9px}.table-fixed{table-layout:fixed}.text-lg{font-size:.8rem;line-height:1.75rem}.px-2{padding-left:.5rem;padding-right:.5rem}.border-2{border-width:2px}.border-black{--tw-border-opacity:1;border-color:rgb(0 0 0 / var(--tw-border-opacity))}.items-center{align-items:center}.center-this,.justify-center{justify-content:center}.text-sm{font-size:.6rem;line-height:1.25rem}.gap-4{gap:1rem}.mb-2{margin-bottom:.5rem}.size-16{width:4rem;height:4rem}.italic{font-style:italic}.font-bold{font-weight:700}.text-left{text-align:left}.underline{text-decoration-line:underline}.uppercase{text-transform:uppercase}.text-6xl{font-size:3.75rem;line-height:1}.font-extrabold{font-weight:800}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-center{text-align:center}.text-nowrap{text-wrap:nowrap}.px-14{padding-left:3.5rem;padding-right:3.5rem}.font-medium{font-weight:500}.indent-4{text-indent:1rem}.py-2{padding-bottom:.5rem}.bg-black{background-color:#000}.text-white{color:#fff}.w-80{width:20rem}.pl-12{padding-left:3rem}.bg-d9d9d9{background-color:#d9d9d9}.bg-pink{background-color:#f9c}.min-w-44{min-width:8rem}.text-xs{font-size:.5rem;line-height:1rem}.min-w-40{min-width:2rem}.bg-gray{background-color:gray}.indent-sixteen{text-indent:-16px}.pl-5{padding-left:1.25rem}.max-w-24{max-width:7.5rem}.leading-rem{line-height:1.5rem}.border-r-2{border-right:2px solid #000}.flex-1{flex:1 1 0%}.p-0{padding:0}.pl-6{padding-left:1.5rem}}
+                            *,body{margin:0;padding:0}@page{size:8.5in 13in portrait;margin:2mm 7.5mm 2mm 7.5mm}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center}th{background-color:#f2f2f2}@media print{#header,.fp-one{width:100%}.bg-white,body{background-color:#fff}.py-12,.py-2{padding-top:.5rem}@page{size:portrait}body{visibility:visible}table{font-size:8px}.modern-wra p{margin-bottom:4px}#header tbody tr td div h1.text-6xl{font-size:4rem}#header tbody tr td div h1.text-3xl{font-size:2rem}#header tbody tr td div p{font-size:.5rem}#header{table-layout:auto}#printableTable{display:flex;justify-content:center;align-items:center}#header tbody tr td div div{flex-direction:row}.flex{display:flex}.flex-col{flex-direction:column}.gap-6{gap:.55rem}.py-12{padding-bottom:3rem}.overflow-x-auto{overflow-x:auto}.border-collapse{border-collapse:collapse}.text-\[9px\]{font-size:9px}.table-fixed{table-layout:fixed}.text-lg{font-size:.8rem;line-height:1.75rem}.px-2{padding-left:.5rem;padding-right:.5rem}.border-2{border-width:2px}.border-black{--tw-border-opacity:1;border-color:rgb(0 0 0 / var(--tw-border-opacity))}.items-center{align-items:center}.center-this,.justify-center{justify-content:center}.text-sm{font-size:.6rem;line-height:1.25rem}.gap-4{gap:1rem}.mb-2{margin-bottom:.5rem}.size-16{width:4rem;height:4rem}.italic{font-style:italic}.font-bold{font-weight:700}.text-left{text-align:left}.underline{text-decoration-line:underline}.uppercase{text-transform:uppercase}.text-6xl{font-size:3.75rem;line-height:1}.font-extrabold{font-weight:800}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-center{text-align:center}.text-nowrap{text-wrap:nowrap}.px-14{padding-left:3.5rem;padding-right:3.5rem}.font-medium{font-weight:500}.indent-4{text-indent:1rem}.py-2{padding-bottom:.5rem}.bg-black{background-color:#000}.text-white{color:#fff}.w-80{width:20rem}.pl-12{padding-left:3rem}.bg-d9d9d9{background-color:#d9d9d9}.bg-pink{background-color:#f9c}.min-w-44{min-width:8rem}.text-xs{font-size:.5rem;line-height:1rem}.min-w-40{min-width:2rem}.bg-gray{background-color:gray}.indent-sixteen{text-indent:-16px}.pl-5{padding-left:1.25rem}.max-w-24{max-width:7.5rem}.leading-rem{line-height:1.5rem}.border-r-2{border-right:2px solid #000}.flex-1{flex:1 1 0%}.p-0{padding:0}.pl-6{padding-left:1.5rem}}
                         </style>
                     </head>
                     <body>
@@ -384,7 +386,12 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                                         {barangayName !== null ? barangayName : user ? user?.barangay_name : ""} {" "} Health Station
                                                     </span>
                                                 </p>
-                                                <p>Projected Population of the Year:</p>
+                                                <p>
+                                                    Projected Population of the Year: {" "}
+                                                    <span className="font-bold underline uppercase">
+                                                        {statuses.length > 0 ? statuses.at(0)?.projected_population  : ""}
+                                                    </span>
+                                                </p>
                                             </div>
                                         </td>
                                         <td className="px-2 border-2 border-black">
@@ -573,22 +580,22 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                                     m. Total Current Users
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["15-19"].total_current_users_beginning_month || 0}
+                                                    {fpReports.totals["10-14"].total_current_users_beginning_month || 0}
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["15-19"].total_new_acceptors_prev_month || 0}
+                                                    {fpReports.totals["10-14"].total_new_acceptors_prev_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["15-19"].total_other_acceptors_present_month || 0}
+                                                    {fpReports.totals["10-14"].total_other_acceptors_present_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["15-19"].total_drop_outs_present_month || 0}
+                                                    {fpReports.totals["10-14"].total_drop_outs_present_month || 0}
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["15-19"].total_current_users_end_month || 0}
+                                                    {fpReports.totals["10-14"].total_current_users_end_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["15-19"].total_new_acceptors_present_month || 0}
+                                                    {fpReports.totals["10-14"].total_new_acceptors_present_month || 0}
                                                 </td>
                                             </tr>
                                         }
@@ -707,22 +714,22 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                                     m. Total Current Users
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["10-14"].total_current_users_beginning_month || 0}
+                                                    {fpReports.totals["15-19"].total_current_users_beginning_month || 0}
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["10-14"].total_new_acceptors_prev_month || 0}
+                                                    {fpReports.totals["15-19"].total_new_acceptors_prev_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["10-14"].total_other_acceptors_present_month || 0}
+                                                    {fpReports.totals["15-19"].total_other_acceptors_present_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["10-14"].total_drop_outs_present_month || 0}
+                                                    {fpReports.totals["15-19"].total_drop_outs_present_month || 0}
                                                 </td>
                                                 <td className="px-2 border-2 font-medium border-black bg-[#ff99cc] bg-pink">
-                                                    {fpReports.totals["10-14"].total_current_users_end_month || 0}
+                                                    {fpReports.totals["15-19"].total_current_users_end_month || 0}
                                                 </td>
                                                 <td className="px-2 font-medium border-2 border-black">
-                                                    {fpReports.totals["10-14"].total_new_acceptors_present_month || 0}
+                                                    {fpReports.totals["15-19"].total_new_acceptors_present_month || 0}
                                                 </td>
                                             </tr>
                                         }
