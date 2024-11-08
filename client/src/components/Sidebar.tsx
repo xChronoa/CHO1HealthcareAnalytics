@@ -18,6 +18,7 @@ interface SidebarProps {
     type: string;
     logoPath: string;
     barangay?: string | undefined;
+    username?: string | undefined;
     isCollapsed: boolean;
     isMinimized: boolean;
     toggleSidebar: () => void;
@@ -29,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
         type,
         logoPath,
         barangay,
+        username,
         toggleSidebar,
         collapseSidebar,
         isMinimized,
@@ -40,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
         return (
             <nav
                 ref={sidebarRef}
-                className={`fixed z-50 h-screen transition-all bg-white shadow-2xl ${
+                className={`fixed z-50 h-screen transition-all bg-white shadow-2xl text-xs sm:text-sm md:text-base ${
                     isMinimized ? "w-20" : "w-56"
                 } ${isCollapsed ? "!w-0 [&>*]:hidden" : "px-2"} overflow-y-scroll no-scrollbar`}
             >
@@ -50,16 +52,19 @@ const Sidebar: React.FC<SidebarProps> = memo(
                     }`}
                 >
                     {!isMinimized && (
-                        <div className="flex flex-col items-center w-full gap-2 pt-10 pb-5 mt-4">
+                        <div className="flex flex-col items-center w-full pt-10 pb-5 mt-4 sm:gap-2">
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
+                            <h3 className="text-center text-nowrap">
+                                {barangay ? `Barangay ${barangay}` : "Cabuyao Health Office 1"}
+                            </h3>
                             <img
                                 src={logoPath}
                                 alt="Logo"
-                                className="origin-center scale-75 sm:scale-95"
+                                className="object-contain transition-all origin-center scale-75 sm:scale-90"
                                 loading="lazy"
                             />
                             <h3 className="text-center text-nowrap">
-                                {barangay ? `Barangay ${barangay}` : "Cabuyao Health Office 1"}
+                                {username ? `Welcome, ${username.toUpperCase()}!` : username}
                             </h3>
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
                         </div>
