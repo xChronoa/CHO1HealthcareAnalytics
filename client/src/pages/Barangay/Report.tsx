@@ -160,7 +160,7 @@ const Report: React.FC = () => {
 
     useEffect(() => {
         if (maxDate) {
-            setSelectedDate(maxDate);
+            handleDateChange({ target: { value: maxDate } } as React.ChangeEvent<HTMLInputElement>);
         }
     }, [maxDate]);
 
@@ -308,25 +308,30 @@ const Report: React.FC = () => {
                 icon: "warning",
                 title: "Incomplete Sections",
                 html: `
-                    <div class="flex flex-col items-center md:items-start md:flex-row justify-center md:justify-between mt-8 gap-8 w-full">
-                        ${m1Incomplete.length > 0 ? `
-                        <div class="w-full">
-                            <h3 class="mb-3 font-semibold">M1 Report</h3>
-                            <ul class="text-left mb-3 list-disc text-xs md:text-sm">
-                                ${m1Incomplete.map(section => `<li class="mb-2">${section}</li>`).join("")}
-                            </ul>
-                        </div>` : ""}
-            
-                        ${m2Incomplete.length > 0 ? `
-                        <div class="w-full">
-                            <h3 class="mb-3 font-semibold ">M2 Report</h3>
-                            <ul class="text-left mb-3 list-disc text-xs md:text-sm">
-                                ${m2Incomplete.map(disease => `<li class="mb-2">${disease}</li>`).join("")}
-                            </ul>
-                        </div>` : ""}
+                    <div class="flex flex-col items-center justify-center gap-8 w-full text-xs sm:text-sm md:text-base">
+                        <h2 class="text-center mb-4 w-full sm:w-3/4">Note: Please enter a whole number greater than or equal to 0. Decimal values and negative numbers are not allowed.</h2>
+
+                        <div class="flex flex-col items-center justify-center gap-8 md:gap-16 reports md:items-start md:flex-row md:justify-between">
+                            ${m1Incomplete.length > 0 ? `
+                            <div class="flex-1">
+                                <h3 class="mb-3 font-semibold">M1 Report</h3>
+                                <ul class="text-left mb-3 list-disc text-xs md:text-sm">
+                                    ${m1Incomplete.map(section => `<li class="mb-2">${section}</li>`).join("")}
+                                </ul>
+                            </div>` : ""}
+
+                            ${m2Incomplete.length > 0 ? `
+                            <div class="flex-1">
+                                <h3 class="mb-3 font-semibold">M2 Report</h3>
+                                <ul class="text-left mb-3 list-disc text-xs md:text-sm">
+                                    ${m2Incomplete.map(disease => `<li class="mb-2">${disease}</li>`).join("")}
+                                </ul>
+                            </div>` : ""}
+                        </div>
                     </div>
                 `,
                 customClass: {
+                    title: "text-sm md:text-base",
                     popup: 'incomplete-section alert',
                 },
                 confirmButtonText: "Review Sections",
