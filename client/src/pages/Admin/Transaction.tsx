@@ -93,7 +93,7 @@ const Transaction: React.FC = () => {
                 </header>
                 <section className="flex flex-col items-start">
                     <div className="flex flex-row flex-wrap items-center justify-start w-full gap-6 mb-6 sm:justify-between lg:gap-0 md:flex-row filter">
-                        <div className="flex flex-row gap-8 wrap-dates">
+                        <div className="flex flex-row justify-between gap-8 wrap-dates">
                             {/* Filter by month and year */}
                             <div className="flex flex-row items-center justify-center gap-2 text-xs sm:gap-5 sm:text-sm">
                                 <label htmlFor="month-from">From:</label>
@@ -105,7 +105,7 @@ const Transaction: React.FC = () => {
                                     max={latestDate}
                                     value={selectedDate}
                                     onChange={handleDateChange}
-                                    className="p-[.45rem] text-center rounded-lg shadow-md shadow-gray-400"
+                                    className="p-[.45rem] text-center rounded-lg shadow-md w-fit shadow-gray-400"
                                 />
                             </div>
 
