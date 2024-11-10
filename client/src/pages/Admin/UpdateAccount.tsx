@@ -1,12 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { User } from "../../types/User";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { useBarangay } from "../../hooks/useBarangay";
 import { useUser } from "../../hooks/useUser";
-import useEffectAfterMount from "../../hooks/useEffectAfterMount";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
 
@@ -24,18 +23,21 @@ const UpdateAccount: React.FC = () => {
 
     const navigate = useNavigate();
 
-    useEffectAfterMount(async () => {
-        if (!user || user.user_id === undefined) return;
-
-        const userData = await getUser(user.user_id);
-
-        if (userData || userData !== undefined) {
-            setUser(userData);
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (!user || user.user_id === undefined) return;
+    
+            const userData = await getUser(user.user_id);
+    
+            if (userData || userData !== undefined) {
+                setUser(userData);
+            }
+    
+            if(user.role === "encoder") {
+                fetchBarangays();
+            }
         }
-
-        if(user.role === "encoder") {
-            fetchBarangays();
-        }
+        fetchUser();
     }, []);
 
     // Stores password visibility state
