@@ -7,6 +7,7 @@ import { useReportStatus } from "../../hooks/useReportStatus";
 // Components
 import SubmittedM1 from "./SubmittedM1";
 import SubmittedM2 from "./SubmittedM2";
+import { useAuth } from "../../context/AuthContext";
 
 const SubmittedReports: React.FC = () => {
     // State variables to manage section and selected date
@@ -19,6 +20,7 @@ const SubmittedReports: React.FC = () => {
 
     // Custom hook to fetch report status data
     const { fetchEarliestAndLatestDates, earliestDate, latestDate } = useReportStatus();
+    const { user } = useAuth();
     const location = useLocation(); // Access the location object to retrieve passed state
 
     // Handle section toggle between M1 and M2
@@ -134,7 +136,7 @@ const SubmittedReports: React.FC = () => {
                 ) : (
                     <div className="w-full p-12 mt-4 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
                         <h1 className="text-center">
-                            No submitted reports were found for Barangay {barangayName}. 
+                            No submitted reports were found for Barangay {barangayName || user?.barangay_name}. 
                         </h1>
                     </div>
                 )}
