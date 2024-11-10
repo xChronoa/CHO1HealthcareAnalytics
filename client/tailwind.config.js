@@ -7,8 +7,8 @@ export default {
   theme: {
     fontFamily: {
       'sans': ['Roboto', 'sans-serif'],
-      'display': ['Poppins'],
-      'roboto': ['Roboto', 'sans-serif'], // Replace 'Roboto' with your font name
+      'display': ['Roboto'],
+      'roboto': ['Roboto', 'sans-serif'],
     },
     extend: {
       colors: {
