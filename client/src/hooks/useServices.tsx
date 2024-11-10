@@ -30,7 +30,7 @@ export const useServices = (): UseServices => {
             incrementLoading();
             setError(null);
     
-            const response = await fetch(`${baseAPIUrl}/services/`, {
+            const response = await fetch(`${baseAPIUrl}/services`, {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",

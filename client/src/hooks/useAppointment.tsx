@@ -76,7 +76,7 @@ export const useAppointment = () => {
         setError(null);
 
         try {
-            const response = await fetch(`${baseAPIUrl}/appointments/`, {
+            const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -168,7 +168,7 @@ export const useAppointment = () => {
             setError(null);
     
             try {
-                const response = await fetch(`${baseAPIUrl}/appointments/`, {
+                const response = await fetch(`${baseAPIUrl}/appointments`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

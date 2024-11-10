@@ -24,7 +24,7 @@ export const useAgeCategory = (): UseAgeCategory => {
             incrementLoading();
             setError(null); 
 
-            const response = await fetch(`${baseAPIUrl}/age-categories/`, {
+            const response = await fetch(`${baseAPIUrl}/age-categories`, {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",

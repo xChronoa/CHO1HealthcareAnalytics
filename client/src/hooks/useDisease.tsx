@@ -25,7 +25,7 @@ export const useDisease = (): UseDisease => {
             incrementLoading();
             setError(null); 
 
-            const response = await fetch(`${baseAPIUrl}/diseases/`, {
+            const response = await fetch(`${baseAPIUrl}/diseases`, {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
