@@ -308,33 +308,49 @@ class ReportStatusController extends Controller
     public function filterReportStatuses(Request $request)
     {
         try {
-            // Retrieve the authenticated user's ID
-            $userId = Auth::id();
+            // Retrieve the authenticated user's ID and role
+            $user = Auth::user(); // This gives access to the authenticated user object
 
             // Ensure the user is authenticated
-            if (!$userId) {
+            if (!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated.',
                 ], 401); // Unauthorized status code
             }
 
-            // Fetch the user's associated barangay_id
-            $barangayId = DB::table('users')
-                ->where('user_id', $userId)
-                ->value('barangay_id');
-
-            if (!$barangayId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No associated barangay found for the user.',
-                ], 404); // Not Found status code
-            }
-
+            // Get the report parameters from the request
             $reportYear = $request->input('report_year');
             $reportMonth = $request->input('report_month');
 
-            // Build the query to fetch report statuses with approved status
+            // Determine the barangay_id to use
+            if ($user->role === 'admin') {
+                // If the user is an admin, use the barangay_id from the request
+                $barangayId = $request->input('barangay_id');
+                if (!$barangayId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Barangay ID is required for admin users.',
+                    ], 400); // Bad Request status code
+                }
+            } elseif ($user->role === 'encoder') {
+                // If the user is an encoder, use the barangay_id from the authenticated user
+                $barangayId = $user->barangay_id;
+                if (!$barangayId) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Encoder does not have an affiliated barangay.',
+                    ], 403); // Forbidden status code
+                }
+            } else {
+                // In case the user's role is neither 'admin' nor 'encoder'
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User role not authorized to access this data.',
+                ], 403); // Forbidden status code
+            }
+
+            // Build the query to fetch report statuses with the approved status
             $query = DB::table('report_statuses')
                 ->select(
                     'report_statuses.report_status_id',
@@ -350,20 +366,9 @@ class ReportStatusController extends Controller
                 ->join('report_submissions', 'report_statuses.report_submission_id', '=', 'report_submissions.report_submission_id')
                 ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
                 ->join('barangays', 'report_submissions.barangay_id', '=', 'barangays.barangay_id')
-                ->where('barangays.barangay_id', $barangayId)
                 ->where('report_statuses.status', 'approved'); // Filter by approved status
 
-            // Apply year and month filters if provided
-            // if ($reportYear) {
-            //     $query->whereYear('report_statuses.submitted_at', $reportYear);
-            // }
-
-            // if ($reportMonth) {
-            //     $query->whereMonth('report_statuses.submitted_at', $reportMonth);
-            // }
-
-
-            // Apply year and month filters based on report_submission_templates table
+            // Apply year and month filters based on the report_submission_templates table
             if ($reportYear) {
                 $query->where('report_submission_templates.report_year', $reportYear);
             }
@@ -371,6 +376,9 @@ class ReportStatusController extends Controller
             if ($reportMonth) {
                 $query->where('report_submission_templates.report_month', $reportMonth);
             }
+
+            // Apply barangay_id filter based on the user's role
+            $query->where('barangays.barangay_id', $barangayId);
 
             // Execute the query and get the results
             $reportStatuses = $query->orderBy('report_statuses.submitted_at', 'desc')->get();
@@ -489,127 +497,126 @@ class ReportStatusController extends Controller
     }
 
     public function getFilteredM1Reports(Request $request)
-{
-    try {
-        // Get the authenticated user and request parameters
-        $user = Auth::user();
-        $barangayId = $request->input('barangay_id');
-        $reportMonth = $request->input('report_month'); // Extracted month
-        $reportYear = $request->input('report_year');   // Extracted year
+    {
+        try {
+            // Get the authenticated user and request parameters
+            $user = Auth::user();
+            $barangayId = $request->input('barangay_id');
+            $reportMonth = $request->input('report_month'); // Extracted month
+            $reportYear = $request->input('report_year');   // Extracted year
 
-        // Initialize the query with necessary relationships
-        $query = ReportSubmission::with([
-            'reportStatus.womenOfReproductiveAge', // Eager load WRA data via ReportStatus
-            'reportStatus.familyPlanningReports',   // Eager load Family Planning data via ReportStatus
-            'reportStatus.serviceData',             // Eager load Service Data via ReportStatus
-            'reportStatus',                         // Eager load Report Status
-            'barangay'                              // Eager load Barangay
-        ]);
+            // Initialize the query with necessary relationships
+            $query = ReportSubmission::with([
+                'reportStatus.womenOfReproductiveAge', // Eager load WRA data via ReportStatus
+                'reportStatus.familyPlanningReports',   // Eager load Family Planning data via ReportStatus
+                'reportStatus.serviceData',             // Eager load Service Data via ReportStatus
+                'reportStatus',                         // Eager load Report Status
+                'barangay'                              // Eager load Barangay
+            ]);
 
-        // Apply filtering based on the user's role
-        if ($user->role === 'admin') {
-            // Admin: use the provided barangay_id or return all if not provided
-            if ($barangayId) {
-                $query->whereHas('reportStatus.reportSubmission', function ($q) use ($barangayId) {
-                    $q->where('barangay_id', $barangayId);
-                });
+            // Apply filtering based on the user's role
+            if ($user->role === 'admin') {
+                // Admin: use the provided barangay_id or return all if not provided
+                if ($barangayId) {
+                    $query->whereHas('reportStatus.reportSubmission', function ($q) use ($barangayId) {
+                        $q->where('barangay_id', $barangayId);
+                    });
+                }
+            } elseif ($user->role === 'encoder') {
+                // Encoder: restrict data to the user's affiliated barangay_id
+                $encoderBarangayId = $user->barangay_id;
+                if ($encoderBarangayId) {
+                    $query->whereHas('reportStatus.reportSubmission', function ($q) use ($encoderBarangayId) {
+                        $q->where('barangay_id', $encoderBarangayId);
+                    });
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Encoder does not have an affiliated barangay.',
+                    ], Response::HTTP_FORBIDDEN);
+                }
             }
-        } elseif ($user->role === 'encoder') {
-            // Encoder: restrict data to the user's affiliated barangay_id
-            $encoderBarangayId = $user->barangay_id;
-            if ($encoderBarangayId) {
-                $query->whereHas('reportStatus.reportSubmission', function ($q) use ($encoderBarangayId) {
-                    $q->where('barangay_id', $encoderBarangayId);
+
+            // Apply filtering for the report period if both month and year are provided
+            if ($reportMonth && $reportYear) {
+                $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($reportMonth, $reportYear) {
+                    $q->where('report_month', $reportMonth)
+                        ->where('report_year', $reportYear);
                 });
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Encoder does not have an affiliated barangay.',
-                ], Response::HTTP_FORBIDDEN);
+                    'message' => 'Report month and year must be provided.',
+                ], Response::HTTP_BAD_REQUEST);
             }
-        }
 
-        // Apply filtering for the report period if both month and year are provided
-        if ($reportMonth && $reportYear) {
-            $query->whereHas('reportStatus.reportSubmission.reportTemplate', function ($q) use ($reportMonth, $reportYear) {
-                $q->where('report_month', $reportMonth)
-                    ->where('report_year', $reportYear);
-            });
-        } else {
+            // Fetch the filtered M1 reports
+            $m1Reports = $query->get();
+
+            // Transform the data for frontend consumption
+            $groupedData = [
+                'wra' => [],
+                'family_planning' => [],
+                'service_data' => [],
+            ];
+
+            // Map and format the data
+            foreach ($m1Reports as $report) {
+                // Process WRA data
+                foreach ($report->womenOfReproductiveAge ?? [] as $wra) {
+                    $groupedData['wra'][] = [
+                        'age_category' => $wra->ageCategory->age_category ?? 'Unknown',
+                        'unmet_need_modern_fp' => $wra->unmet_need_modern_fp,
+                    ];
+                }
+
+                // Process Family Planning data
+                foreach ($report->familyPlanningReports ?? [] as $fp) {
+                    $groupedData['family_planning'][] = [
+                        'age_category' => $fp->ageCategory->age_category ?? 'Unknown',
+                        'fp_method' => $fp->fpMethod->method_name,
+                        'current_users_beginning_month' => $fp->current_users_beginning_month,
+                        'new_acceptors_prev_month' => $fp->new_acceptors_prev_month,
+                        'other_acceptors_present_month' => $fp->other_acceptors_present_month,
+                        'drop_outs_present_month' => $fp->drop_outs_present_month,
+                        'current_users_end_month' => $fp->current_users_end_month,
+                        'new_acceptors_present_month' => $fp->new_acceptors_present_month,
+                    ];
+                }
+
+                // Process Service Data
+                foreach ($report->serviceData ?? [] as $service) {
+                    $groupedData['service_data'][] = [
+                        'service_name' => $service->service->service_name ?? 'Unknown',
+                        'indicator' => $service->indicator->indicator_name ?? 'Unknown',
+                        'age_category' => $service->ageCategory->age_category ?? 'Unknown',
+                        'value_type' => $service->value_type,
+                        'value' => $service->value,
+                        'remarks' => $service->remarks,
+                    ];
+                }
+            }
+
+            // Prepare the final response structure
+            $response = [
+                'report_id' => $m1Reports->isNotEmpty() ? $m1Reports->first()->report_submission_id : null,
+                // 'report_status' => $m1Reports->isNotEmpty() ? $m1Reports->first()->reportStatus->status : null,
+                'report_period' => $m1Reports->isNotEmpty() ? Carbon::create($reportYear, $reportMonth, 1)->format('Y-m') : null,
+                'data' => $groupedData,
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $response,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Log the exception for debugging purposes
+            Log::error('Error fetching M1 reports: ' . $e->getMessage());
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Report month and year must be provided.',
-            ], Response::HTTP_BAD_REQUEST);
+                'message' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        // Fetch the filtered M1 reports
-        $m1Reports = $query->get();
-
-        // Transform the data for frontend consumption
-        $groupedData = [
-            'wra' => [],
-            'family_planning' => [],
-            'service_data' => [],
-        ];
-
-        // Map and format the data
-        foreach ($m1Reports as $report) {
-            // Process WRA data
-            foreach ($report->womenOfReproductiveAge ?? [] as $wra) {
-                $groupedData['wra'][] = [
-                    'age_category' => $wra->ageCategory->age_category ?? 'Unknown',
-                    'unmet_need_modern_fp' => $wra->unmet_need_modern_fp,
-                ];
-            }
-
-            // Process Family Planning data
-            foreach ($report->familyPlanningReports ?? [] as $fp) {
-                $groupedData['family_planning'][] = [
-                    'age_category' => $fp->ageCategory->age_category ?? 'Unknown',
-                    'fp_method' => $fp->fpMethod->method_name,
-                    'current_users_beginning_month' => $fp->current_users_beginning_month,
-                    'new_acceptors_prev_month' => $fp->new_acceptors_prev_month,
-                    'other_acceptors_present_month' => $fp->other_acceptors_present_month,
-                    'drop_outs_present_month' => $fp->drop_outs_present_month,
-                    'current_users_end_month' => $fp->current_users_end_month,
-                    'new_acceptors_present_month' => $fp->new_acceptors_present_month,
-                ];
-            }
-
-            // Process Service Data
-            foreach ($report->serviceData ?? [] as $service) {
-                $groupedData['service_data'][] = [
-                    'service_name' => $service->service->service_name ?? 'Unknown',
-                    'indicator' => $service->indicator->indicator_name ?? 'Unknown',
-                    'age_category' => $service->ageCategory->age_category ?? 'Unknown',
-                    'value_type' => $service->value_type,
-                    'value' => $service->value,
-                    'remarks' => $service->remarks,
-                ];
-            }
-        }
-
-        // Prepare the final response structure
-        $response = [
-            'report_id' => $m1Reports->isNotEmpty() ? $m1Reports->first()->report_submission_id : null,
-            // 'report_status' => $m1Reports->isNotEmpty() ? $m1Reports->first()->reportStatus->status : null,
-            'report_period' => $m1Reports->isNotEmpty() ? Carbon::create($reportYear, $reportMonth, 1)->format('Y-m') : null,
-            'data' => $groupedData,
-        ];
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $response,
-        ], Response::HTTP_OK);
-    } catch (\Exception $e) {
-        // Log the exception for debugging purposes
-        Log::error('Error fetching M1 reports: ' . $e->getMessage());
-
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-}
-
 }
