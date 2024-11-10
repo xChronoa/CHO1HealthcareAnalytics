@@ -26,6 +26,7 @@ ChartJS.register(
 
 interface MorbidityFormChartProps {
     setIsButtonDisabled: (value: boolean) => void;
+    chartRef: React.RefObject<HTMLDivElement>;
     textRef: React.RefObject<HTMLHeadingElement>;
     barangay: string;
     year: String | null;
@@ -33,6 +34,7 @@ interface MorbidityFormChartProps {
 
 const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     setIsButtonDisabled,
+    chartRef,
     textRef,
     barangay,
     year,
@@ -311,7 +313,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
 
     return (
-        <section className="flex flex-col items-center py-8 bg-almond" id="myChart">
+        <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
             <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg lg:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">

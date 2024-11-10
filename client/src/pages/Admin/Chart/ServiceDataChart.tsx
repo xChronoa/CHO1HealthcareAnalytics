@@ -34,6 +34,7 @@ interface ServiceData {
 
 interface ServiceDataChartProps {
     setIsButtonDisabled: (value: boolean) => void;
+    chartRef: React.RefObject<HTMLDivElement>;
     textRef: React.RefObject<HTMLHeadingElement>;
     barangay: string;
     year: String | null;
@@ -41,6 +42,7 @@ interface ServiceDataChartProps {
 
 const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
     setIsButtonDisabled,
+    chartRef,
     textRef,
     barangay,
     year,
@@ -970,7 +972,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     </select>
                     
                     <section 
-                        className="flex flex-col items-center my-8 bg-almond" id="myChart"
+                        className="flex flex-col items-center my-8 bg-almond" id="myChart" ref={chartRef}
                     >
                         <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg lg:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 

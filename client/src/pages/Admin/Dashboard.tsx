@@ -712,6 +712,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             {section === "m1" && (
                                 <ServiceDataChart
                                     setIsButtonDisabled={setIsButtonDisabled}
+                                    chartRef={chartRef}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
                                     year={selectedYear}
@@ -720,6 +721,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             {section === "m2" && (
                                 <MorbidityFormChart
                                     setIsButtonDisabled={setIsButtonDisabled}
+                                    chartRef={chartRef}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
                                     year={selectedYear}
