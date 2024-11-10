@@ -9,7 +9,8 @@ interface UseReportStatus {
     latestDate: string;
     fetchReportStatuses: (
         reportYear: number,
-        reportMonth: number
+        reportMonth: number,
+        barangayId?: number | null,
     ) => Promise<void>;
     fetchEarliestAndLatestDates: (barangayId?: number | null) => Promise<void>;
 }
@@ -32,7 +33,7 @@ export const useReportStatus = (): UseReportStatus => {
     const [latestDate, setLatestDate] = useState<string>("");
 
     const fetchReportStatuses = useCallback(
-        async (reportYear: number, reportMonth: number) => {
+        async (reportYear: number, reportMonth: number, barangayId?: number | null) => {
             incrementLoading();
             setError(null);
 
@@ -47,6 +48,7 @@ export const useReportStatus = (): UseReportStatus => {
                         },
                         credentials: "include",
                         body: JSON.stringify({
+                            barangay_id: barangayId,
                             report_year: reportYear,
                             report_month: reportMonth,
                         }),
