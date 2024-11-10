@@ -138,7 +138,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
             rowCells.push(
                 <td
                     key={`${diseaseName}-${ageGroup}-M`}
-                    className="px-2 border border-black"
+                    className="px-2 text-[.6rem] font-bold border border-black"
                     style={{ borderRight: "2px dashed black" }}
                 >
                     {diseaseData[ageGroup]?.M || 0}
@@ -147,7 +147,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
             rowCells.push(
                 <td
                     key={`${diseaseName}-${ageGroup}-F`}
-                    className="px-2 border border-black"
+                    className="px-2 text-[.6rem] font-bold border border-black"
                 >
                     {diseaseData[ageGroup]?.F || 0}
                 </td>
@@ -180,8 +180,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                     <head>
                         <title>Barangay ${barangayName !== null ? barangayName : user ? user?.barangay_name : ""} - Morbidity Report - ${new Date(0, Number(selectedMonth) - 1).toLocaleString("default", { month: "long" })} ${selectedYear}</title>
                         <style>
-                        *{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}
-                           *,body{margin:0;padding:0}@page{size:11in 8.5in}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center;padding:8px}@media print{body,table{visibility:visible}.bg-white,body{background-color:#fff}@page{size:landscape}table{width:100%;border-collapse:collapse;font-size:7px}.px-2{padding-left:.5rem;padding-right:.5rem}tr{page-break-inside:avoid}.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.underline{text-decoration:underline}.uppercase{text-transform:uppercase}.size-14{width:5rem;height:5rem}.font-bold{font-weight:700}.italic{font-style:italic}.text-gray-500{color:#6b7280}.text-lg{font-size:1.125rem}.text-5xl{font-size:3rem}.text-2xl{font-size:1.5rem}.size-16{width:64px;height:64px}.min-w-200{min-width:200px}.text-left{text-align:left}.gap-2{gap:.5rem}}
+                            *{-webkit-print-color-adjust:exact;color-adjust:exact;print-color-adjust:exact}*,body{margin:0;padding:0}@page{size:11in 8.5in}body{font-family:Arial,sans-serif;visibility:hidden;background-color:gray}td,th{border:1px solid #000;text-align:center;padding:6px}@media print{table,thead th{font-size:10px}body,table{visibility:visible}.bg-white,body{background-color:#fff}@page{size:landscape}table{width:100%;border-collapse:collapse}thead th{text-wrap:nowrap}tbody td{font-size:11px}.px-2{padding-left:.5rem;padding-right:.5rem}tr{page-break-inside:avoid}.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.underline{text-decoration:underline}.uppercase{text-transform:uppercase}.size-14{width:5rem;height:5rem}.font-bold{font-weight:700}.italic{font-style:italic}.text-gray-500{color:#6b7280}.text-lg{font-size:1.125rem}.text-5xl{font-size:3rem}.text-2xl{font-size:1.5rem}.size-16{width:64px;height:64px}.min-w-200{min-width:200px}.text-left{text-align:left}.gap-2{gap:.5rem}}
                         </style>
                     </head>
                     <body>
