@@ -98,7 +98,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
 
                 // Fetch reports
                 const response = await fetch(
-                    `${baseAPIUrl}/service-data-reports/`,
+                    `${baseAPIUrl}/service-data-reports`,
                     {
                         method: "POST",
                         headers: {
@@ -210,7 +210,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
             fetchServiceDataReports(selectedMonth, selectedYear);
             fetchFamilyPlanningReports(selectedMonth, selectedYear);
             fetchModernWRAReports(selectedMonth, selectedYear);
-            fetchReportStatuses(Number(selectedYear), Number(selectedMonth));
+            fetchReportStatuses(Number(selectedYear), Number(selectedMonth), barangayId);
         }
     }, [fetchServiceDataReports, fetchFamilyPlanningReports, fetchModernWRAReports, fetchReportStatuses, selectedMonth, selectedYear]);
 
