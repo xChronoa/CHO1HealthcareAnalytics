@@ -27,13 +27,13 @@ ChartJS.register(
 interface ModernWRAProps {
     barangay: string;
     year: String | null;
-    reportNull: React.RefObject<HTMLDivElement>;
+    setIsButtonDisabled: (value: boolean) => void;
 }
 
 const ModernWRAChart: React.FC<ModernWRAProps> = ({ 
     barangay, 
     year, 
-    reportNull 
+    setIsButtonDisabled
 }) => {
     const { wraData, error, fetchWra } = useWra();
     const [isMaximized, setIsMaximized] = useState<boolean>(false);
@@ -159,6 +159,10 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
         }
     }, [selectedOption, options, wraData, barangay, year])
 
+    useEffect(() => {
+        setIsButtonDisabled(!(wraData.length > 0));
+    }, [wraData, barangay, year])
+
     return (
         <>
             {error ? (
@@ -222,7 +226,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                         </>
                     </div>
                 ) : ( 
-                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400" ref={reportNull}>
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>

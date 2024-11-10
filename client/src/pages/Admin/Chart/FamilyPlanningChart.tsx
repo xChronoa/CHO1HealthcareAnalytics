@@ -41,13 +41,13 @@ interface FamilyPlanningReport {
 interface FamilyPlanningChartProps {
     barangay: string;
     year: String | null;
-    reportNull: React.RefObject<HTMLDivElement>;
+    setIsButtonDisabled: (value: boolean) => void;
 }
 
 const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
     barangay,
     year,
-    reportNull
+    setIsButtonDisabled
 }) => {
     // State declarations
     const [data, setData] = useState<FamilyPlanningReport[]>([]);
@@ -295,7 +295,11 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
             localStorage.setItem('charts', JSON.stringify(charts));
         }
     }, [selectedOptions, options, data, barangay, year]);
+
     
+    useEffect(() => {
+            setIsButtonDisabled(!(data.length > 0));
+    }, [data, barangay, year])
 
     return (
         <>
@@ -425,7 +429,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                         })}
                     </>
                 ) : (
-                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400" ref={reportNull}>
+                    <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                         <h1 className="text-center">
                             No submitted reports were found for Barangay {barangay} for the year {year}. 
                         </h1>

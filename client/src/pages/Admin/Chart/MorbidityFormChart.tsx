@@ -25,14 +25,14 @@ ChartJS.register(
 );
 
 interface MorbidityFormChartProps {
-    chartRef: React.RefObject<HTMLDivElement>;
+    setIsButtonDisabled: (value: boolean) => void;
     textRef: React.RefObject<HTMLHeadingElement>;
     barangay: string;
     year: String | null;
 }
 
 const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
-    chartRef,
+    setIsButtonDisabled,
     textRef,
     barangay,
     year,
@@ -299,19 +299,19 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             localStorage.setItem('charts', JSON.stringify(charts));
         }
     }, [selectedOptionMale, selectedOptionFemale, optionsMale, optionsFemale, morbidityReports]);
-
-    useEffect(() => {
-        if (chartRef.current) {
-            chartRef.current.dataset.isSubmitted = morbidityReports.length > 0 ? 'true' : 'false';
-        }
-    }, [chartRef, morbidityReports, barangay, year]);
-
+    
     useEffect(() => {
         decrementLoading();
     }, []);
 
+
+    useEffect(() => {
+        setIsButtonDisabled(!(morbidityReports.length > 0));
+    }, [morbidityReports, barangay, year])
+
+
     return (
-        <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
+        <section className="flex flex-col items-center py-8 bg-almond" id="myChart">
             <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg lg:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">

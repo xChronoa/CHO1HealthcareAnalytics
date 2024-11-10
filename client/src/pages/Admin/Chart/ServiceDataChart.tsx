@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -33,28 +33,26 @@ interface ServiceData {
 }
 
 interface ServiceDataChartProps {
-    chartRef: React.RefObject<HTMLDivElement>;
+    setIsButtonDisabled: (value: boolean) => void;
     textRef: React.RefObject<HTMLHeadingElement>;
     barangay: string;
     year: String | null;
 }
 
 const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
-    chartRef,
+    setIsButtonDisabled,
     textRef,
     barangay,
     year,
 }) => {
     const [serviceData, setServiceData] = useState<ServiceData[]>([]);
     const [selectedService, setSelectedService] = useState<string>("Modern FP Unmet Need");
-    const { incrementLoading, decrementLoading, isLoading } = useLoading();
+    const { incrementLoading, decrementLoading } = useLoading();
     const [error, setError] = useState<string | null>(null);
     const [services, setServices] = useState<string[]>([]);
     
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
     const [maximizedCharts, setMaximizedCharts] = useState<{ [key: string]: boolean }>({});
-    
-    const reportNull = useRef<HTMLDivElement>(null);
 
     const capitalize = (text: string) =>
         text
@@ -941,18 +939,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
     }, [selectedService, selectedOptions, options, serviceData]);
 
     useEffect(() => {
-        if (chartRef.current) {
-            if(!isLoading) {
-                const isSubmitted = (() => {
-                if (selectedService === "Family Planning" || selectedService === "Modern FP Unmet Need") {
-                    return reportNull.current === null ? 'true' : 'false';
-                }
-                    return serviceData.length > 0 ? 'true' : 'false';
-                })();
-                chartRef.current.dataset.isSubmitted = isSubmitted;
-            }
+        if(selectedService !== "Family Planning" && selectedService !== "Modern FP Unmet Need") {
+            setIsButtonDisabled(!(serviceData.length > 0))
         }
-    }, [chartRef, selectedService, serviceData, barangay, year, isLoading]);
+    }, [selectedService, serviceData, barangay, year]); // Dependencies without chartRef
     
     return (
         <>
@@ -980,7 +970,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     </select>
                     
                     <section 
-                        className="flex flex-col items-center my-8 bg-almond" id="myChart" ref={chartRef}
+                        className="flex flex-col items-center my-8 bg-almond" id="myChart"
                     >
                         <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg lg:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
 
@@ -997,10 +987,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         </div>
                                     )
                                 ) : (
-                                    <ModernWRAChart barangay={barangay} year={year} reportNull={reportNull}/>
+                                    <ModernWRAChart setIsButtonDisabled={setIsButtonDisabled} barangay={barangay} year={year}/>
                                 )
                             ) : (
-                                <FamilyPlanningChart barangay={barangay} year={year} reportNull={reportNull}/>
+                                <FamilyPlanningChart setIsButtonDisabled={setIsButtonDisabled} barangay={barangay} year={year}/>
                             )}
                         </div>
                     </section>

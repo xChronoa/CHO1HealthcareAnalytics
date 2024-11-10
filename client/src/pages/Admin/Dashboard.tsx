@@ -576,34 +576,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                 : "bg-slate-200 text-black"
         }`;
 
-    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-    const [currentRef, setCurrentRef] = useState(chartRef.current?.dataset.isSubmitted);
-
-    useEffect(() => {
-        if (!isLoading && chartRef.current) {
-            const currentIsSubmitted = chartRef.current.dataset.isSubmitted;
-            
-            // Only proceed if the current value is different from the previous value
-            if (currentIsSubmitted !== currentRef) {
-                setCurrentRef(currentIsSubmitted); // Update the ref to the current value
-
-                const checkNoSubmittedReport = () => {
-                    if (chartRef.current) {
-                        const hasNoSubmittedReport = chartRef.current.dataset.isSubmitted === 'false';
-                        setIsButtonDisabled(hasNoSubmittedReport);
-                    }
-                };
-
-                const observer = new MutationObserver(checkNoSubmittedReport);
-                checkNoSubmittedReport(); // Initial check
-                observer.observe(chartRef.current, { attributes: true, childList: true, subtree: true });
-
-                return () => {
-                    observer.disconnect();
-                };
-            }
-        }
-    }, [chartRef.current?.dataset.isSubmitted, isLoading]); // Depend on dataset.isSubmitted and isLoading
+    const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
 
     return (
         <>
@@ -738,7 +711,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                         <>
                             {section === "m1" && (
                                 <ServiceDataChart
-                                    chartRef={chartRef}
+                                    setIsButtonDisabled={setIsButtonDisabled}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
                                     year={selectedYear}
@@ -746,7 +719,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                             )}
                             {section === "m2" && (
                                 <MorbidityFormChart
-                                    chartRef={chartRef}
+                                    setIsButtonDisabled={setIsButtonDisabled}
                                     textRef={textRef}
                                     barangay={selectedBarangay}
                                     year={selectedYear}
