@@ -82,7 +82,8 @@ const History: React.FC = () => {
                             max={latestDate}
                             onChange={handleDateChange}
                             value={selectedDate}
-                            className="px-2 py-1 border rounded-md shadow-md shadow-gray-400 "
+                            disabled={latestDate === null}
+                            className={`px-2 py-1 border rounded-md shadow-md shadow-gray-400 bg-white ${latestDate === null ? "cursor-not-allowed" : ""}`}
                         />
                     </div>
                     <div className="w-full table-container">
@@ -114,12 +115,15 @@ const History: React.FC = () => {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="px-4 py-2 text-center"
                                         >
-                                            No report status found for the
-                                            selected report date.
+                                            <div className="w-full p-12 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
+                                                <h1 className="text-center">
+                                                    No report submissions were found for the selected period. 
+                                                </h1>
+                                            </div>
                                         </td>
                                     </tr>
+
                                 ) : (
                                     statuses.map((status) => (
                                         <tr key={status.report_status_id}>
