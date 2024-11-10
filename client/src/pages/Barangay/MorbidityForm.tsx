@@ -243,25 +243,17 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                                     <span className="w-full font-bold uppercase">Total:</span>
                                     <span className="w-full px-2 py-1 mx-1 my-1">
                                         {ageCategories.reduce((sum, category) => {
-                                            const maleValue =
-                                                parseInt(
-                                                    String(
-                                                        formData[disease.disease_name]?.[category.age_category]?.M ?? 0
-                                                    )
-                                                );
-                                            return sum + maleValue;
-                                        }, 0)}
+                                            const maleValue = 
+                                                parseInt(String(formData[disease.disease_name]?.[category.age_category]?.M ?? 0), 10);
+                                            return sum + (isNaN(maleValue) ? 0 : maleValue);
+                                        }, 0) ?? 0}
                                     </span>
                                     <span className="w-full px-2 py-1 mx-1 my-1">
                                         {ageCategories.reduce((sum, category) => {
-                                            const femaleValue =
-                                                parseInt(
-                                                    String(
-                                                        formData[disease.disease_name]?.[category.age_category]?.F ?? 0
-                                                    )
-                                                );
-                                            return sum + femaleValue;
-                                        }, 0)}
+                                            const femaleValue = 
+                                                parseInt(String(formData[disease.disease_name]?.[category.age_category]?.F ?? 0), 10);
+                                            return sum + (isNaN(femaleValue) ? 0 : femaleValue);
+                                        }, 0) ?? 0}
                                     </span>
                                 </div>
                             </div>
