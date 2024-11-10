@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                 className="object-contain transition-all origin-center scale-75 sm:scale-90"
                                 loading="lazy"
                             />
-                            <h3 className="text-center text-nowrap">
+                            <h3 className="text-center">
                                 {username ? `Welcome, ${username.toUpperCase()}!` : username}
                             </h3>
                             <div className="w-11/12 h-[2px] bg-black rounded"></div>
