@@ -187,7 +187,7 @@ const Transaction: React.FC = () => {
                                         <td colSpan={3}>
                                             <div className="w-full p-12 bg-white rounded-lg shadow-md no-submitted-report shadow-gray-400">
                                                 <h1 className="text-center">
-                                                    No submissions have been made for any barangays yet.
+                                                    No pending submissions have been made for any barangays yet.
                                                 </h1>
                                             </div>
                                         </td>
@@ -217,7 +217,7 @@ const Transaction: React.FC = () => {
                                                 })()}
                                                 <span className="text-xs italic text-nowrap sm:text-wrap">
                                                     {submission.status === "submitted late" && submission.tardy_days > 0 
-                                                        ? ` (${submission.tardy_days} days late)` 
+                                                        ? ` (${submission.tardy_days} day${submission.tardy_days > 1 ? "s" : ""} late)` 
                                                         : ""}
                                                 </span>
                                                 </>
