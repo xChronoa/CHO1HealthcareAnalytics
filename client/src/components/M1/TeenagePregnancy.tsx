@@ -90,7 +90,7 @@ Teenage Pregnancy</legend>
                                         category,
                                         undefined,
                                         "value"
-                                    ) || ""
+                                    ) ?? ""
                                 }
                                 onChange={(e) =>
                                     handleInputChange(

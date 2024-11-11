@@ -47,7 +47,7 @@ export const ModernWRA: React.FC<ModernWRAProps> = ({ data, updateData }) => {
                                 type="number"
                                 placeholder="0"
                                 min="0"
-                                value={item?.unmet_need_modern_fp || ""}
+                                value={item?.unmet_need_modern_fp ?? ""}
                                 onChange={(e) =>
                                     updateData(
                                         category,

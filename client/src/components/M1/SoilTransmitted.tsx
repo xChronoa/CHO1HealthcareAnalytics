@@ -70,7 +70,7 @@ export const SoilTransmitted: React.FC<ServiceProps> = ({
                                                 undefined,
                                                 "total",
                                                 "value"
-                                            ) || ""
+                                            ) ?? ""
                                         }
                                         onChange={(e) =>
                                             handleInputChange(

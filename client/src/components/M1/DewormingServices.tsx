@@ -120,7 +120,7 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                                                         undefined,
                                                         "male",
                                                         "value"
-                                                    ) || ""
+                                                    ) ?? ""
                                                 }
                                                 onChange={(e) =>
                                                     handleInputChange(
@@ -153,7 +153,7 @@ export const DewormingServices: React.FC<ServiceProps> = ({
                                                         undefined,
                                                         "female",
                                                         "value"
-                                                    ) || ""
+                                                    ) ?? ""
                                                 }
                                                 onChange={(e) =>
                                                     handleInputChange(

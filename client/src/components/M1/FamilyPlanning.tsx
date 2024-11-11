@@ -93,13 +93,13 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
         ageCategory: string,
         methodId: number,
         fieldKey: keyof FamilyPlanningEntry
-    ): string | number => {
+    ): string | number | undefined => {
         const entry = data.familyplanning.find(
             (entry) =>
                 entry.age_category === ageCategory &&
                 entry.fp_method_id === methodId
         );
-        return entry ? entry[fieldKey] || 0 : 0;
+        return entry ? entry[fieldKey] : "";
     };
 
     const handleInputChange = (
@@ -190,7 +190,7 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                                                             category,
                                                             method.method_id,
                                                             field.key as keyof FamilyPlanningEntry
-                                                        ) || ""
+                                                        ) ?? ""
                                                     }
                                                     onChange={(e) =>
                                                         handleInputChange(

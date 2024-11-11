@@ -103,7 +103,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                                     '10-14',
                                                     undefined,
                                                     'value'
-                                                ) || ""
+                                                ) ?? ""
                                             }
                                             onChange={(e) =>
                                                 handleInputChange(
@@ -136,7 +136,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                                     '15-19',
                                                     undefined,
                                                     'value'
-                                                ) || ""
+                                                ) ?? ""
                                             }
                                             onChange={(e) =>
                                                 handleInputChange(
@@ -169,7 +169,7 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                                     '20-49',
                                                     undefined,
                                                     'value'
-                                                ) || ""
+                                                ) ?? ""
                                             }
                                             onChange={(e) =>
                                                 handleInputChange(
