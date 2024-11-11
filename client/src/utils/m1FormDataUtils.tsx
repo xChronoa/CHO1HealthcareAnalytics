@@ -15,7 +15,7 @@ export const updateWRAData = (
 
         if (existingIndex > -1) {
             updatedWRA = prevData.wra.map((item, i) =>
-                i === existingIndex ? { ...item, [field]: value === "" ? undefined : value } : item
+                i === existingIndex ? { ...item, [field]: value === "" ? "" : Number(value) } : item
             );
         } else {
             updatedWRA = [
@@ -51,7 +51,7 @@ export const updateFamilyPlanningData = (
 
         if (existingIndex > -1) {
             updatedFamilyPlanning = prevData.familyplanning.map((item, i) =>
-                i === existingIndex ? { ...item, [field]: value === "" ? undefined : value } : item
+                i === existingIndex ? { ...item, [field]: value === "" ? "" : Number(value) } : item
             );
         } else {
             updatedFamilyPlanning = [

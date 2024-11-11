@@ -7,7 +7,7 @@ export const getInputValue = (
     ageCategory: string | undefined,
     valueType: string | undefined,
     fieldKey: keyof ServiceData
-): string | number => {
+): string | number | undefined => {
     if (ageCategory === undefined) {
         const entry = servicedata.find(
             (entry) =>
@@ -16,7 +16,7 @@ export const getInputValue = (
                 entry.value_type === valueType
         );
 
-        return entry ? entry[fieldKey] || 0 : 0;
+        return entry ? entry[fieldKey] : "";
     } else {
         const entry = servicedata.find(
             (entry) =>
@@ -24,7 +24,7 @@ export const getInputValue = (
                 entry.indicator_id === indicatorId &&
                 entry.age_category === ageCategory
         );
-        return entry ? entry[fieldKey] || 0 : 0;
+        return entry ? entry[fieldKey] : "";
     }
 };
 
@@ -49,8 +49,8 @@ export const handleInputChange = (
         fieldKey === "remarks"
             ? value // Keep the value as-is for remarks
             : value === ""
-            ? undefined // Handle empty string case
-            : value; // Convert to number if not empty
+            ? "" // Handle empty string case
+            : Number(value); // Convert to number if not empty
 
     // If the fieldKey is "remarks", repeat for each valueType
     if (fieldKey === "remarks") {
