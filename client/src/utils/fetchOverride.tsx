@@ -40,8 +40,12 @@ const fetchOverride = async (input: RequestInfo | URL, init: RequestInit = {}) =
             ...init, // Allow overriding
         });
 
-        // Handle 401 Unauthorized and redirect
-        if (response.status === 401 && !/\/(admin|barangay)\/login/.test(currentPath)) {
+        // Handle 401 Unauthorized and redirect, but not if already on a login page
+        if (
+            response.status === 401 &&
+            currentPath !== "/barangay/login" &&
+            currentPath !== "/admin/login"
+        ) {
             const loginPath = currentPath.startsWith("/barangay") 
                 ? "/barangay/login" 
                 : "/admin/login"; // Defaults to admin login if not "barangay"
