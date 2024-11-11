@@ -23,9 +23,9 @@ const BarangayView: React.FC<BarangayViewProp> = ({ logoPath, barangayId, barang
             />
             <button
                 onClick={handleViewClick}
-                className="w-full px-5 py-2 uppercase transition-all bg-white rounded-lg shadow-md border-[2px] hover:bg-green hover:border-white hover:text-white shadow-gray-500"
+                className="text-[.5rem] sm:text-sm font-extrabold w-full sm:px-5 py-2 uppercase transition-all bg-white rounded-lg shadow-md border-[2px] hover:bg-green hover:border-white hover:text-white shadow-gray-500 min-h-[3rem]"
             >
-                View
+                View {barangayName}
             </button>
         </div>
     );
