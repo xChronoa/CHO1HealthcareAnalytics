@@ -2,6 +2,16 @@ import { faBullseye, faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 
+import landing_page from "../assets/images/landing_page.png"
+import cabuyao_logo from "../assets/images/cabuyao_logo.png"
+import cho_logo from "../assets/images/cho_logo.png"
+import breast_cancer from "../assets/images/breast_cancer.png"
+import diabetes_awareness from "../assets/images/diabetes_awareness.png"
+import lifestyle_program from "../assets/images/lifestyle_program.png"
+import barrio_bakuna from "../assets/images/barrio_bakuna.png"
+import buntis_congress from "../assets/images/buntis_congress.png"
+import barrio_bakuna_2 from "../assets/images/barrio_bakuna_2.png"
+
 const Overview: React.FC = () => {
     return (
         <>
@@ -34,7 +44,7 @@ const Overview: React.FC = () => {
 
                 <div className="flex-1 right">
                     <img
-                        src="./src/assets/images/landing_page.png"
+                        src={landing_page}
                         alt=""
                         className="min-w-full rounded-lg shadow-lg shadow-gray-500"
                     />
@@ -54,7 +64,7 @@ const Overview: React.FC = () => {
                 <div className="flex flex-col gap-16 text-justify md:gap-8 md:flex-row">
                     <article className="relative flex flex-col flex-1 gap-8 p-4 bg-gray-200 rounded-lg cgc">
                         <img
-                            src="./src/assets/images/cabuyao_logo.png"
+                            src={cabuyao_logo}
                             alt=""
                             className="absolute inset-0 mx-auto -inset-y-10 size-24 aspect-square"
                         />
@@ -105,7 +115,7 @@ const Overview: React.FC = () => {
 
                     <article className="relative flex flex-col flex-1 gap-8 p-4 bg-gray-200 rounded-lg cho1">
                         <img
-                            src="./src/assets/images/cho_logo.png"
+                            src={cho_logo}
                             alt=""
                             className="absolute inset-0 mx-auto -inset-y-10 size-24 aspect-square"
                         />
@@ -169,32 +179,32 @@ const Overview: React.FC = () => {
                 </div>
                 <div className="grid items-center justify-center w-full grid-cols-1 gap-8 px-8 pt-2 pb-4 sm:px-12 sm:grid-cols-2 place-items-center justify-items-center wrap">
                     <img
-                        src="./src/assets/images/breast_cancer.png"
+                        src={breast_cancer}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
-                        src="./src/assets/images/diabetes_awareness.png"
+                        src={diabetes_awareness}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
-                        src="./src/assets/images/lifestyle_program.png"
+                        src={lifestyle_program}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
-                        src="./src/assets/images/barrio_bakuna.png"
+                        src={barrio_bakuna}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
-                        src="./src/assets/images/buntis_congress.png"
+                        src={buntis_congress}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
-                        src="./src/assets/images/barrio_bakuna_2.png"
+                        src={barrio_bakuna_2}
                         alt=""
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
