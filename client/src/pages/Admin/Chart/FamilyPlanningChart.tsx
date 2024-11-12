@@ -221,9 +221,14 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                 callbacks: {
                     title: (tooltipItems: any) => {
                         const label = tooltipItems[0]?.label;
-                        const [year, month] = label
-                            ? label.split("-")
-                            : ["Unknown", "Unknown"];
+                        // Find the full report_period for the given month name
+                        const reportPeriod = data.find(entry => {
+                            const [, month] = entry.report_period.split("-");  // Extract month
+                            return monthNames[+month - 1] === label;  // Match with the displayed month name
+                        })?.report_period || "Unknown";  // Get full report_period (YYYY-MM)
+
+                        const [year, month] = reportPeriod.split("-");
+
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
                         return `Report Period: ${year}, ${monthName}`;
@@ -242,9 +247,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                     display: true,
                     text: year ? year.toString() : "",
                 },
-                ticks: {
-                    callback: (value: string | number) => monthNames[value as number % 12],
-                },
+                labels: [...new Set(data.map(({ report_period }) => monthNames[+report_period.split("-")[1] - 1] || "Unknown"))],
             },
             y: {
                 title: {
@@ -374,27 +377,34 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                                         callbacks: {
                                                             ...options.plugins.tooltip.callbacks,
                                                             afterLabel: (tooltipItem: any) => {
-                                                                const reportPeriod = tooltipItem.label;
-                                                                const methods: { [key: string]: number } = {};
-
-                                                                filteredData.forEach((entry) => {
-                                                                    if (entry.report_period === reportPeriod) {
-                                                                        const key = tooltipItem.dataset.label
-                                                                            .toLowerCase()
-                                                                            .replace(/ /g, "_") as keyof FamilyPlanningReport;
-                                                                        if (typeof entry[key] === "number") {
-                                                                            methods[entry.method_name] =
-                                                                                (methods[entry.method_name] || 0) +
-                                                                                entry[key];
+                                                                const monthName = tooltipItem.label; // The month name displayed on the x-axis
+                                                                const reportPeriod = filteredData.find(entry => {
+                                                                    const [, month] = entry.report_period.split("-");
+                                                                    return monthNames[+month - 1] === monthName; // Find the corresponding full report_period
+                                                                })?.report_period; // Get the full 'YYYY-MM' format
+                                        
+                                                                if (reportPeriod) {
+                                                                    const methods: { [key: string]: number } = {};
+                                        
+                                                                    filteredData.forEach((entry) => {
+                                                                        if (entry.report_period === reportPeriod) {
+                                                                            const key = tooltipItem.dataset.label
+                                                                                .toLowerCase()
+                                                                                .replace(/ /g, "_") as keyof FamilyPlanningReport;
+                                                                            if (typeof entry[key] === "number") {
+                                                                                methods[entry.method_name] =
+                                                                                    (methods[entry.method_name] || 0) + entry[key];
+                                                                            }
                                                                         }
-                                                                    }
-                                                                });
-
-                                                                const methodDetails = Object.entries(methods)
-                                                                    .map(([method, count]) => `${method}: ${count}`)
-                                                                    .join("\n");
-
-                                                                return `\nMethods:\n${methodDetails}`;
+                                                                    });
+                                        
+                                                                    const methodDetails = Object.entries(methods)
+                                                                        .map(([method, count]) => `${method}: ${count}`)
+                                                                        .join("\n");
+                                        
+                                                                    return `\nMethods:\n${methodDetails}`;
+                                                                }
+                                                                return ''; // Return empty if no corresponding reportPeriod is found
                                                             },
                                                         },
                                                     },

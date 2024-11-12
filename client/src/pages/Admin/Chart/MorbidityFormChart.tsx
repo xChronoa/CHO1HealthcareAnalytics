@@ -127,14 +127,22 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     const optionsMale: ChartOptions<"line"> = {
         responsive: true,
         plugins: {
-            tooltip: {
+            tooltip: { 
                 callbacks: {
                     title: (tooltipItems: any) => {
                         const label = tooltipItems[0]?.label;
-                        const [_, month] = label ? label.split("-") : ["Unknown"];
+                        
+                        // Find the full report_period for the given month name
+                        const reportPeriod = morbidityReports.find(entry => {
+                            const [, month] = entry.report_period.split("-");  // Extract month
+                            return monthNames[+month - 1] === label;  // Match with the displayed month name
+                        })?.report_period || "Unknown";  // Get full report_period (YYYY-MM)
+
+                        const [year, month] = reportPeriod.split("-");
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
-                        return `Report Period: ${monthName}`;
+                        
+                        return `Report Period: ${year}, ${monthName}`;
                     },
                     label: (tooltipItem: any) => {
                         const datasetLabel = tooltipItem.dataset.label || "";
@@ -142,7 +150,17 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                         return `${datasetLabel}: ${value}`;
                     },
                     afterLabel: (tooltipItem: any) => {
-                        const reportPeriod = tooltipItem.label;
+                        const monthName = tooltipItem.label;
+
+                        const reportPeriod = morbidityReports.find(entry => {
+                            const [, month] = entry.report_period.split("-");
+                            return monthNames[+month - 1] === monthName; // Find the corresponding full report_period
+                        })?.report_period; // Get the full 'YYYY-MM' format
+
+                        if (!reportPeriod) {
+                            return;
+                        }
+                        
                         const diseaseName = tooltipItem.dataset.label;
                         const aggregatedByAgeCategory: { [age: string]: number } = {};
                         const gender = tooltipItem.dataset.gender.toLowerCase() as "male" | "female";
@@ -160,7 +178,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                 }
                             }
                         });
-
+                        
                         const ageCategoryDetails = Object.entries(aggregatedByAgeCategory)
                             .map(([ageCategory, total]) => `${ageCategory}: ${total}`)
                             .join("\n");
@@ -179,13 +197,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     display: true,
                     text: year ? year.toString() : "",
                 },
-                ticks: {
-                    callback: (value) => {
-                        // Ensure value is a number
-                        const monthIndex = Number(value) % 12;
-                        return monthNames[monthIndex] || "Unknown"; // Use the monthNames variable
-                    }, // Adjust based on the data array format
-                },
+                labels: [...new Set(morbidityReports.map(({ report_period }) => monthNames[+report_period.split("-")[1] - 1] || "Unknown"))],
             },
             y: {
                 title: {
@@ -203,10 +215,18 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                 callbacks: {
                     title: (tooltipItems: any) => {
                         const label = tooltipItems[0]?.label;
-                        const [_, month] = label ? label.split("-") : ["Unknown"];
+                        
+                        // Find the full report_period for the given month name
+                        const reportPeriod = morbidityReports.find(entry => {
+                            const [, month] = entry.report_period.split("-");  // Extract month
+                            return monthNames[+month - 1] === label;  // Match with the displayed month name
+                        })?.report_period || "Unknown";  // Get full report_period (YYYY-MM)
+
+                        const [year, month] = reportPeriod.split("-");
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
-                        return `Report Period: ${monthName}`;
+                        
+                        return `Report Period: ${year}, ${monthName}`;
                     },
                     label: (tooltipItem: any) => {
                         const datasetLabel = tooltipItem.dataset.label || "";
@@ -214,7 +234,17 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                         return `${datasetLabel}: ${value}`;
                     },
                     afterLabel: (tooltipItem: any) => {
-                        const reportPeriod = tooltipItem.label;
+                        const monthName = tooltipItem.label;
+
+                        const reportPeriod = morbidityReports.find(entry => {
+                            const [, month] = entry.report_period.split("-");
+                            return monthNames[+month - 1] === monthName; // Find the corresponding full report_period
+                        })?.report_period; // Get the full 'YYYY-MM' format
+
+                        if (!reportPeriod) {
+                            return;
+                        }
+                        
                         const diseaseName = tooltipItem.dataset.label;
                         const aggregatedByAgeCategory: { [age: string]: number } = {};
                         const gender = tooltipItem.dataset.gender.toLowerCase() as "male" | "female";
@@ -251,13 +281,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     display: true,
                     text: year ? year.toString() : "",
                 },
-                ticks: {
-                    callback: (value) => {
-                        // Ensure value is a number
-                        const monthIndex = Number(value) % 12;
-                        return monthNames[monthIndex] || "Unknown"; // Use the monthNames variable
-                    }, // Adjust based on the data array format
-                },
+                labels: [...new Set(morbidityReports.map(({ report_period }) => monthNames[+report_period.split("-")[1] - 1] || "Unknown"))],
             },
             y: {
                 title: {

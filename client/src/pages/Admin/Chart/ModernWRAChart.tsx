@@ -105,9 +105,17 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                 callbacks: {
                     title: (tooltipItems: any) => {
                         const label = tooltipItems[0]?.label;
-                        const [year, month] = label ? label.split("-") : ["Unknown", "Unknown"];
+                        
+                        // Find the full report_period for the given month name
+                        const reportPeriod = wraData.find(entry => {
+                            const [, month] = entry.report_period.split("-");  // Extract month
+                            return monthNames[+month - 1] === label;  // Match with the displayed month name
+                        })?.report_period || "Unknown";  // Get full report_period (YYYY-MM)
+
+                        const [year, month] = reportPeriod.split("-");
                         const monthIndex = parseInt(month, 10) - 1;
                         const monthName = monthNames[monthIndex] || "Unknown";
+                        
                         return `Report Period: ${year}, ${monthName}`;
                     },
                     label: (tooltipItem: any) => {
@@ -127,9 +135,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                     display: true,
                     text: year ? year.toString() : "",
                 },
-                ticks: {
-                    callback: (value) => monthNames[value as number % 12],
-                },
+                labels: [...new Set(wraData.map(({ report_period }) => monthNames[+report_period.split("-")[1] - 1] || "Unknown"))],
             },
             y: {
                 title: {
