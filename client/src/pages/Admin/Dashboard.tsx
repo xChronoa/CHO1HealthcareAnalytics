@@ -202,11 +202,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                             scales: {
                                                 x: {
                                                     ...${chartData.male.options}.scales.x,
-                                                    ticks: {
-                                                        callback: function(value) {
-                                                            return monthNames[Number(value) % 12];
-                                                        },
-                                                    },
                                                 },
                                             },
                                         },
@@ -223,11 +218,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                             scales: {
                                                 x: {
                                                     ...${chartData.female.options}.scales.x,
-                                                    ticks: {
-                                                        callback: function(value) {
-                                                            return monthNames[Number(value) % 12];
-                                                        },
-                                                    },
                                                 },
                                             },
                                         },
@@ -304,11 +294,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                             scales: {
                                                 x: {
                                                     ...${chartData.options}.scales.x,
-                                                    ticks: {
-                                                        callback: function(value) {
-                                                            return monthNames[Number(value) % 12];
-                                                        },
-                                                    },
                                                 },
                                             },
                                         },
@@ -378,11 +363,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                     scales: {
                                                         x: {
                                                             ...ageCategoryData.options.scales.x,
-                                                            ticks: {
-                                                                callback: function(value) {
-                                                                    return monthNames[Number(value) % 12];
-                                                                },
-                                                            },
                                                         },
                                                     },
                                                     plugins: {
@@ -475,11 +455,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                             scales: {
                                                                 x: ageCategoryData.options.scales ? {
                                                                     ...ageCategoryData.options.scales.x,
-                                                                    ticks: {
-                                                                        callback: function(value) {
-                                                                            return monthNames[Number(value) % 12];
-                                                                        },
-                                                                    },
                                                                 } : undefined, // Handle cases where scales might be undefined
                                                             },
                                                             plugins: {
@@ -517,11 +492,6 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                             scales: {
                                                                 x: valueTypeData.options.scales ? {
                                                                     ...valueTypeData.options.scales.x,
-                                                                    ticks: {
-                                                                        callback: function(value) {
-                                                                            return monthNames[Number(value) % 12];
-                                                                        },
-                                                                    },
                                                                 } : undefined, // Handle cases where scales might be undefined
                                                             },
                                                             plugins: {
