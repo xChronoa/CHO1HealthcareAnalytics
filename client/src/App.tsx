@@ -24,7 +24,9 @@ import NotFound from "./pages/NotFound";
 import Loading from "./components/Loading";
 
 // Lazy load pages
-// const Overview = React.lazy(() => import("./pages/Overview"));
+const Overview = React.lazy(() => import("./pages/Overview"));
+const Terms = React.lazy(() => import("./pages/Terms"));
+const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Appointment = React.lazy(() => import("./pages/Appointment"));
 const AppointmentConfirmation = React.lazy(() => import("./pages/AppointmentConfirmation"));
@@ -55,8 +57,10 @@ function App() {
                     <Routes>
                         {/* Guest Routes */}
                         <Route element={<GuestLayout />}>
-                            {/* <Route index element={<Overview />} /> */}
-                            <Route index element={<Login image={cho_logo} />} />
+                            <Route index element={<Overview />} />
+                            <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/terms" element={<Terms />} />
+                            {/* <Route index element={<Login image={cho_logo} />} /> */}
                             <Route path="/appointment" element={<Appointment />} />
                             <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
                             <Route path="/barangay/login" element={<Login image={cabuyao_logo} />} />
