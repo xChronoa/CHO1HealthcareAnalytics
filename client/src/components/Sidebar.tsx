@@ -1,4 +1,5 @@
 import {
+    faArchive,
     faCalendarCheck,
     faChartColumn,
     faClose,
@@ -86,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     destination="history"
                                 />
                                 <SidebarButton
-                                    icon={faNewspaper}
+                                    icon={faArchive}
                                     labelText="Submitted Reports"
                                     isMinimized={isMinimized}
                                     destination="report/submitted"
