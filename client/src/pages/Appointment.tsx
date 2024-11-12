@@ -230,13 +230,14 @@ const Appointment: React.FC = () => {
             scrollToError(Object.keys(validationErrors)[0]);
             return;
         }
+        
+        // Verify OTP
+        const isOtpValid = await verifyOTP();
+        if (!isOtpValid) return;
     
         try {
             incrementLoading();
             
-            // Verify OTP
-            const isOtpValid = await verifyOTP();
-            if (!isOtpValid) return;
     
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
@@ -669,18 +670,24 @@ const Appointment: React.FC = () => {
                             <label htmlFor="terms">
                                 <p className="font-bold text-justify">
                                     I agree with the{" "}
-                                    <span className="text-green">
-                                        Terms of Use
+                                    <span className="text-green hover:underline">
+                                        <a target="_blank" href="/privacy" rel="noopener noreferrer">
+                                            Terms of Use
+                                        </a>
                                     </span>{" "}
                                     and{" "}
-                                    <span className="text-green">
-                                        Privacy Policy
+                                    <span className="text-green hover:underline">
+                                        <a target="_blank" href="/privacy" rel="noopener noreferrer">
+                                            Privacy Policy
+                                        </a>
                                     </span>{" "}
                                     and I declare that I have read the
                                     Information that is required in accordance
                                     with{" "}
-                                    <span className="text-green">
-                                        RA 1073 (Data Privacy Act of 2012)
+                                    <span className="text-green hover:underline">
+                                        <a target="_blank" href="https://privacy.gov.ph/data-privacy-act/" rel="noopener noreferrer">
+                                            RA 1073 (Data Privacy Act of 2012)
+                                        </a>
                                     </span>
                                     .
                                 </p>
