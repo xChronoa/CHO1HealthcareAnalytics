@@ -27,7 +27,7 @@ export const useBarangay = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch barangays');
+                throw new Error('There was an issue fetching the barangay data. Please reload the page or try again later.');
             }
 
             const data: Barangay[] = await response.json();

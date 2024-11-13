@@ -27,7 +27,7 @@ export const useIndicator = () => {
             );
 
             if (!response.ok) {
-                let errorMessage = "Unable to fetch indicators at this time.";
+                let errorMessage = "Unable to fetch indicators at this time. Please reload or try again later.";
     
                 if (response.status >= 500) {
                     errorMessage = "Server error. Please try again later.";

@@ -114,7 +114,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                     }
                 );
 
-                if (!response.ok) throw new Error("Failed to fetch reports.");
+                if (!response.ok) throw new Error("We encountered an issue while retrieving the service reports. Please reload the page or try again later.");
 
                 const data = await response.json();
                 setReports(data.data);
@@ -153,7 +153,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                     }
                 );
 
-                if (!response.ok) throw new Error("Failed to fetch family planning reports.");
+                if (!response.ok) throw new Error("Unable to fetch family planning reports at the moment. Please reload or try again later.");
 
                 const data = await response.json();
                 setFPReports(data.data);
@@ -192,7 +192,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                     }
                 );
 
-                if (!response.ok) throw new Error("Failed to fetch modern WRA reports.");
+                if (!response.ok) throw new Error("There was an issue fetching the modern WRA reports. Please reload the page or try again later.");
 
                 const data = await response.json();
                 setModernWRAReports(data.data);

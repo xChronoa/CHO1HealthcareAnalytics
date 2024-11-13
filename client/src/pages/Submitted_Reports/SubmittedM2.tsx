@@ -66,7 +66,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                     }
                 );
 
-                if (!response.ok) throw new Error("Failed to fetch reports.");
+                if (!response.ok) throw new Error("We couldn't retrieve the morbidity reports. Please reload or try again later.");
 
                 const data: MorbidityReport[] = await response.json();
                 setReports(data);

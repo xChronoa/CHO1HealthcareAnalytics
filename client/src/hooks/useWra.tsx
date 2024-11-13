@@ -42,7 +42,7 @@ export const useWra = (): UseWra => {
             });
     
             if (!response.ok) {
-                throw new Error("An error occurred while fetching the women of reproductive ages.");
+                throw new Error("An error occurred while fetching the women of reproductive age data. Please reload the page or try again later.");
             }
     
             const result = await response.json();

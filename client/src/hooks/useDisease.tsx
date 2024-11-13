@@ -33,8 +33,8 @@ export const useDisease = (): UseDisease => {
                 credentials: "include",
             });
 
-            if(!response.ok) {
-                throw new Error("An error occured while fetching the diseases.");
+            if (!response.ok) {
+                throw new Error("We're unable to fetch the disease data right now. Please reload or try again later.");
             }
 
             const data = await response.json();

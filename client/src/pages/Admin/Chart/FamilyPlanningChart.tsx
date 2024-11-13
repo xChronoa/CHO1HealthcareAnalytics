@@ -77,7 +77,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                 );
 
                 if (!response.ok) {
-                    let errorMessage = `An error occurred while fetching data: ${response.statusText}`;
+                    let errorMessage = `An error occurred while fetching the data: ${response.statusText}. Please reload or try again later.`;
     
                     // Handle specific status codes with friendly messages
                     if (response.status >= 500) {
