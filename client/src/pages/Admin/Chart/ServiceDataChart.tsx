@@ -844,7 +844,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
     useEffect(() => {
         decrementLoading();
-    }, [])
+    }, [serviceData])
 
     useEffect(() => {
         if(selectedService !== "Modern FP Unmet Need" && selectedService !== "Family Planning" && options) {
