@@ -15,6 +15,15 @@ export default {
         'almond': '#F8E9D3',
         'green': '#008000',
       },
+      animation: {
+        bounceHigh: 'bounceHigh 1.5s ease-in-out infinite',
+      },
+      keyframes: {
+        bounceHigh: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' }, // Increased the bounce height
+        },
+      }
     },
   },
   plugins: [
