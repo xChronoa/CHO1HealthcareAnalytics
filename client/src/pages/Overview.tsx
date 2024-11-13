@@ -17,7 +17,7 @@ const Overview: React.FC = () => {
         <>
             <section
                 id="appointment"
-                className="flex flex-col items-center gap-4 p-4 lg:gap-10 lg:p-8 md:min-h-screen lg:px-20 md:flex-row"
+                className="flex flex-col items-center gap-4 p-4 lg:gap-10 lg:p-8 lg:px-20 md:flex-row"
             >
                 <div className="flex flex-col self-center flex-1 gap-4 px-6 text-base lg:px-0 md:justify-between left md:text-lg">
                     <h1 className="text-lg font-bold text-center md:text-left md:text-2xl">
@@ -52,14 +52,14 @@ const Overview: React.FC = () => {
             </section>
             <section
                 id="about-us"
-                className="w-full min-h-screen px-12 py-4 bg-green "
+                className="w-full px-12 py-4 bg-green "
             >
                 <div className="flex flex-row items-center w-full gap-4 mb-12 title">
-                    <div className="w-9/12 h-[2px] border-white border-[1px]"></div>
+                    <div className="w-9/12 h-[2px] border-white border-[1px]" />
                     <h1 className="text-xl font-bold text-white uppercase text-nowrap">
                         About Us
                     </h1>
-                    <div className="w-9/12 h-[2px] border-white border-[1px]"></div>
+                    <div className="w-9/12 h-[2px] border-white border-[1px]" />
                 </div>
                 <div className="flex flex-col gap-16 text-justify md:gap-8 md:flex-row">
                     <article className="relative flex flex-col flex-1 gap-8 p-4 bg-gray-200 rounded-lg cgc">
@@ -175,37 +175,37 @@ const Overview: React.FC = () => {
                     <h1 className="text-xl font-bold text-black uppercase text-nowrap">
                         Programs & Events
                     </h1>
-                    <div className="w-full h-[2px] border-black border-[1px]"></div>
+                    <div className="w-full h-[2px] border-black border-[1px]" />
                 </div>
                 <div className="grid items-center justify-center w-full grid-cols-1 gap-8 px-8 pt-2 pb-4 sm:px-12 sm:grid-cols-2 place-items-center justify-items-center wrap">
                     <img
                         src={breast_cancer}
-                        alt=""
+                        alt="Breast Cancer"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
                         src={diabetes_awareness}
-                        alt=""
+                        alt="Diabetes Awareness"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
                         src={lifestyle_program}
-                        alt=""
+                        alt="Lifestyle Program"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
                         src={barrio_bakuna}
-                        alt=""
+                        alt="Barrio Bakuna - Butong"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
                         src={buntis_congress}
-                        alt=""
+                        alt="Buntis Congress"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                     <img
                         src={barrio_bakuna_2}
-                        alt=""
+                        alt="Barrio Bakuna"
                         className="rounded-lg shadow-md shadow-gray-500"
                     />
                 </div>
