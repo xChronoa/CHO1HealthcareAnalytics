@@ -671,7 +671,7 @@ const Appointment: React.FC = () => {
                                 <p className="font-bold text-justify">
                                     I agree with the{" "}
                                     <span className="text-green hover:underline">
-                                        <a target="_blank" href="/privacy" rel="noopener noreferrer">
+                                        <a target="_blank" href="/terms" rel="noopener noreferrer">
                                             Terms of Use
                                         </a>
                                     </span>{" "}
