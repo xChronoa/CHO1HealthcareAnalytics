@@ -4,6 +4,7 @@ import React, {
     useState,
     useCallback,
     ReactNode,
+    useEffect,
 } from "react";
 import Loading from "../components/Loading";
 
@@ -41,6 +42,20 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({
     }, []);
 
     const isLoading = loadingCount > 0;
+
+    useEffect(() => {
+        // Disable scrolling when loading starts
+        if (isLoading) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cleanup to re-enable scrolling
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isLoading]);
 
     return (
         <LoadingContext.Provider
