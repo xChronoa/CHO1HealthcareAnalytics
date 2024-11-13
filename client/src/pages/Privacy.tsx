@@ -69,8 +69,7 @@ const Privacy: React.FC = () => {
                 <ul className="pl-6 list-disc">
                     <li>
                         <strong>Appointment Scheduling:</strong> To process your
-                        appointment requests, confirm your appointment, send
-                        reminders, and provide updates about your appointments.
+                        appointment requests and confirm your appointment.
                     </li>
                     <li>
                         <strong>Communication:</strong> To communicate with you
