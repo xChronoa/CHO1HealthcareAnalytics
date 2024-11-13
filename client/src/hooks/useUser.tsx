@@ -12,7 +12,7 @@ interface UseUser {
     disableUser: (user: User) => Promise<boolean>;
 
     // Variables
-    users: User[] | null;
+    users: User[];
     success: boolean;
     error: string | null;
     errorMessage?: Errors;
