@@ -3,10 +3,8 @@ import { useAppointmentCategory } from "../../hooks/useAppointmentCategory";
 import { useAppointment } from "../../hooks/useAppointment"; // Hook for fetching appointments
 
 const AppointmentList: React.FC = () => {
-    const {
-        fetchAppointmentCategories,
-        appointmentCategories,
-    } = useAppointmentCategory();
+    const { fetchAppointmentCategories, appointmentCategories } =
+        useAppointmentCategory();
 
     const {
         fetchAppointmentsByCategory,
@@ -29,18 +27,14 @@ const AppointmentList: React.FC = () => {
     // Get earliest and latest appointment dates
     useEffect(() => {
         fetchEarliestAndLatestAppointments();
-    }, [fetchEarliestAndLatestAppointments])
+    }, [fetchEarliestAndLatestAppointments]);
 
     //  Get appointments
     useEffect(() => {
         if (selectedDate && selectedAppointmentType) {
             fetchAppointmentsByCategory(selectedAppointmentType, selectedDate);
         }
-    }, [
-        selectedDate,
-        selectedAppointmentType,
-        fetchAppointmentsByCategory,
-    ]);
+    }, [selectedDate, selectedAppointmentType, fetchAppointmentsByCategory]);
 
     // Update the selectedDate when maxDate changes (if needed)
     useEffect(() => {
@@ -63,6 +57,29 @@ const AppointmentList: React.FC = () => {
         if (count === 2) return "grid-cols-1 md:grid-cols-2";
         if (count === 3) return "grid-cols-1 md:grid-cols-2";
         return "grid-cols-1 md:grid-cols-2";
+    };
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const appointmentsPerPage = 10;
+
+    // Calculate the indices for slicing the appointments array
+    const indexOfLastAppointment = currentPage * appointmentsPerPage;
+    const indexOfFirstAppointment =
+        indexOfLastAppointment - appointmentsPerPage;
+    const currentAppointments = appointments.slice(
+        indexOfFirstAppointment,
+        indexOfLastAppointment
+    );
+
+    // Handle page change
+    const totalPages = Math.ceil(appointments.length / appointmentsPerPage);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
 
     return (
@@ -128,57 +145,128 @@ const AppointmentList: React.FC = () => {
                     </div>
 
                     <div className="w-full text-xs rounded-lg sm:text-sm md:text-base sm:py-4 table-container ">
-                        <div className={`grid gap-6 ${appointments?.length ? getGridClass(appointments.length) : 'grid-cols-1'}`}>
+                        <div
+                            className={`grid gap-6 ${
+                                appointments?.length
+                                    ? getGridClass(appointments.length)
+                                    : "grid-cols-1"
+                            }`}
+                        >
                             {error ? (
                                 <div className="text-center text-red-500 col-span-full">
-                                Error loading appointments: {error}
+                                    Error loading appointments: {error}
                                 </div>
                             ) : appointments.length === 0 ? (
                                 <div className="w-full p-12 bg-white rounded-lg shadow-md col-span-full">
-                                <h1 className="text-center">
-                                    No appointments found for the selected category.
-                                </h1>
+                                    <h1 className="text-center">
+                                        No appointments found for the selected
+                                        category.
+                                    </h1>
                                 </div>
                             ) : (
-                                appointments.map((appointment) => (
-                                <div
-                                    key={appointment.patient.patient_id}
-                                    className="grid grid-cols-1 p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
-                                >
-                                    <h3 className="mb-4 text-lg font-bold">
-                                    {appointment.patient.first_name} {appointment.patient.last_name}
-                                    </h3>
-                                    <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
-                                        <span className="font-semibold">Queue Number:</span>
-                                        <span>{appointment.queue_number}</span>
+                                currentAppointments.map((appointment) => (
+                                    <div
+                                        key={appointment.patient.patient_id}
+                                        className="grid grid-cols-1 p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
+                                    >
+                                        <h3 className="text-lg font-bold">
+                                            {appointment.patient.first_name}{" "}
+                                            {appointment.patient.last_name}
+                                        </h3>
+                                        <div className="w-full h-[2px] border-green border-t-[3px] rounded-md mb-4" />
 
-                                        <span className="font-semibold">Sex:</span>
-                                        <span>{appointment.patient.sex}</span>
+                                        <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
+                                            <span className="font-semibold">
+                                                Queue Number:
+                                            </span>
+                                            <span>
+                                                {appointment.queue_number}
+                                            </span>
 
-                                        <span className="font-semibold">Birthdate:</span>
-                                        <span>{appointment.patient.birthdate}</span>
+                                            <span className="font-semibold">
+                                                Sex:
+                                            </span>
+                                            <span>
+                                                {appointment.patient.sex}
+                                            </span>
 
-                                        <span className="font-semibold">Address:</span>
-                                        <span className="break-words">{appointment.patient.address}</span>
+                                            <span className="font-semibold">
+                                                Birthdate:
+                                            </span>
+                                            <span>
+                                                {appointment.patient.birthdate}
+                                            </span>
 
-                                        <span className="font-semibold">Email:</span>
-                                        <span className="break-words">{appointment.patient.email}</span>
+                                            <span className="font-semibold">
+                                                Address:
+                                            </span>
+                                            <span className="break-words">
+                                                {appointment.patient.address}
+                                            </span>
 
-                                        <span className="font-semibold">Phone#:</span>
-                                        <span>{appointment.patient.phone_number}</span>
+                                            <span className="font-semibold">
+                                                Email:
+                                            </span>
+                                            <span className="break-words">
+                                                {appointment.patient.email}
+                                            </span>
 
-                                        <span className="font-semibold">Patient Note:</span>
-                                        <span className="break-words">{appointment.patient_note || "None"}</span>
-                                        {selectedAppointmentType.toLowerCase() === "all" ? (
-                                            <>
-                                                <span className="font-semibold text-nowrap">Appointment Type:</span>
-                                                <span className="break-words">{appointment.appointment_category.name || "None"}</span>
-                                            </>
-                                        ) : ( null )}
+                                            <span className="font-semibold">
+                                                Phone#:
+                                            </span>
+                                            <span>
+                                                {
+                                                    appointment.patient
+                                                        .phone_number
+                                                }
+                                            </span>
+
+                                            <span className="font-semibold">
+                                                Patient Note:
+                                            </span>
+                                            <span className="break-words">
+                                                {appointment.patient_note ||
+                                                    "None"}
+                                            </span>
+
+                                            {selectedAppointmentType.toLowerCase() ===
+                                                "all" && (
+                                                <>
+                                                    <span className="font-semibold">
+                                                        Appointment Type:
+                                                    </span>
+                                                    <span className="break-words">
+                                                        {appointment
+                                                            .appointment_category
+                                                            .name || "None"}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
                                 ))
                             )}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        <div className="flex items-center justify-between sm:justify-center mt-16">
+                            <button
+                                onClick={prevPage}
+                                disabled={currentPage === 1}
+                                className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Previous
+                            </button>
+                            <span className="px-4 py-2 align-middle text-center">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={nextPage}
+                                disabled={currentPage === totalPages}
+                                className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Next
+                            </button>
                         </div>
                     </div>
                 </section>

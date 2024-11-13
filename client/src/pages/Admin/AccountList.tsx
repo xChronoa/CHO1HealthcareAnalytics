@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User } from "../../types/User";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const alert = withReactContent(Swal);
 
@@ -57,6 +57,25 @@ const AccountList: React.FC = () => {
         }
     };
 
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const usersPerPage = 10;
+
+    // Calculate the indices for slicing the appointments array
+    const indexOfLastUsers = currentPage * usersPerPage;
+    const indexOfFirstAppointment = indexOfLastUsers - usersPerPage;
+    const currentUsers = users.slice(indexOfFirstAppointment, indexOfLastUsers);
+
+    // Handle page change
+    const totalPages = Math.ceil(users.length / usersPerPage);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+    };
+
     return (
         <>
             <div className="w-11/12 py-16">
@@ -83,8 +102,8 @@ const AccountList: React.FC = () => {
                             </thead>
                             {/* Table Contents */}
                             <tbody>
-                                {users ? (
-                                    users.map((user) => (
+                                {currentUsers.length > 0 ? (
+                                    currentUsers.map((user) => (
                                         <tr key={user.user_id}>
                                             <td className="px-4 py-2 font-semibold uppercase align-center">
                                                 {user.username}
@@ -128,7 +147,11 @@ const AccountList: React.FC = () => {
                                             colSpan={5}
                                             className="px-4 py-2 text-center"
                                         >
-                                            No users.
+                                            <div className="w-full p-12 bg-white rounded-lg shadow-md col-span-full">
+                                                <h1 className="text-center">
+                                                    No users found.
+                                                </h1>
+                                            </div>
                                         </td>
                                     </tr>
                                 )}
@@ -137,8 +160,8 @@ const AccountList: React.FC = () => {
 
                         {/* Mobile-friendly Card Layout */}
                         <div className="block md:hidden">
-                            {users ? (
-                                users.map((user) => (
+                            {currentUsers.length > 0 ? (
+                                currentUsers.map((user) => (
                                     <div
                                         key={user.user_id}
                                         className="p-4 mb-4 bg-white rounded-lg shadow-md outline outline-1 outline-black"
@@ -192,8 +215,33 @@ const AccountList: React.FC = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center">No users.</div>
+                                <div className="w-full p-12 bg-white rounded-lg shadow-md col-span-full">
+                                    <h1 className="text-center">
+                                        No users found.
+                                    </h1>
+                                </div>
                             )}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        <div className="flex items-center justify-between sm:justify-center mt-16">
+                            <button
+                                onClick={prevPage}
+                                disabled={currentPage === 1}
+                                className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Previous
+                            </button>
+                            <span className="px-4 py-2 align-middle text-center">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={nextPage}
+                                disabled={currentPage === totalPages}
+                                className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+                            >
+                                Next
+                            </button>
                         </div>
                     </div>
                 </section>
