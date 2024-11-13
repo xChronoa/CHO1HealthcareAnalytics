@@ -1,16 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Loading from "../components/Loading";
 
 export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
     allowedRoles,
 }) => {
-    const { user, loading } = useAuth();
+    const { user } = useAuth();
     const location = useLocation(); // Get the current location
-
-    if(loading) {
-        return <Loading />
-    }
 
     if (!user) {
         // If the user is not authenticated, redirect to the appropriate login page
