@@ -205,9 +205,51 @@ const Appointment: React.FC = () => {
         setErrors({});
         setGeneralError(null);
 
+        // Validate form data
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            scrollToError(Object.keys(validationErrors)[0]);
+            return;
+        }
+
+        const { first_name, last_name, sex, birthdate, address, email, phone_number, appointment_date, appointment_category_name } = formData;
+
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: "Are you sure you want to book this appointment?",
+            title: "Confirm Appointment Details",
+            html: `
+            <p>Are you sure you want to book this appointment?</p>
+                <div class="border-2 border-black rounded-lg text-xs text-left p-4">
+                    <h3 class="text-lg font-bold mb-2">
+                        ${first_name} ${last_name}
+                    </h3>
+                    <div class="w-full h-[2px] border-green border-t-[3px] rounded-md mb-4"></div>
+
+                    <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
+                        <span class="font-semibold">Sex:</span>
+                        <span>${sex}</span>
+
+                        <span class="font-semibold">Birthdate:</span>
+                        <span>${birthdate}</span>
+
+                        <span class="font-semibold">Address:</span>
+                        <span class="break-words">${address}</span>
+
+                        <span class="font-semibold">Email:</span>
+                        <span class="break-words">${email}</span>
+
+                        <span class="font-semibold">Phone Number:</span>
+                        <span>${phone_number}</span>
+
+                        <span class="font-semibold">Appointment Date:</span>
+                        <span>${appointment_date}</span>
+
+                        <span class="font-semibold">Category:</span>
+                        <span>${appointment_category_name}</span>
+                    </div>
+                </div>
+                
+            `,
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: "Yes, book it!",
@@ -216,29 +258,20 @@ const Appointment: React.FC = () => {
                 confirmButton:
                     "bg-green text-white px-4 py-2 rounded-md hover:bg-[#3d8c40]",
                 cancelButton:
-                    "bg-white  border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+                    "bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
             buttonsStyling: false,
         });
 
         if (!result.isConfirmed) return;
-    
-        // Validate form data
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            scrollToError(Object.keys(validationErrors)[0]);
-            return;
-        }
         
         // Verify OTP
         const isOtpValid = await verifyOTP();
         if (!isOtpValid) return;
+
+        incrementLoading();
     
         try {
-            incrementLoading();
-            
-    
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
                 headers: {
@@ -277,14 +310,27 @@ const Appointment: React.FC = () => {
 
             switch (error.status) {
                 case 409:
-                    setGeneralError("You already have an appointment on this date.");
+                    setGeneralError("You already have an appointment scheduled for this date. Please choose a different date.");
                     break;
                 case 422:
                     if (data.errors) {
+                        // Set specific form field errors (e.g., first_name, last_name, etc.)
                         setErrors(data.errors);
                     } else {
-                        setGeneralError("Invalid data provided. Please check your inputs.");
+                        setGeneralError("Invalid data provided. Please check your inputs and try again.");
                     }
+                    break;
+                case 400:
+                    // Handle specific bad request scenarios, like no slots available or invalid category days
+                    if (data.error) {
+                        setGeneralError(data.error);
+                    } else {
+                        setGeneralError("The requested appointment cannot be booked. Please try a different date or category.");
+                    }
+                    break;
+                case 500:
+                    // General server error handling for unexpected issues
+                    setGeneralError("An unexpected error occurred while processing your appointment. Please try again later.");
                     break;
                 default:
                     setGeneralError("An unexpected error occurred. Please try again later.");
@@ -293,7 +339,8 @@ const Appointment: React.FC = () => {
         } else {
             setGeneralError("A network error occurred. Please check your connection and try again.");
         }
-        showErrorAlert(generalError || "An error occured. Please try again.");
+
+        showErrorAlert(generalError || "An error occurred. Please try again.");
     };
 
     const showSuccessAlert = () => {
