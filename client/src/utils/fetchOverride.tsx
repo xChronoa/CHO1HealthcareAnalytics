@@ -69,17 +69,6 @@ const fetchOverride = async (input: RequestInfo | URL, init: RequestInit = {}) =
                 title: "Network Error",
                 text: "Unable to connect. Please check your internet connection and try again.",
                 confirmButtonText: "Retry"
-            }).then(() => {
-                // Optional: Retry the request
-                fetchOverride(input, init).catch(retryError => {
-                    console.error("Retry failed:", retryError);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Connection Failed",
-                        text: "The network seems to be down. Please try again later.",
-                        confirmButtonText: "Close"
-                    });
-                });
             });
         } else {
             // Generic error handling for non-network errors
