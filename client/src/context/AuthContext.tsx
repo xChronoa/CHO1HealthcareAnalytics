@@ -60,6 +60,8 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                         role: data.role,
                         barangay_name: data.barangay_name,
                         username: data.username,
+                        email: data.email,
+                        user_id: data.user_id,
                     });
                 } else {
                     const { message, status } = await response.json();
