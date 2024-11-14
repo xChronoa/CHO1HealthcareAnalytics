@@ -64,7 +64,7 @@ const PendingReportNotice: React.FC<PendingReportNoticeProps> = ({
                             task to avoid any delays in our operations. Thank
                             you for your cooperation.
                         </p>
-                        <button onClick={() => window.location.href = '/barangay/report'}className="bg-green text-white px-8 py-2 rounded-lg flex flex-row gap-2 items-center hover:opacity-70 shadow-lg shadow-gray-400 active:scale-[98%] transition-all">
+                        <button onClick={() => window.location.href = '/report'}className="bg-green text-white px-8 py-2 rounded-lg flex flex-row gap-2 items-center hover:opacity-70 shadow-lg shadow-gray-400 active:scale-[98%] transition-all">
                             <FontAwesomeIcon icon={faFileLines} className="justify-self-start" />
                             Submit Report
                         </button>
