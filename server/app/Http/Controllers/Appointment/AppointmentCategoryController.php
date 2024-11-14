@@ -24,11 +24,11 @@ class AppointmentCategoryController extends Controller
 
         // Define the slot limits and allowed days for each category
         $slotsPerCategory = [
-            'Maternal Health' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
+            'Maternal Health Consultation' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
             'Animal Bite Vaccination' => ['days' => ['Monday', 'Thursday'], 'slots' => 70],
             'General Checkup' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
             'Baby Vaccine' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
-            'TB Dots' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+            'TB DOTS' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
         ];
 
         // Fetch appointment categories and calculate available slots if a date is provided
@@ -43,12 +43,21 @@ class AppointmentCategoryController extends Controller
                 ];
             }
 
+            // Check if category exists in slotsPerCategory
+            if (!isset($slotsPerCategory[$categoryName])) {
+                error_log("Category '$categoryName' not found in slotsPerCategory.");
+                return [
+                    'category' => $category,
+                    'available_slots' => null,
+                ];
+            }
+
             // Parse the selected date and determine the day of the week
             $date = new \DateTime($selectedDate);
-            $dayOfWeek = $date->format('l'); // For example, "Monday"
+            $dayOfWeek = $date->format('l'); // e.g., "Monday"
 
             // Check if appointments are allowed on this day for the category
-            if (in_array($dayOfWeek, $slotsPerCategory[$categoryName]['days'] ?? [])) {
+            if (in_array($dayOfWeek, $slotsPerCategory[$categoryName]['days'])) {
                 // Total slots defined for the category
                 $totalSlots = $slotsPerCategory[$categoryName]['slots'];
 
