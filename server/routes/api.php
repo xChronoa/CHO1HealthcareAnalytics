@@ -83,6 +83,9 @@ Route::get('/auth/check', function (Request $request) {
             // Include barangay information if available
             'barangay_name' => optional($user->barangay)->barangay_name,
             'username' => $user->username,
+            'status' => $user->status,
+            'email' => $user->email,
+            'user_id' => $user->user_id,
         ];
 
         return response()->json($response);
