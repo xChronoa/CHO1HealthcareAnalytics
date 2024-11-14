@@ -1,8 +1,10 @@
+import Swal from "sweetalert2";
+
 // Global fetch override
 const originalFetch = window.fetch;
 
 const fetchOverride = async (input: RequestInfo | URL, init: RequestInit = {}) => {
-    // List of routes where the fetch override should be active
+    // Define routes where the fetch override should be active
     const protectedRoutes = [
         "/barangay/login",
         "/admin/login",
@@ -51,12 +53,44 @@ const fetchOverride = async (input: RequestInfo | URL, init: RequestInit = {}) =
                 : "/admin/login"; // Defaults to admin login if not "barangay"
             
             window.location.href = loginPath;
+
             return Promise.reject(new Error("Unauthenticated: Redirecting to login."));
         }
 
         return response;
     } catch (error) {
         console.error("Fetch error:", error);
+
+        // Handle network errors or other general fetch errors
+        if (error instanceof TypeError && error.message === "Failed to fetch") {
+            // Display a user-friendly error message with SweetAlert
+            Swal.fire({
+                icon: "error",
+                title: "Network Error",
+                text: "Unable to connect. Please check your internet connection and try again.",
+                confirmButtonText: "Retry"
+            }).then(() => {
+                // Optional: Retry the request
+                fetchOverride(input, init).catch(retryError => {
+                    console.error("Retry failed:", retryError);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Connection Failed",
+                        text: "The network seems to be down. Please try again later.",
+                        confirmButtonText: "Close"
+                    });
+                });
+            });
+        } else {
+            // Generic error handling for non-network errors
+            Swal.fire({
+                icon: "error",
+                title: "An Error Occurred",
+                text: "Something went wrong. Please try again later.",
+                confirmButtonText: "Close"
+            });
+        }
+
         return Promise.reject(error);
     }
 };
