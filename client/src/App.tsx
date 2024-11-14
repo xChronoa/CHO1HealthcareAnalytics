@@ -91,6 +91,7 @@ function App() {
                                 <Route path="history" element={<History />} />
                                 <Route path="report" element={<Report />} />
                                 <Route path="report/submitted" element={<SubmittedReports />} />
+                                <Route path="edit/account" element={<UpdateAccount />} />
                             </Route>
                         </Route>
 
