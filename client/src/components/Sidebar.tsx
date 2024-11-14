@@ -39,6 +39,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
     }) => {
         const { logout } = useAuth();
         const sidebarRef = useRef<HTMLDivElement>(null);
+        const { user } = useAuth();
 
         return (
             <nav
@@ -91,6 +92,12 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     labelText="Submitted Reports"
                                     isMinimized={isMinimized}
                                     destination="report/submitted"
+                                />
+                                <SidebarButton
+                                    icon={faUserPen}
+                                    labelText="Edit Account"
+                                    isMinimized={isMinimized}
+                                    destination={`${user && user.role === "admin" ? "manage/update" : "edit/account"}`}
                                 />
                             </>
                         ) : 
