@@ -46,16 +46,16 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                incrementLoading();
                 const response = await fetch(`${baseAPIUrl}/auth/check`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json", Accept: "application/json" },
                     credentials: "include",
                 });
-
+    
                 if (response.ok) {
                     const data = await response.json();
-
+    
+                    // Successfully fetched user data, update the state
                     setUser({
                         role: data.role,
                         barangay_name: data.barangay_name,
@@ -64,20 +64,29 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                         user_id: data.user_id,
                     });
                 } else {
+                    // If the response is not ok, handle the server-side failure
                     const { message, status } = await response.json();
+                    // Display a generic message if status is "not_logged"
                     if (status !== "not_logged") {
-                        setError(message || "Failed to fetch authentication.");
+                        setError(message || "An unexpected error occurred. Please try again later.");
                     }
                 }
-
-            } catch {
-                setError("An error occurred while checking authentication.");
+            } catch (error) {
+                // Handle errors that occur during the network request
+                if (error instanceof TypeError) {
+                    // Network error (e.g., no internet connection)
+                    setError("Network error: Unable to connect. Please check your internet connection.");
+                } else {
+                    // General unexpected error (e.g., fetch failure, API issues)
+                    setError("An error occurred while checking authentication. Please try again later.");
+                }
+    
             } finally {
-                decrementLoading();
-                setLoading(false);
+                decrementLoading(); // Hide loading indicator after request
+                setLoading(false); // Stop loading state
             }
         };
-
+    
         checkAuth();
     }, []);
 
