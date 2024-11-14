@@ -31,6 +31,7 @@ import {
 } from "../../utils/m1FormDataUtils";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
 import { useLoading } from "../../context/LoadingContext";
+import Swal from "sweetalert2";
 
 interface M1ReportProps {
     setReportDatas: (type: "m1" | "m2", data: any) => void;
@@ -269,6 +270,46 @@ export const M1Report: React.FC<M1ReportProps> = ({
             topRef.current.focus();
         }
     }, [isLoading]); // This effect runs when isLoading changes
+
+    useEffect(() => {
+        // Check if the user has already dismissed the alert in the current session
+        if (sessionStorage.getItem("m1FormDismissed") === "true") {
+            return; // Exit early if the user has already dismissed the alert
+        }
+    
+        Swal.fire({
+            icon: "info", // Informational icon
+            title: "Please Verify Your Details",
+            html: `
+                <div class="text-lg font-medium">
+                    <p class="mb-4">Before you begin entering your details, please take a moment to review the instructions and ensure all your information is correct. You will be able to review everything before submitting your form.</p>
+                    <p class="text-sm text-gray-600">
+                        <strong>Important:</strong> The system is not responsible for any inaccuracies in the details you provide. You confirm that the information you enter is accurate and complete to the best of your knowledge.
+                    </p>
+                    <p class="mt-4 text-sm text-gray-500">
+                        Once you submit the form, you will not be able to make any changes to the details. Please ensure everything is correct before final submission.
+                    </p>
+                </div>
+            `,
+            confirmButtonText: "I Confirm, Proceed",
+            showCancelButton: true, // Show the cancel button for "Don't Show Again"
+            cancelButtonText: "I Confirm, Don't Show Again", // Label for the "Don't Show Again" button
+            allowOutsideClick: false, // Prevent closing when clicking outside the alert
+            allowEscapeKey: false, // Prevent closing with the escape key
+            customClass: {
+                title: "text-xl font-bold text-gray-800", // Tailwind styling for the title
+                htmlContainer: "text-gray-700", // Tailwind styling for the HTML text container
+                popup: "p-4 text-center", // Tailwind styling for the popup container
+                confirmButton: "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                cancelButton: "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+            },
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                // If the user clicked "Don't Show Again", set flag in sessionStorage
+                sessionStorage.setItem("m1FormDismissed", "true");
+            }
+        });
+    }, []);
 
     return (
         <>
