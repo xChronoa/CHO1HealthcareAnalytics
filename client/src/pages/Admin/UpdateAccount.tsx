@@ -8,12 +8,17 @@ import { useBarangay } from "../../hooks/useBarangay";
 import { useUser } from "../../hooks/useUser";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 const UpdateAccount: React.FC = () => {
     const location = useLocation();
     const { getUser, updateUser, success, errorMessage } = useUser();
     const { fetchBarangays, barangays} = useBarangay();
-    const [user, setUser] = useState<User>(location.state?.user);
+    const { user: userDetails } = useAuth();
+    
+    const isFromManageUpdate = location.pathname === '/admin/manage/update';
+    const [user, setUser] = useState<User>(isFromManageUpdate ? location.state?.user : userDetails);
+
     const [redirecting, setRedirecting] = useState(false);
     const { isLoading } = useLoading();
 
@@ -24,17 +29,14 @@ const UpdateAccount: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        fetchBarangays();
         const fetchUser = async () => {
-            if (!user || user.user_id === undefined) return;
-    
+            if (!user || !user.user_id) return;
+
             const userData = await getUser(user.user_id);
-    
-            if (userData || userData !== undefined) {
+
+            if (userData) {
                 setUser(userData);
-            }
-    
-            if(user.role === "encoder") {
-                fetchBarangays();
             }
         }
         fetchUser();
@@ -90,19 +92,27 @@ const UpdateAccount: React.FC = () => {
                     title: "Account Updated!",
                     text: "The account details were successfully updated.",
                     icon: "success",
-                    confirmButtonText: "Go to Accounts List",
+                    confirmButtonText: `${userDetails && userDetails.role === "admin" ? "Go to Accounts List" : "Ok"}`,
                     customClass: {
                         confirmButton: "transition-all bg-blue-400 text-white px-4 py-2 rounded-md hover:opacity-75",
                     }
-                }).then(() => navigate("/admin/manage/accounts"));
+                }).then(() => navigate(`${userDetails && userDetails.role === "admin" ? "/admin/manage/accounts" : "/barangay/history"}`));
             }
         }
     };
+
+    const [isNotEditable] = useState<boolean>(userDetails?.role === "encoder");
 
     const handleChange = (
         event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = event.target;
+
+        // Check if the field is not editable, but allow password field to be editable
+        if (isNotEditable && name !== "password") {
+            return; // Prevent editing if not allowed, except for the password field
+        }
+
         setUser((prevUser) => ({
             ...prevUser,
             [name]: value,
@@ -171,7 +181,7 @@ const UpdateAccount: React.FC = () => {
                         <div className="flex flex-col mb-3 input-group">
                             <label htmlFor="email">Email</label>
                             <input
-                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1 disabled:bg-neutral-300 disabled:cursor-not-allowed"
                                 type="email"
                                 name="email"
                                 id="email"
@@ -179,13 +189,14 @@ const UpdateAccount: React.FC = () => {
                                 value={user.email}
                                 onChange={handleChange}
                                 placeholder="email@email.com"
+                                disabled={isNotEditable}
                             />
                         </div>
 
                         <div className="flex flex-col mb-3 input-group">
                             <label htmlFor="username">Username</label>
                             <input
-                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                className="bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1 disabled:bg-neutral-300 disabled:cursor-not-allowed"
                                 type="text"
                                 name="username"
                                 id="username"
@@ -193,82 +204,86 @@ const UpdateAccount: React.FC = () => {
                                 value={user.username}
                                 onChange={handleChange}
                                 placeholder="Username"
+                                disabled={isNotEditable}
                             />
                         </div>
 
-                        <div className="flex flex-col mb-3 input-group">
-                            <label htmlFor="password">Password</label>
-
-                            <div className="relative w-full input">
-                                <input
-                                    className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
-                                    type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    id="password"
-                                    value={user.password || ""}
-                                    onChange={handleChange}
-                                    placeholder="Password"
-                                />
-                                {showPassword ? (
-                                    <FontAwesomeIcon
-                                        onClick={togglePassword}
-                                        icon={faEye}
-                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                    />
-                                ) : (
-                                    <FontAwesomeIcon
-                                        onClick={togglePassword}
-                                        icon={faEyeSlash}
-                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        {user.role === "encoder" ? (
+                        {userDetails && userDetails?.role === "encoder" ? (
                             <div className="flex flex-col mb-3 input-group">
-                                <label htmlFor="barangay_name">Barangay</label>
-                                <select
-                                    className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
-                                    name="barangay_name"
-                                    id="barangay_name"
-                                    required
-                                    value={user.barangay_name || ""}
-                                    onChange={handleChange}
-                                >
-                                    {/* Can be replaced with the barangay values from the database */}
-                                    <option hidden>Select Barangay</option>
-                                    {isLoading ? (
-                                        <option disabled>Loading...</option>
+                                <label htmlFor="password">Password</label>
+                            
+                                <div className="relative w-full input">
+                                    <input
+                                        className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1 pr-12"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        id="password"
+                                        value={user.password || ""}
+                                        onChange={handleChange}
+                                        placeholder="Password"
+                                    />
+                                    {showPassword ? (
+                                        <FontAwesomeIcon
+                                            onClick={togglePassword}
+                                            icon={faEye}
+                                            className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                        />
                                     ) : (
-                                        barangays.map((barangay) => (
-                                            <option
-                                                key={barangay.barangay_id}
-                                                value={barangay.barangay_name}
-                                            >
-                                                {barangay.barangay_name}
-                                            </option>
-                                        ))
+                                        <FontAwesomeIcon
+                                            onClick={togglePassword}
+                                            icon={faEyeSlash}
+                                            className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                        />
                                     )}
-                                </select>
+                                </div>
                             </div>
-                        ) : null}
+                        ) : null} 
 
                         <div className="flex flex-col mb-3 input-group">
-                            <label htmlFor="status">Status</label>
+                            <label htmlFor="barangay_name">Barangay</label>
                             <select
-                                className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
-                                name="status"
-                                id="status"
-                                value={user.status}
-                                onChange={handleChange}
+                                className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1 disabled:bg-neutral-300 disabled:cursor-not-allowed"
+                                name="barangay_name"
+                                id="barangay_name"
                                 required
+                                value={user.barangay_name}
+                                onChange={handleChange}
+                                disabled={isNotEditable}
                             >
-                                <option hidden>Select Status</option>
-                                <option value="active">Active</option>
-                                <option value="disabled">Disabled</option>
+                                {/* Can be replaced with the barangay values from the database */}
+                                <option hidden>Select Barangay</option>
+                                {isLoading ? (
+                                    <option disabled>Loading...</option>
+                                ) : (
+                                    barangays.map((barangay) => (
+                                        <option
+                                            key={barangay.barangay_id}
+                                            value={barangay.barangay_name}
+                                        >
+                                            {barangay.barangay_name}
+                                        </option>
+                                    ))
+                                )}
                             </select>
                         </div>
+                        
+                        {userDetails && userDetails.role === "admin" ? (
+                            <div className="flex flex-col mb-3 input-group">
+                                <label htmlFor="status">Status</label>
+                                <select
+                                    className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
+                                    name="status"
+                                    id="status"
+                                    value={user.status}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option hidden>Select Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+                            </div>
+                        ) : (null)}
 
                         <button
                             className="w-full p-2 my-5 font-bold text-white uppercase transition-all bg-blue-400 rounded-lg shadow-lg shadow-gray-400 hover:opacity-75"
