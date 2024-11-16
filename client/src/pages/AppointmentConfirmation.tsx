@@ -41,7 +41,7 @@ const AppointmentConfirmation: React.FC = () => {
             </div>
 
             <button
-                onClick={() => navigate("/appointment")}
+                onClick={() => navigate("/")}
                 className="px-5 py-2.5 font-medium text-white bg-green rounded-lg shadow-gray-500 shadow-md hover:opacity-70 transition duration-200 ease-in-out"
             >
                 Back to Home
