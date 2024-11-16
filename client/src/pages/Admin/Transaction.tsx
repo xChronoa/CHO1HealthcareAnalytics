@@ -8,6 +8,7 @@ const Transaction: React.FC = () => {
         submissions,
         earliestDate,
         latestDate,
+        dueDate,
         fetchReportSubmissions,
         fetchEarliestAndLatestDates,
     } = useReportSubmissions();
@@ -112,7 +113,7 @@ const Transaction: React.FC = () => {
                             <div className="flex flex-row items-center justify-center gap-2 text-xs pointer-events-none sm:gap-5 sm:text-sm">
                                 <label htmlFor="due-date">Due:</label>
                                 <span className="p-2 bg-white rounded-lg shadow-md shadow-gray-400">
-                                    {submissions.length > 0 ? formatDateForDisplay(submissions[0].due_at) : "mm/dd/yyyy"}
+                                    {formatDateForDisplay(dueDate) ?? "mm/dd/yyyy"}
                                 </span>
                             </div>
                         </div>
