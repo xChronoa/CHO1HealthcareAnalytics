@@ -95,7 +95,7 @@ const AppointmentList: React.FC = () => {
                 <section className="flex flex-col items-start">
                     <div className="flex flex-row items-center justify-end w-full gap-10 mt-6 mb-5 sm:mb-0 filter">
                         {/* Filter by month and year */}
-                        <div className="relative flex flex-row items-center justify-center w-fit md:w-[17%] gap-2">
+                        <div className="relative flex flex-row items-center justify-left w-fit md:w-[17%] gap-2">
                             <label
                                 htmlFor="date"
                                 className="absolute left-0 top-[-1.5rem] font-medium w-full text-nowrap"
@@ -114,7 +114,7 @@ const AppointmentList: React.FC = () => {
                             />
                         </div>
 
-                        <div className="relative flex flex-row items-center justify-center gap-5 min-w-40 md:w-fit">
+                        <div className="relative flex flex-row items-center gap-5 justify-left min-w-40 md:w-fit">
                             <label
                                 htmlFor="appointment-type"
                                 className="absolute left-0 top-[-1.5rem] font-medium w-full text-nowrap"
@@ -169,7 +169,7 @@ const AppointmentList: React.FC = () => {
                                         key={appointment.patient.patient_id}
                                         className="grid grid-cols-1 p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
                                     >
-                                        <h3 className="text-lg font-bold">
+                                        <h3 className="text-lg font-bold uppercase">
                                             {appointment.patient.first_name}{" "}
                                             {appointment.patient.last_name}
                                         </h3>
@@ -249,20 +249,20 @@ const AppointmentList: React.FC = () => {
                         </div>
 
                         {/* Pagination Controls */}
-                        <div className="flex items-center justify-between sm:justify-center mt-16">
+                        <div className="flex items-center justify-between mt-16 sm:justify-center">
                             <button
                                 onClick={prevPage}
-                                disabled={currentPage === 1}
+                                disabled={currentPage <= 1}
                                 className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
                             >
                                 Previous
                             </button>
-                            <span className="px-4 py-2 align-middle text-center">
+                            <span className="px-4 py-2 text-center align-middle">
                                 Page {currentPage} of {totalPages}
                             </span>
                             <button
                                 onClick={nextPage}
-                                disabled={currentPage === totalPages}
+                                disabled={currentPage >= totalPages}
                                 className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
                             >
                                 Next
