@@ -16,6 +16,27 @@ const Header: React.FC<HeaderProp> = ({ logoPath }) => {
     // Check if the current route is the index ("/") route
     const isIndexRoute = location.pathname === "/" || location.pathname === "/terms" || location.pathname === "/privacy";
 
+    // List of routes where the sidebar should not be shown
+    const routesWithoutSidebar = [
+        "/",
+        "/privacy",
+        "/terms",
+        "/appointment",
+        "/appointment/confirmation",
+        "/barangay/login",
+        "/admin/login"
+    ];
+
+    // Explicitly allow sidebar on /admin and /barangay
+    const routesWithSidebar = [
+        "/admin",
+        "/barangay"
+    ];
+
+    // Check if the current route is in routesWithoutSidebar, but also allow sidebar on /admin and /barangay
+    const isWithoutSidebar = routesWithoutSidebar.some(route => location.pathname.startsWith(route));
+    const isWithSidebar = routesWithSidebar.some(route => location.pathname.startsWith(route));
+
     return (
         <header
             className={`box-border flex items-center justify-between w-full px-8 ${
@@ -27,7 +48,7 @@ const Header: React.FC<HeaderProp> = ({ logoPath }) => {
             } shadow-lg bg-green`}
         >
             {" "}
-            {collapseSidebar && (
+            {(!isWithoutSidebar || isWithSidebar) && (
                 <FontAwesomeIcon
                     icon={faBars}
                     className="self-center p-[4px] lg:hidden cursor-pointer hover:bg-lime-800 transition-all duration-300 text-white border-2 border-white rounded-lg size-6"

@@ -176,7 +176,6 @@ export const useReportSubmissions = (): UseReportSubmission => {
                 if (result.success) {
                     if (Array.isArray(result.data)) {
                         setSubmissions(result.data);
-                        console.log(result);
                         setDueDate(result.due_at);
                     } else {
                         throw new Error("Unexpected data format.");
