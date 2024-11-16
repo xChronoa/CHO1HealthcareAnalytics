@@ -16,6 +16,7 @@ import ModernWRAChart from "./ModernWRAChart";
 import { useLoading } from "../../../context/LoadingContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMaximize, faMinimize } from "@fortawesome/free-solid-svg-icons";
+import { useSidebarContext } from "../../../context/SidebarContext";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, Tooltip, Legend, PointElement);
 
@@ -956,7 +957,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             setIsButtonDisabled(!(serviceData.length > 0))
         }
     }, [selectedService, serviceData, barangay, year]); // Dependencies without chartRef
-    
+
+    const { isMinimized } = useSidebarContext();
     return (
         <>
             {error ? (
@@ -968,7 +970,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             ) : (
                 <>
                     <select
-                        className="self-center w-full px-2 py-2 text-xs rounded-lg justify-self-center-center sm:text-sm sm:w-9/12 shadow-md shadow-[#a3a19d]"
+                        className={`self-center ${isMinimized ? "w-11/12" : "w-full"} px-2 py-2 text-xs rounded-lg justify-self-center-center sm:text-sm shadow-md shadow-[#a3a19d]`}
                         onChange={handleServiceChange}
                         value={selectedService}
                     >
@@ -985,9 +987,9 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     <section 
                         className="flex flex-col items-center my-8 bg-almond" id="myChart" ref={chartRef}
                     >
-                        <h1 id="chart-title" className="w-full p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg lg:w-9/12 bg-green" ref={textRef}>{selectedService}</h1>
+                        <h1 id="chart-title" className={`p-2 text-sm font-bold text-center text-white align-middle rounded-lg sm:text-lg bg-green ${isMinimized ? "w-11/12" : "w-full"}`} ref={textRef}>{selectedService}</h1>
 
-                        <div className="flex flex-col items-center w-full gap-8 print:w-full lg:w-9/12 chart-container">
+                        <div className={`flex flex-col items-center ${isMinimized ? "w-11/12" : "w-full"} gap-8 print:w-full chart-container`}>
                             {selectedService !== "Family Planning" ? (
                                 selectedService !== "Modern FP Unmet Need" ? (
                                     serviceData.length > 0 ? (

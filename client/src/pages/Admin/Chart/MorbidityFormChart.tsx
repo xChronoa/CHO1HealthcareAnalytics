@@ -14,6 +14,7 @@ import { useMorbidityReport } from "../../../hooks/useMorbidityReport";
 import { faMinimize, faMaximize } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoading } from "../../../context/LoadingContext";
+import { useSidebarContext } from "../../../context/SidebarContext";
 
 ChartJS.register(
     LineElement,
@@ -335,10 +336,11 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
         setIsButtonDisabled(!(morbidityReports.length > 0));
     }, [morbidityReports, barangay, year])
 
+    const { isMinimized } = useSidebarContext();
 
     return (
         <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
-            <h1 id="chart-title" className="self-center w-full p-2 text-2xl font-bold text-center text-white align-middle rounded-lg lg:w-9/12 bg-green" ref={textRef}>Morbidity Report</h1>
+            <h1 id="chart-title" className={`self-center w-full ${isMinimized ? "lg:w-11/12" : "w-full"} p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green`} ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -348,7 +350,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className="flex flex-col items-center w-full gap-8 lg:w-9/12 print:w-full chart-container">
+                        <div className={`flex flex-col items-center w-full gap-8 ${isMinimized ? "lg:w-11/12" : "w-full"} print:w-full chart-container`}>
                             {/* Male Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md print:w-full shadow-[#a3a19d] 
