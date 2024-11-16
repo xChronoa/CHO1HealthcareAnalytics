@@ -4,9 +4,13 @@ import { useAuth } from "../context/AuthContext";
 export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
     allowedRoles,
 }) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const location = useLocation(); // Get the current location
 
+    if(loading) {
+        return;
+    }
+    
     if (!user) {
         // If the user is not authenticated, redirect to the appropriate login page
         const loginPath =
