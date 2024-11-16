@@ -143,10 +143,9 @@ const Appointment: React.FC = () => {
 
     const requestOtp = async (event?: MouseEvent<HTMLButtonElement>) => {
         event?.preventDefault();
-
-        setResendCountdown(60);
+    
         setErrors({});
-
+    
         if (!recaptchaVerifier) {
             return setGeneralError("RecaptchaVerifier is not initialized");
         }
@@ -160,14 +159,24 @@ const Appointment: React.FC = () => {
         
         try {
             const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+            // Start the countdown only if the OTP is sent successfully
+            const countdownEndTime = Date.now() + 60 * 1000; // 60 seconds from now
+            localStorage.setItem("resendCountdown", countdownEndTime.toString()); // Store countdown end time
+            
+            setResendCountdown(60);
+    
             startTransition(() => {
                 setConfirmationResult(confirmationResult);
             });
         } catch (error: any) {
+            // Reset countdown in case of error
             setResendCountdown(0);
+            localStorage.removeItem("resendCountdown"); // Clear the stored countdown if there's an error
+    
             handleOTPError(error);
         }
     };
+    
 
     const verifyOTP = async (): Promise<boolean> => {
         try {
@@ -196,6 +205,7 @@ const Appointment: React.FC = () => {
                     confirmButtonText: "OK",
                 });
             }
+            decrementLoading();
             return false;
         }
     };
@@ -262,14 +272,20 @@ const Appointment: React.FC = () => {
             },
             buttonsStyling: false,
         });
-
+        
         if (!result.isConfirmed) return;
         
-        // Verify OTP
-        const isOtpValid = await verifyOTP();
-        if (!isOtpValid) return;
-
         incrementLoading();
+
+        // Check if OTP is already verified and valid from session storage or previous request
+        let isOtpValid = sessionStorage.getItem("otpValid") === "true"; // Retrieve OTP validity status
+        
+        if (!isOtpValid) {
+            // If OTP is not valid, request OTP verification
+            const otpVerified = await verifyOTP();  // OTP verification process
+            if (!otpVerified) return;
+            sessionStorage.setItem("otpValid", "true");  // Store OTP validity for future use
+        }
     
         try {
             const response = await fetch(`${baseAPIUrl}/appointments`, {
@@ -287,7 +303,8 @@ const Appointment: React.FC = () => {
                 return;
             }
     
-            // Successful appointment creation
+            // If successful, invalidate the OTP and save appointment details
+            sessionStorage.removeItem("otpValid");  // Invalidate the OTP after successful submission
             const result = await response.json();
             sessionStorage.setItem("appointmentDetails", JSON.stringify({
                 ...formData,
@@ -304,43 +321,57 @@ const Appointment: React.FC = () => {
     // Helper function to handle error responses and network errors
     const handleErrorResponse = async (error: Response | Error) => {
         setGeneralError(null);
-
+    
+        let errorMessage = "An error occurred. Please try again."; // Default error message
+    
         if (error instanceof Response) {
             const data = await error.json();
-
+    
             switch (error.status) {
                 case 409:
-                    setGeneralError("You already have an appointment scheduled for this date. Please choose a different date.");
+                    errorMessage = "You already have an appointment scheduled for this date. Please choose a different date.";
                     break;
                 case 422:
                     if (data.errors) {
-                        // Set specific form field errors (e.g., first_name, last_name, etc.)
-                        setErrors(data.errors);
-                    } else {
-                        setGeneralError("Invalid data provided. Please check your inputs and try again.");
+                        setErrors(data.errors); // Set specific form field errors
+                        errorMessage = "Invalid data provided. Please check your inputs and try again.";
                     }
                     break;
                 case 400:
-                    // Handle specific bad request scenarios, like no slots available or invalid category days
                     if (data.error) {
-                        setGeneralError(data.error);
+                        errorMessage = data.error;
                     } else {
-                        setGeneralError("The requested appointment cannot be booked. Please try a different date or category.");
+                        errorMessage = "The requested appointment cannot be booked. Please try a different date or category.";
                     }
                     break;
                 case 500:
-                    // General server error handling for unexpected issues
-                    setGeneralError("An unexpected error occurred while processing your appointment. Please try again later.");
+                    errorMessage = "An unexpected error occurred while processing your appointment. Please try again later.";
                     break;
                 default:
-                    setGeneralError("An unexpected error occurred. Please try again later.");
+                    errorMessage = "An unexpected error occurred. Please try again later.";
                     break;
             }
         } else {
-            setGeneralError("A network error occurred. Please check your connection and try again.");
+            errorMessage = "A network error occurred. Please check your connection and try again.";
         }
+    
+        setGeneralError(errorMessage); // Update state for potential UI reflection
+        showErrorAlert(errorMessage, getErrorTitle(error instanceof Response ? error.status : 0)); // Pass title dynamically
+    };
 
-        showErrorAlert(generalError || "An error occurred. Please try again.");
+    const getErrorTitle = (statusCode: number) => {
+        switch (statusCode) {
+            case 409:
+                return "Appointment Conflict";
+            case 422:
+                return "Invalid Input";
+            case 400:
+                return "Bad Request";
+            case 500:
+                return "Server Error";
+            default:
+                return "Something Went Wrong";
+        }
     };
 
     const showSuccessAlert = () => {
@@ -352,15 +383,16 @@ const Appointment: React.FC = () => {
         }).then(() => navigate("/appointment/confirmation"));
     };
 
-    const showErrorAlert = (message: string) => {
+    const showErrorAlert = (message: string, title: string) => {
         Swal.fire({
-            title: "Error",
+            title: title,
             text: message,
             icon: "error",
             confirmButtonText: "OK",
         });
     };
 
+    // OTP error handler
     const handleOTPError = (error: any) => {
         if (error.code) {
             switch (error.code) {
@@ -372,16 +404,19 @@ const Appointment: React.FC = () => {
                     scrollToError('phone_number');
                     break;
                 case "auth/too-many-requests":
-                    setGeneralError("Too many requests. Please try again later.");
-                    showErrorAlert(generalError || "Too many requests. Please try again later.");
+                    const tooManyRequestsMessage = "Too many requests. Please try again later.";
+                    setGeneralError(tooManyRequestsMessage);
+                    showErrorAlert(tooManyRequestsMessage, "Request Limit Exceeded");
                     break;
                 default:
-                    setGeneralError("Failed to send OTP. Please try again.");
-                    showErrorAlert(generalError || "Failed to send OTP. Please try again.");
+                    const defaultOTPError = "Failed to send OTP. Please try again.";
+                    setGeneralError(defaultOTPError);
+                    showErrorAlert(defaultOTPError, "OTP Error");
             }
         } else {
-            setGeneralError("An unknown error occurred. Please try again.");
-            showErrorAlert(generalError || "An unknown error occurred. Please try again.");
+            const unknownError = "An unknown error occurred. Please try again.";
+            setGeneralError(unknownError);
+            showErrorAlert(unknownError, "Unknown Error");
         }
     };
 
@@ -400,6 +435,32 @@ const Appointment: React.FC = () => {
     useEffect(() => {
         fetchAppointmentCategories(formData.appointment_date);
     }, [formData.appointment_date])
+
+    useEffect(() => {
+        // Check if there is a countdown value in localStorage
+        const storedCountdown = localStorage.getItem("resendCountdown");
+        if (storedCountdown) {
+            const timeRemaining = Math.max(0, Math.ceil((+storedCountdown - Date.now()) / 1000));
+            if (timeRemaining > 0) {
+                setResendCountdown(timeRemaining);
+    
+                // Update countdown in intervals
+                const interval = setInterval(() => {
+                    const newTimeRemaining = Math.max(0, Math.ceil((+storedCountdown - Date.now()) / 1000));
+                    setResendCountdown(newTimeRemaining);
+    
+                    if (newTimeRemaining === 0) {
+                        clearInterval(interval);
+                        localStorage.removeItem("resendCountdown");
+                    }
+                }, 1000);
+    
+                return () => clearInterval(interval); // Cleanup interval on unmount
+            } else {
+                localStorage.removeItem("resendCountdown");
+            }
+        }
+    }, []);
 
     return (
         <>
