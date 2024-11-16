@@ -1,5 +1,5 @@
 // Import Components
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -30,8 +30,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
     const { isMinimized, isCollapsed, toggleSidebar, collapseSidebar } = useSidebar();
     const { user } = useAuth();
     const logoPath = user?.barangay_name ? logos[user.barangay_name.toLowerCase()] : cabuyao_logo;
-    const location = useLocation();
-    const isDashboardRoute = location.pathname === "/admin"
 
     return (
         <>
@@ -46,7 +44,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
                 username={user?.username}
             />
             <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
-            <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && !isCollapsed ? isDashboardRoute ? "lg:pl-14" : "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
+            <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && !isCollapsed ? "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
                 <Outlet />
             </main>
             <Footer />
