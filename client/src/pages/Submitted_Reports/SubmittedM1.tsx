@@ -336,7 +336,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         <div id="printableTable" className="flex flex-col w-full gap-6 py-12 overflow-x-auto border-2 border-black rounded-lg xl:items-center 2xl:items-center 2xl:justify-center">
                             <table
                                 id="header"
-                                className="border-collapse text-[9px] bg-white text-center table-fixed text-lg"
+                                className="border-collapse text-[9px] bg-white text-center table-fixed text-lg sm:text-xs lg:text-sm"
                             >
                                 <tbody>
                                     <tr>
@@ -389,7 +389,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                                 <p>
                                                     Projected Population of the Year: {" "}
                                                     <span className="font-bold underline uppercase">
-                                                        {statuses.length > 0 ? statuses.at(0)?.projected_population  : ""}
+                                                        {statuses.length > 0 ? statuses.at(0)?.projected_population.toLocaleString()  : ""}
                                                     </span>
                                                 </p>
                                             </div>
@@ -415,7 +415,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                 </p>
                                 <table
                                     id="modern-wra"
-                                    className="border-collapse text-[9px] bg-white text-center table-fixed text-xs"
+                                    className="border-collapse text-[9px] bg-white text-center table-fixed text-xs sm:text-xs lg:text-sm"
                                 >
                                     <thead>
                                         <tr>
@@ -469,7 +469,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                             <div className="flex flex-row items-center 2xl:items-center 2xl:justify-center center-this fp-one">
                                 <table
                                     id="family-planning one"
-                                    className="border-black border-collapse text-[9px] bg-white text-center table-fixed text-nowrap"
+                                    className="border-black border-collapse text-[9px] bg-white text-center table-fixed text-nowrap sm:text-xs lg:text-sm"
                                 >
                                     <thead>
                                         <tr>
@@ -603,7 +603,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                                 </table>
                                 <table
                                     id="family-planning one"
-                                    className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap"
+                                    className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap sm:text-xs lg:text-sm"
                                 >
                                     <thead>
                                         <tr>
@@ -740,7 +740,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                             {/* Family Planning Two */}
                             <table
                                 id="family-planning two"
-                                className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap"
+                                className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap sm:text-xs lg:text-sm"
                             >
                                 <thead>
                                     <tr>
@@ -869,7 +869,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                             {/* Section B. Maternal Services */}
                             <table
                                 id="maternal-services"
-                                className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap"
+                                className="border-collapse text-[9px] bg-white text-center table-fixed text-nowrap sm:text-xs lg:text-sm"
                             >
                                 <thead>
                                     <tr>
@@ -1150,7 +1150,7 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
 
                             {/* M1 Back */}
                             <table
-                                className="border-collapse text-[9px] bg-white text-center table-fixed"
+                                className="border-collapse text-[9px] bg-white text-center table-fixed sm:text-xs lg:text-sm"
                             >
                                 <thead className="text-nowrap">
                                     <tr className="text-xs">

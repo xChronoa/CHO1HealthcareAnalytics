@@ -138,7 +138,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
             rowCells.push(
                 <td
                     key={`${diseaseName}-${ageGroup}-M`}
-                    className="px-2 text-[.6rem] font-bold border border-black"
+                    className="px-2 text-[.6rem] font-bold border border-black sm:text-xs lg:text-sm"
                     style={{ borderRight: "2px dashed black" }}
                 >
                     {diseaseData[ageGroup]?.M || 0}
@@ -147,7 +147,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
             rowCells.push(
                 <td
                     key={`${diseaseName}-${ageGroup}-F`}
-                    className="px-2 text-[.6rem] font-bold border border-black"
+                    className="px-2 text-[.6rem] font-bold border border-black sm:text-xs lg:text-sm"
                 >
                     {diseaseData[ageGroup]?.F || 0}
                 </td>
@@ -359,7 +359,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="sm:text-xs lg:text-sm">
                                     {reports &&
                                         Object.keys(reports.data.data).map(
                                             (disease, index) => {
