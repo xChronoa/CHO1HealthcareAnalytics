@@ -309,23 +309,24 @@ class ReportSubmissionController extends Controller
         $status = $request->input('status', 'all'); // Default to 'all' if not provided
 
         try {
+            // First query to get the submissions with due_at from report_submissions
             $query = DB::table('report_submissions')
                 ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
                 ->leftJoin('barangays', 'report_submissions.barangay_id', '=', 'barangays.barangay_id')
-                ->leftJoin('report_statuses', 'report_submissions.report_submission_id', '=', 'report_statuses.report_submission_id') // Left join with report_statuses
+                ->leftJoin('report_statuses', 'report_submissions.report_submission_id', '=', 'report_statuses.report_submission_id')
                 ->where('report_submission_templates.report_year', $reportYear)
                 ->where('report_submission_templates.report_month', $reportMonth)
                 ->select(
                     'barangays.barangay_id',
                     'barangays.barangay_name',
                     'report_submissions.status',
-                    'report_submissions.due_at', // Select due_at from report_submissions
+                    'report_submissions.due_at', // Correctly fetch due_at from report_submissions
                     'report_statuses.submitted_at',
                     DB::raw('DATEDIFF(report_statuses.submitted_at, report_submissions.due_at) as tardy_days')
                 )
                 ->distinct();
 
-            // Apply status filtering
+            // Apply status filtering (if any)
             if ($status !== 'all') {
                 if ($status === 'submitted' || $status === "submitted late") {
                     $query->whereIn('report_submissions.status', ['submitted', 'submitted late']);
@@ -343,10 +344,28 @@ class ReportSubmissionController extends Controller
             // Fetch the results
             $submissions = $query->get();
 
-            // Return the results   
+            // If no submissions were found, fetch the due_at from report_submissions (fallback query)
+            if ($submissions->isEmpty()) {
+                // Query for due_at using report_year and report_month in report_submissions (if no submissions exist)
+                $dueDateQuery = DB::table('report_submissions')
+                    ->join('report_submission_templates', 'report_submissions.report_submission_template_id', '=', 'report_submission_templates.report_submission_template_id')
+                    ->where('report_submission_templates.report_year', $reportYear)
+                    ->where('report_submission_templates.report_month', $reportMonth)
+                    ->select('report_submissions.due_at')
+                    ->first(); // Get the first result
+
+                // If due_at is found, use it; otherwise, use a default placeholder
+                $dueDate = $dueDateQuery ? $dueDateQuery->due_at : ''; // Return empty string or placeholder
+            } else {
+                // If submissions are found, use the due_at from the first record
+                $dueDate = $submissions->first()->due_at;
+            }
+
+            // Return response with due_date included
             return response()->json([
                 'success' => true,
-                'data' => $submissions,
+                'data' => $submissions, // Report data (may be empty for barangay reports)
+                'due_at' => $dueDate,  // Return the due_date value
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
