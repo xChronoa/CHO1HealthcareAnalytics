@@ -30,7 +30,7 @@ class AppointmentController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the incoming request data with user-friendly error messages
+        // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -38,35 +38,25 @@ class AppointmentController extends Controller
             'birthdate' => 'required|date',
             'address' => 'required|string|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'email' => 'required|email|exists:patients,email',
-            'appointment_date' => 'required|date|after_or_equal:today',
+            'email' => 'required|email',
+            'appointment_date' => 'required|date',
             'appointment_category_name' => 'required|string|exists:appointment_categories,appointment_category_name',
             'patient_note' => 'nullable|string',
-        ], [
-            'first_name.required' => 'Please enter your first name.',
-            'last_name.required' => 'Please enter your last name.',
-            'sex.required' => 'Please select a valid gender.',
-            'birthdate.required' => 'Please enter your birthdate.',
-            'address.required' => 'Please enter your address.',
-            'email.required' => 'Please enter a valid email address.',
-            'email.exists' => 'The provided email does not match our records. Please register first.',
-            'appointment_date.required' => 'Please select a date for the appointment.',
-            'appointment_date.after_or_equal' => 'The appointment date cannot be in the past.',
-            'appointment_category_name.required' => 'Please select an appointment category.',
-            'appointment_category_name.exists' => 'The selected appointment category does not exist.',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Start a transaction
         DB::beginTransaction();
 
         try {
-            // Check if a patient with the same email exists, update details if so
+            // Check if a patient with the same email exists, if so, update details, otherwise create
             $patient = Patient::where('email', $request->email)->first();
 
             if ($patient) {
+                // Update the existing patient details
                 $patient->update([
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
@@ -76,6 +66,7 @@ class AppointmentController extends Controller
                     'phone_number' => $request->phone_number,
                 ]);
             } else {
+                // Create a new patient if none exists with the same email
                 $patient = Patient::create([
                     'first_name' => $request->first_name,
                     'last_name' => $request->last_name,
@@ -87,19 +78,20 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            // Prevent duplicate appointments on the same date
+            // Check if the patient already has an appointment on the same date
             $existingAppointment = Appointment::where('patient_id', $patient->patient_id)
                 ->whereDate('appointment_date', $request->appointment_date)
                 ->exists();
 
             if ($existingAppointment) {
-                return response()->json([
-                    'error' => 'You already have an appointment scheduled for this date. Please choose a different date.'
-                ], 409);
+                return response()->json(['error' => 'You already have an appointment on this date.'], 409);
             }
 
-            // Retrieve appointment category and validate allowed days and slots
+            // Retrieve the appointment_category_id using the appointment_category_name
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
+            $appointmentCategoryId = $appointmentCategory->appointment_category_id;
+
+            // Define the slot limits and allowed days for each category (use your logic to determine available slots)
             $slotsPerCategory = [
                 'Maternal Health Consultation' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
                 'Animal Bite Vaccination' => ['days' => ['Monday', 'Thursday'], 'slots' => 70],
@@ -108,62 +100,71 @@ class AppointmentController extends Controller
                 'TB DOTS' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
             ];
 
-            // Parse the appointment date and check the allowed days
+            // Parse the selected date and determine the day of the week
             $date = new \DateTime($request->appointment_date);
-            $dayOfWeek = $date->format('l');
+            $dayOfWeek = $date->format('l'); // For example, "Monday"
 
+            // Check if the appointment category allows appointments on this day
             if (!in_array($dayOfWeek, $slotsPerCategory[$appointmentCategory->appointment_category_name]['days'] ?? [])) {
-                return response()->json([
-                    'error' => 'Appointments are not available on ' . $dayOfWeek . ' for the selected category. Please choose an allowed day.'
-                ], 400);
+                return response()->json(['error' => 'Appointments are not available on this day for the selected category.'], 400);
             }
 
-            // Check and calculate available slots
-            $appointmentsCount = Appointment::where('appointment_category_id', $appointmentCategory->appointment_category_id)
+            // Count existing appointments on the selected date for the category
+            $appointmentsCount = Appointment::where('appointment_category_id', $appointmentCategoryId)
                 ->whereDate('appointment_date', $request->appointment_date)
                 ->count();
+
+            // Calculate the available slots
             $totalSlots = $slotsPerCategory[$appointmentCategory->appointment_category_name]['slots'];
             $availableSlots = $totalSlots - $appointmentsCount;
 
             if ($availableSlots <= 0) {
-                return response()->json([
-                    'error' => 'No available slots for the selected category on this date. Please choose another date or category.'
-                ], 400);
+                return response()->json(['error' => 'No available slots for the selected category on this date. Please choose another date or category.'], 400);
             }
 
-            // Queue number generation
+            // Check for the highest queue_number for the given appointment_date
             $maxQueueNumber = Appointment::whereDate('appointment_date', $request->appointment_date)
                 ->max('queue_number');
+
+            // If no appointments exist for the date, start at 1, otherwise increment
             $queueNumber = $maxQueueNumber ? $maxQueueNumber + 1 : 1;
 
-            // Create appointment
+            // Create the appointment with the generated queue number
             $appointment = Appointment::create([
                 'patient_id' => $patient->patient_id,
                 'appointment_date' => $request->appointment_date,
-                'appointment_category_id' => $appointmentCategory->appointment_category_id,
+                'appointment_category_id' => $appointmentCategoryId,
                 'patient_note' => $request->patient_note,
                 'queue_number' => $queueNumber,
             ]);
 
             // Send confirmation email
-            Mail::to($patient->email)->send(new AppointmentConfirmation(
-                $patient,
-                $appointment,
-                $appointmentCategory->appointment_category_name
-            ));
+            try {
+                Mail::to($patient->email)
+                    ->send(new AppointmentConfirmation(
+                        $patient,
+                        $appointment,
+                        $appointmentCategory->appointment_category_name
+                    ));
 
-            DB::commit();
+                // Commit the transaction
+                DB::commit();
 
-            return response()->json([
-                "success" => "Appointment successfully created, and a confirmation email has been sent.",
-                'patient' => $patient,
-                'appointment' => $appointment,
-                'appointmentCategory' => $appointmentCategory->appointment_category_name
-            ]);
+                return response()->json([
+                    "success" => "Appointment successfully created, and a confirmation email has been sent.",
+                    'patient' => $patient,
+                    "appointment" => $appointment,
+                    "appointmentCategory" => $appointmentCategory->appointment_category_name
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack(); // Rollback if email fails
+                return response()->json(["Error" => $e->getMessage()], 500);
+            }
         } catch (\Exception $e) {
+            // Rollback the transaction if anything goes wrong
             DB::rollBack();
 
-            // Log the error for debugging (production ready)
+            // Log the error for debugging
             Log::error("Error creating appointment: " . $e->getMessage());
 
             return response()->json([
@@ -369,7 +370,7 @@ class AppointmentController extends Controller
             // Return the response with appointment dates
             return response()->json($responseData, 200);
         } catch (\Exception $e) {
-            // Log the error for debugging purposes in production
+            // Log the error for debugging purposes
             Log::error('Error fetching earliest and latest appointment dates: ' . $e->getMessage());
 
             // Return a generic error response with status 500 (Internal Server Error)
