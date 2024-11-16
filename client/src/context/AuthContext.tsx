@@ -39,12 +39,42 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const privateRoutes = [
+        "/admin/login",
+        "/admin",
+        "/admin/transactions",
+        "/admin/barangays",
+        "/admin/appointments",
+        "/admin/manage",
+        "/admin/manage/create",
+        "/admin/manage/update",
+        "/admin/manage/accounts",
+        "/admin/report",
+        "/admin/report/submitted/",
+
+
+        "/barangay/login",
+        "/barangay",
+        "/barangay/history",
+        "/barangay/report",
+        "/barangay/report/submitted",
+        "/barangay/edit/account"
+    ];
+
     /**
      * Checks the authentication status of the user by making a request to the server.
      * Updates the context state based on the response.
      */
     useEffect(() => {
         const checkAuth = async () => {
+            const currentPath = window.location.pathname;
+            const isPrivateRoute = privateRoutes.some(route => currentPath.startsWith(route));
+
+            if(!isPrivateRoute) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await fetch(`${baseAPIUrl}/auth/check`, {
                     method: "GET",
@@ -86,7 +116,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 setLoading(false); // Stop loading state
             }
         };
-    
+
         checkAuth();
     }, []);
 
