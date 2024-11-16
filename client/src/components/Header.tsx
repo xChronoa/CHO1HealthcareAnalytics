@@ -3,14 +3,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLocation } from "react-router-dom";
 import cho_logo from "../assets/images/cho_logo.png";
 import cabuyao_logo from "../assets/images/cabuyao_logo.png";
+import { useSidebarContext } from "../context/SidebarContext";
 
 interface HeaderProp {
     logoPath?: string | null;
-    collapseSidebar?: () => void;
 }
 
-const Header: React.FC<HeaderProp> = ({ logoPath, collapseSidebar }) => {
+const Header: React.FC<HeaderProp> = ({ logoPath }) => {
     const location = useLocation(); // Get the current route path
+    const { collapseSidebar } = useSidebarContext();
 
     // Check if the current route is the index ("/") route
     const isIndexRoute = location.pathname === "/" || location.pathname === "/terms" || location.pathname === "/privacy";

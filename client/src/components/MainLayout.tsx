@@ -3,11 +3,11 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
-import useSidebar from "../hooks/useSidebar";
 
 import cabuyao_logo from "../assets/images/cabuyao_logo.png";
 import { useAuth } from "../context/AuthContext";
 import logos from "../assets/logoImports";
+import { useSidebarContext } from "../context/SidebarContext";
 
 // Interface for Sidebar Configuration
 interface SidebarConfig {
@@ -27,7 +27,7 @@ interface MainLayoutProps {
  * @returns {JSX.Element} The main layout component containing the common layout elements.
  */
 const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
-    const { isMinimized, isCollapsed, toggleSidebar, collapseSidebar } = useSidebar();
+    const { isMinimized } = useSidebarContext();
     const { user } = useAuth();
     const logoPath = user?.barangay_name ? logos[user.barangay_name.toLowerCase()] : cabuyao_logo;
 
@@ -35,16 +35,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
         <>
             <Sidebar
                 logoPath={logoPath}
-                isMinimized={isMinimized}
-                isCollapsed={isCollapsed}
-                toggleSidebar={toggleSidebar}
-                collapseSidebar={collapseSidebar}
                 type={sidebarConfig.type}
                 barangay={user?.barangay_name}
                 username={user?.username}
             />
-            <Header logoPath={cabuyao_logo} collapseSidebar={collapseSidebar} />
-            <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized && !isCollapsed ? "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
+            <Header logoPath={cabuyao_logo} />
+            <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized ? "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
                 <Outlet />
             </main>
             <Footer />

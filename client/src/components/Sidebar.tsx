@@ -11,19 +11,16 @@ import {
     faUserPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import SidebarButton from "./SidebarButton";
 import { useAuth } from "../context/AuthContext";
+import { useSidebarContext } from "../context/SidebarContext";
 
 interface SidebarProps {
     type: string;
     logoPath: string;
     barangay?: string | undefined;
     username?: string | undefined;
-    isCollapsed: boolean;
-    isMinimized: boolean;
-    toggleSidebar: () => void;
-    collapseSidebar: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = memo(
@@ -32,14 +29,16 @@ const Sidebar: React.FC<SidebarProps> = memo(
         logoPath,
         barangay,
         username,
-        toggleSidebar,
-        collapseSidebar,
-        isMinimized,
-        isCollapsed,
     }) => {
         const { logout } = useAuth();
         const sidebarRef = useRef<HTMLDivElement>(null);
         const { user } = useAuth();
+
+        const { isMinimized, isCollapsed, toggleSidebar, collapseSidebar } = useSidebarContext();
+
+        useEffect(() => {
+            console.log(isMinimized);
+        }, [isMinimized])
 
         return (
             <nav
