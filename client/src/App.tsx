@@ -22,6 +22,7 @@ import ManageAccountLayout from "./components/ManageAccountLayout";
 // Import Components
 import NotFound from "./pages/NotFound";
 import Loading from "./components/Loading";
+import { SidebarProvider } from "./context/SidebarContext";
 
 // Lazy load pages
 const Overview = React.lazy(() => import("./pages/Overview"));
@@ -53,51 +54,53 @@ function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <React.Suspense fallback={<Loading />}>
-                    <Routes>
-                        {/* Guest Routes */}
-                        <Route element={<GuestLayout />}>
-                            <Route index element={<Overview />} />
-                            <Route path="/privacy" element={<Privacy />} />
-                            <Route path="/terms" element={<Terms />} />
-                            {/* <Route index element={<Login image={cho_logo} />} /> */}
-                            <Route path="/appointment" element={<Appointment />} />
-                            <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
-                            <Route path="/barangay/login" element={<Login image={cabuyao_logo} />} />
-                            <Route path="/admin/login" element={<Login image={cho_logo} />} />
-                        </Route>
+                <SidebarProvider>
+                    <React.Suspense fallback={<Loading />}>
+                        <Routes>
+                            {/* Guest Routes */}
+                            <Route element={<GuestLayout />}>
+                                <Route index element={<Overview />} />
+                                <Route path="/privacy" element={<Privacy />} />
+                                <Route path="/terms" element={<Terms />} />
+                                {/* <Route index element={<Login image={cho_logo} />} /> */}
+                                <Route path="/appointment" element={<Appointment />} />
+                                <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
+                                <Route path="/barangay/login" element={<Login image={cabuyao_logo} />} />
+                                <Route path="/admin/login" element={<Login image={cho_logo} />} />
+                            </Route>
 
-                        {/* Admin Routes */}
-                        <Route element={<PrivateRoute allowedRoles={['admin']} />}>
-                            <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }} />}>
-                                <Route index element={<Dashboard />} />
-                                <Route path="transactions" element={<Transaction />} />
-                                <Route path="barangays" element={<BarangayList />} />
-                                <Route path="appointments" element={<AppointmentList />} />
-                                <Route path="manage" element={<ManageAccountLayout />}>
-                                    <Route index element={<ManageAccount />} />
-                                    <Route path="create" element={<CreateAccount />} />
-                                    <Route path="update" element={<UpdateAccount />} />
-                                    <Route path="accounts" element={<AccountList />} />
+                            {/* Admin Routes */}
+                            <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+                                <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }} />}>
+                                    <Route index element={<Dashboard />} />
+                                    <Route path="transactions" element={<Transaction />} />
+                                    <Route path="barangays" element={<BarangayList />} />
+                                    <Route path="appointments" element={<AppointmentList />} />
+                                    <Route path="manage" element={<ManageAccountLayout />}>
+                                        <Route index element={<ManageAccount />} />
+                                        <Route path="create" element={<CreateAccount />} />
+                                        <Route path="update" element={<UpdateAccount />} />
+                                        <Route path="accounts" element={<AccountList />} />
+                                    </Route>
+                                    <Route path="report/submitted/:barangayName" element={<SubmittedReports />} />
                                 </Route>
-                                <Route path="report/submitted/:barangayName" element={<SubmittedReports />} />
                             </Route>
-                        </Route>
 
-                        {/* Barangay Routes */}
-                        <Route element={<PrivateRoute allowedRoles={['encoder']} />}>
-                            <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay' }} />}>
-                                <Route index element={<History />} />
-                                <Route path="history" element={<History />} />
-                                <Route path="report" element={<Report />} />
-                                <Route path="report/submitted" element={<SubmittedReports />} />
-                                <Route path="edit/account" element={<UpdateAccount />} />
+                            {/* Barangay Routes */}
+                            <Route element={<PrivateRoute allowedRoles={['encoder']} />}>
+                                <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay' }} />}>
+                                    <Route index element={<History />} />
+                                    <Route path="history" element={<History />} />
+                                    <Route path="report" element={<Report />} />
+                                    <Route path="report/submitted" element={<SubmittedReports />} />
+                                    <Route path="edit/account" element={<UpdateAccount />} />
+                                </Route>
                             </Route>
-                        </Route>
 
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
-                </React.Suspense>
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </React.Suspense>
+                </SidebarProvider>
             </AuthProvider>
         </BrowserRouter>
     );
