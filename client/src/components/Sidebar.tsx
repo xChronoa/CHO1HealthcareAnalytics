@@ -5,7 +5,7 @@ import {
     faClose,
     faFileContract,
     faFileLines,
-    faNewspaper,
+    faHistory,
     faRightFromBracket,
     faTent,
     faUserPen,
@@ -77,12 +77,12 @@ const Sidebar: React.FC<SidebarProps> = memo(
                             <>
                                 <SidebarButton
                                     icon={faFileLines}
-                                    labelText="Reports"
+                                    labelText="Submit Reports"
                                     isMinimized={isMinimized}
                                     destination="report"
                                 />
                                 <SidebarButton
-                                    icon={faNewspaper}
+                                    icon={faHistory}
                                     labelText="Submittal History"
                                     isMinimized={isMinimized}
                                     destination="history"
@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                 />
                                 <SidebarButton
                                     icon={faFileContract}
-                                    labelText="Transaction"
+                                    labelText="Reports"
                                     isMinimized={isMinimized}
                                     destination="transactions"
                                 />
