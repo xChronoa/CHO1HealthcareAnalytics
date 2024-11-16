@@ -32,6 +32,8 @@ import {
 import { IncompleteUpdate } from "../../types/IncompleteForm";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 
 interface M1ReportProps {
     setReportDatas: (type: "m1" | "m2", data: any) => void;
@@ -291,25 +293,34 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     </p>
                 </div>
             `,
-            confirmButtonText: "I Confirm, Proceed",
+            confirmButtonText: "I confirm, don't show again.",
+            cancelButtonText: "I confirm, proceed",
             showCancelButton: true, // Show the cancel button for "Don't Show Again"
-            cancelButtonText: "I Confirm, Don't Show Again", // Label for the "Don't Show Again" button
             allowOutsideClick: false, // Prevent closing when clicking outside the alert
             allowEscapeKey: false, // Prevent closing with the escape key
             customClass: {
                 title: "text-xl font-bold text-gray-800", // Tailwind styling for the title
                 htmlContainer: "text-gray-700", // Tailwind styling for the HTML text container
                 popup: "p-4 text-center", // Tailwind styling for the popup container
-                confirmButton: "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
-                cancelButton: "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+                confirmButton:
+                    "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                cancelButton:
+                    "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
+            buttonsStyling: false,
         }).then((result) => {
-            if (result.dismiss === Swal.DismissReason.cancel) {
+            if (result.isConfirmed) {
                 // If the user clicked "Don't Show Again", set flag in sessionStorage
                 sessionStorage.setItem("m1FormDismissed", "true");
             }
         });
     }, []);
+
+    const sectionNames = [
+        "WRA",
+        "Family Planning",
+        ...Object.values(services).map((s) => s.service_name), // Service names
+    ];
 
     return (
         <>
@@ -320,44 +331,63 @@ export const M1Report: React.FC<M1ReportProps> = ({
                 </header>
 
                 {/* Progress Bar */}
-                <div className="relative mb-6">
+                <div className="relative mb-14">
                     <div className="flex items-center w-full">
-                        {[...Array(totalSteps)].map((_, index) => (
-                            <div
-                                key={index}
-                                className="relative flex items-center flex-1"
-                            >
-                                {/* Circle */}
-                                <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center absolute ${
-                                        step > index
-                                            ? "bg-green"
-                                            : "bg-gray-300"
-                                    } transition-colors duration-300`}
-                                    style={{
-                                        zIndex: 1,
-                                        left: `calc(${
-                                            (100 / totalSteps) * index
-                                        }% - .60rem)`,
-                                    }}
-                                >
-                                    <span className="text-white">
-                                        {index + 1}
-                                    </span>
-                                </div>
+                        {[...Array(totalSteps)].map((_, index) => {
+                            const sectionName = sectionNames[index];
 
-                                {/* Progress Bar */}
-                                {index < totalSteps && (
+                            // Custom logic for WRA step
+                            const isIncomplete =
+                                sectionName === "WRA"
+                                    ? incompleteSections.includes("WRA") || incompleteSections.includes("Projected Population")
+                                    : incompleteSections.includes(sectionName);
+
+                            // Determine the circle's color
+                            const circleColor =
+                                index === step - 1
+                                    ? "bg-yellow-500" // Emphasized for the current step
+                                    : step > index
+                                    ? isIncomplete
+                                        ? "bg-red-500" // Red for incomplete completed steps
+                                        : "bg-green" // Green for complete steps
+                                    : "bg-gray-300"; // Default gray for future steps
+
+                            // Determine the progress bar's color
+                            const progressBarColor =
+                                step > index
+                                    ? isIncomplete
+                                        ? "bg-red-500"
+                                        : "bg-green"
+                                    : "bg-gray-300";
+
+                            return (
+                                <div key={index} className="relative flex items-center flex-1">
+                                    {/* Circle */}
                                     <div
-                                        className={`flex-1 h-1 ${
-                                            step > index
-                                                ? "bg-green"
-                                                : "bg-gray-300"
-                                        } transition-colors duration-300`}
-                                    />
-                                )}
-                            </div>
-                        ))}
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center absolute ${circleColor} transition-colors duration-300`}
+                                        style={{
+                                            zIndex: 1,
+                                            left: `calc(${(100 / totalSteps) * index}% - .60rem)`,
+                                        }}
+                                    >
+                                        <span className="text-white">{index + 1}</span>
+                                        {index === step - 1 ? (
+                                            <FontAwesomeIcon
+                                                icon={faArrowUp}
+                                                className="absolute color-[#d66666] inset-y-8 animate-bounceHigh"
+                                            />
+                                        ) : ( null )}
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    {index < totalSteps && (
+                                        <div
+                                            className={`flex-1 h-1 ${progressBarColor} transition-colors duration-300`}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
