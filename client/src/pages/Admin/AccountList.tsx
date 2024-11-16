@@ -89,13 +89,16 @@ const AccountList: React.FC = () => {
                             {/* Table Header */}
                             <thead className="bg-white rounded-[16px] shadow-lg outline outline-1 outline-black uppercase">
                                 <tr>
-                                    <th className="px-4 py-2 rounded-tl-[16px] rounded-bl-[16px]">
+                                    <th className="px-4 py-2 rounded-l-[16px]">
+                                        Role
+                                    </th>
+                                    <th className="px-4 py-2">
                                         Username
                                     </th>
                                     <th className="px-4 py-2">Email</th>
                                     <th className="px-4 py-2">Barangay</th>
                                     <th className="px-4 py-2">Status</th>
-                                    <th className="px-4 py-2 rounded-tr-[16px] rounded-br-[16px]">
+                                    <th className="px-4 py-2 rounded-r-[16px]">
                                         Action
                                     </th>
                                 </tr>
@@ -105,6 +108,9 @@ const AccountList: React.FC = () => {
                                 {currentUsers.length > 0 ? (
                                     currentUsers.map((user) => (
                                         <tr key={user.user_id}>
+                                            <td className="px-4 py-2 font-semibold uppercase align-center">
+                                                {user.role}
+                                            </td>
                                             <td className="px-4 py-2 font-semibold uppercase align-center">
                                                 {user.username}
                                             </td>
@@ -144,7 +150,7 @@ const AccountList: React.FC = () => {
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={5}
+                                            colSpan={6}
                                             className="px-4 py-2 text-center"
                                         >
                                             <div className="w-full p-12 bg-white rounded-lg shadow-md col-span-full">
@@ -164,8 +170,14 @@ const AccountList: React.FC = () => {
                                 currentUsers.map((user) => (
                                     <div
                                         key={user.user_id}
-                                        className="p-4 mb-4 bg-white rounded-lg shadow-md outline outline-1 outline-black"
+                                        className="p-4 mb-4 text-xs bg-white rounded-lg shadow-md sm:text-base outline outline-1 outline-black"
                                     >
+                                        <div className="flex justify-between mb-2">
+                                            <span className="font-semibold">
+                                                Role:
+                                            </span>
+                                            <span className="uppercase">{user.role}</span>
+                                        </div>
                                         <div className="flex justify-between mb-2">
                                             <span className="font-semibold">
                                                 Username:
@@ -224,22 +236,21 @@ const AccountList: React.FC = () => {
                         </div>
 
                         {/* Pagination Controls */}
-                        <div className="flex items-center justify-between sm:justify-center mt-16">
+                        <div className="flex items-center justify-between mt-16 text-xs sm:justify-center sm:text-base">
                             <button
                                 onClick={prevPage}
-                                disabled={currentPage === 1}
+                                disabled={currentPage <= 1}
                                 className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
                             >
                                 Previous
                             </button>
-                            <span className="px-4 py-2 align-middle text-center">
+                            <span className="px-4 py-2 text-center align-middle text-nowrap sm:text-wrap">
                                 Page {currentPage} of {totalPages}
                             </span>
                             <button
                                 onClick={nextPage}
-                                disabled={currentPage === totalPages}
-                                className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
-                            >
+                                disabled={currentPage >= totalPages}
+                                className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"                            >
                                 Next
                             </button>
                         </div>
