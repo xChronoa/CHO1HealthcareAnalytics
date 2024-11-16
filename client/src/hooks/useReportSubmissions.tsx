@@ -17,6 +17,7 @@ interface UseReportSubmission {
     submissions: ReportSubmission[];
     earliestDate: string;
     latestDate: string;
+    dueDate: string;
     pendingReportCount: number;
     m1Reports: Report[];
     m2Reports: Report[];
@@ -59,6 +60,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
     const [submissions, setSubmissions] = useState<ReportSubmission[]>([]);
     const [earliestDate, setEarliestDate] = useState<string>("");
     const [latestDate, setLatestDate] = useState<string>("");
+    const [dueDate, setDueDate] = useState<string>("");
     const [pendingReportCount, setPendingReportCount] = useState<number>(0);
 
     const [m1Reports, setM1Reports] = useState<Report[]>([]);
@@ -174,6 +176,8 @@ export const useReportSubmissions = (): UseReportSubmission => {
                 if (result.success) {
                     if (Array.isArray(result.data)) {
                         setSubmissions(result.data);
+                        console.log(result);
+                        setDueDate(result.due_at);
                     } else {
                         throw new Error("Unexpected data format.");
                     }
@@ -311,6 +315,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
         submissions,
         earliestDate,
         latestDate,
+        dueDate,
         pendingReportCount,
         m1Reports,
         m2Reports,
