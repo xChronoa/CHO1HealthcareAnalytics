@@ -15,7 +15,7 @@ export const updateWRAData = (
 
         if (existingIndex > -1) {
             updatedWRA = prevData.wra.map((item, i) =>
-                i === existingIndex ? { ...item, [field]: value === "" ? "" : Number(value) } : item
+                i === existingIndex ? { ...item, [field]: value === "" ? undefined : Number(value) } : item
             );
         } else {
             updatedWRA = [
@@ -30,7 +30,7 @@ export const updateWRAData = (
 
         return { ...prevData, wra: updatedWRA };
     });
-};
+};  
 
 export const updateFamilyPlanningData = (
     setFormData: React.Dispatch<React.SetStateAction<FormData>>,
@@ -51,7 +51,7 @@ export const updateFamilyPlanningData = (
 
         if (existingIndex > -1) {
             updatedFamilyPlanning = prevData.familyplanning.map((item, i) =>
-                i === existingIndex ? { ...item, [field]: value === "" ? "" : Number(value) } : item
+                i === existingIndex ? { ...item, [field]: value === "" ? undefined : Number(value) } : item
             );
         } else {
             updatedFamilyPlanning = [
