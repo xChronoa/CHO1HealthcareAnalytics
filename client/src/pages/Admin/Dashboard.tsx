@@ -557,7 +557,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                 </header>
 
                 {/* Overview of Total Patients, Appointments, and Pending Reports */}
-                <div className="flex justify-center gap-5 overview">
+                <div className="flex flex-col justify-center gap-5 text-xs sm:flex-row overview sm:text-base">
                     <div className="flex flex-col items-center justify-center flex-1 px-4 py-2 text-center bg-yellow-500 shadow-lg rounded-2xl shadow-neutral-300 total-patients">
                         <label htmlFor="patient-amount">Total Patients</label>
                         <span className="text-2xl font-bold text-center text-black bg-transparent patient-amount">
