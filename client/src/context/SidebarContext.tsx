@@ -1,33 +1,45 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
-function useSidebar() {
-    // Determines sidebar state
+interface SidebarContextProps {
+    isMinimized: boolean;
+    isCollapsed: boolean;
+    toggleSidebar: () => void;
+    collapseSidebar: () => void;
+}
+
+const SidebarContext = createContext<SidebarContextProps | undefined>(undefined);
+
+export const useSidebarContext = (): SidebarContextProps => {
+    const context = useContext(SidebarContext);
+    if (!context) {
+        throw new Error("useSidebarContext must be used within a SidebarProvider");
+    }
+    return context;
+};
+
+export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isMinimized, setIsMinimized] = useState(window.innerWidth < 1024);
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 1024);
     const [prevMinimizedState, setPrevMinimizedState] = useState(window.innerWidth < 1024);
     const location = useLocation();
 
-    // Minimizes or maximizes sidebar
     const toggleSidebar = useCallback(() => {
         setIsMinimized((prevState) => {
             let newState = !prevState;
             setPrevMinimizedState(newState);
             return newState;
-        })
+        });
     }, []);
 
-    // Show or hide sidebar
     const collapseSidebar = useCallback(() => {
-        setIsCollapsed((prev) => !prev)
+        setIsCollapsed((prev) => !prev);
     }, []);
 
-    // Check for change in screen size then change state
     const handleResize = useCallback(() => {
         if (window.innerWidth < 1024) {
-            setIsMinimized(false)
-
-            if(isCollapsed) {
+            setIsMinimized(false);
+            if (isCollapsed) {
                 setIsCollapsed(true);
             }
         } else {
@@ -36,20 +48,19 @@ function useSidebar() {
         }
     }, [isCollapsed, prevMinimizedState]);
 
-    // Collapse the sidebar whenever the page changes
     useEffect(() => {
         setIsCollapsed(true); // Collapse sidebar on route change
-    }, [location]); // Triggers when the route changes
+    }, [location]);
 
     useEffect(() => {
         window.addEventListener("resize", handleResize);
-
         handleResize();
-
         return () => window.removeEventListener("resize", handleResize);
     }, [handleResize]);
 
-    return { isMinimized, isCollapsed, toggleSidebar, collapseSidebar };
-}
-
-export default useSidebar;
+    return (
+        <SidebarContext.Provider value={{ isMinimized, isCollapsed, toggleSidebar, collapseSidebar }}>
+            {children}
+        </SidebarContext.Provider>
+    );
+};
