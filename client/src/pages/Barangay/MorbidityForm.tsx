@@ -134,20 +134,23 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                     </p>
                 </div>
             `,
-            confirmButtonText: "I Confirm, Proceed",
-            showCancelButton: true, // Show the cancel button for "Don't Show Again"
-            cancelButtonText: "I Confirm, Don't Show Again", // Label for the "Don't Show Again" button
-            allowOutsideClick: false, // Prevent closing when clicking outside the alert
-            allowEscapeKey: false, // Prevent closing with the escape key
+            confirmButtonText: "I confirm, don't show again.",
+            cancelButtonText: "I confirm, proceed",
+            showCancelButton: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
             customClass: {
-                title: "text-xl font-bold text-gray-800", // Tailwind styling for the title
-                htmlContainer: "text-gray-700", // Tailwind styling for the HTML text container
-                popup: "p-4 text-center", // Tailwind styling for the popup container
-                confirmButton: "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
-                cancelButton: "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
+                title: "text-xl font-bold text-gray-800",
+                htmlContainer: "text-gray-700",
+                popup: "p-4 text-center",
+                confirmButton:
+                    "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
+                cancelButton:
+                    "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
+            buttonsStyling: false,
         }).then((result) => {
-            if (result.dismiss === Swal.DismissReason.cancel) {
+            if (result.isConfirmed) {
                 // If the user clicked "Don't Show Again", set flag in sessionStorage
                 sessionStorage.setItem("morbidityFormAlertDismissed", "true");
             }
