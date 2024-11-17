@@ -216,14 +216,14 @@ const Transaction: React.FC = () => {
                                                         return "Not Submitted";
                                                     }
                                                 })()}
-                                                <span className="text-xs italic text-nowrap sm:text-wrap">
+                                                <span className="text-xs italic text-yellow-600 text-nowrap sm:text-wrap">
                                                     {submission.status === "submitted late" && submission.tardy_days > 0 
                                                         ? ` (${submission.tardy_days} day${submission.tardy_days > 1 ? "s" : ""} late)` 
                                                         : ""}
                                                 </span>
                                                 </>
                                             </td>
-                                            <td className={`px-4 py-2 font-semibold uppercase ${submission.status === "pending" ? "text-red-500" : "text-green"} `}>
+                                            <td className={`px-4 py-2 font-semibold uppercase ${submission.status.toLowerCase() === "pending" ? "text-red-500" : submission.status.toLowerCase() === "submitted late" ? "text-yellow-600" : "text-green-500"}`}>
                                                 {submission.status}
                                             </td>
                                         </tr>
