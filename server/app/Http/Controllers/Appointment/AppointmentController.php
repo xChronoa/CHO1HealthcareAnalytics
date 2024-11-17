@@ -136,6 +136,7 @@ class AppointmentController extends Controller
                 'appointment_category_id' => $appointmentCategoryId,
                 'patient_note' => $request->patient_note,
                 'queue_number' => $queueNumber,
+                'status' => "pending",
             ]);
 
             // Send confirmation email
@@ -205,6 +206,7 @@ class AppointmentController extends Controller
             'appointment_category_id' => 'sometimes|required|exists:appointment_categories,appointment_category_id',
             'patient_note' => 'nullable|string',
             'queue_number' => 'nullable|integer',
+            'status' => 'sometimes|required|in:pending,complete,no-show',
         ]);
 
         $appointment = Appointment::findOrFail($id);
@@ -268,7 +270,7 @@ class AppointmentController extends Controller
     }
 
     /**
-     * List patients with their appointment details for a specific category name and date.
+     * List patients with their appointment details for a specific category name, date, and status.
      *
      * @param string $categoryName
      * @param Request $request
@@ -276,17 +278,26 @@ class AppointmentController extends Controller
      */
     public function patientsForCategory(string $categoryName, Request $request)
     {
+        // Get query parameters
         $date = $request->query('date');
+        $status = strtolower($request->query('status'));
 
-        // If the category is "All" or "all", fetch appointments for all categories on the given date
+        // If the category is "All" or "all", fetch appointments for all categories filtered by date and status
         if (strtolower($categoryName) === 'all') {
-            // Fetch appointments across all categories filtered by date
+            // Fetch appointments across all categories, filtered by date and status
             $appointmentsQuery = Appointment::with('patient', 'category');
 
+            // Filter by date if provided
             if ($date) {
                 $appointmentsQuery->whereDate('appointment_date', $date);
             }
 
+            // If status is not 'all', filter by status
+            if ($status && $status !== 'all') {
+                $appointmentsQuery->where('status', $status);  // Filter by status if provided
+            }
+
+            // Fetch all appointments with the applied filters
             $appointments = $appointmentsQuery->get();
         } else {
             // Fetch the category ID for the given category name
@@ -298,7 +309,7 @@ class AppointmentController extends Controller
 
             $categoryId = $category->appointment_category_id;
 
-            // Fetch appointments for the given category ID and date
+            // Fetch appointments for the given category ID, date, and status
             $appointmentsQuery = Appointment::where('appointment_category_id', $categoryId)
                 ->with('patient', 'category');  // Eager load relationships
 
@@ -307,12 +318,18 @@ class AppointmentController extends Controller
                 $appointmentsQuery->whereDate('appointment_date', $date);
             }
 
+            // If status is not 'all', filter by status
+            if ($status && $status !== 'all') {
+                $appointmentsQuery->where('status', $status);
+            }
+
             $appointments = $appointmentsQuery->orderBy("queue_number")->get();
         }
 
         // Format the data to include patient details and appointment details
         $data = $appointments->map(function ($appointment) {
             return [
+                'id' => $appointment->appointment_id,
                 'patient' => [
                     'patient_id' => $appointment->patient->patient_id,
                     'first_name' => $appointment->patient->first_name,
@@ -330,6 +347,7 @@ class AppointmentController extends Controller
                 ],
                 'patient_note' => $appointment->patient_note,
                 'queue_number' => $appointment->queue_number,
+                'status' => $appointment->status,
             ];
         });
 
