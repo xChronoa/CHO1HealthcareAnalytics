@@ -24,7 +24,8 @@ const Header: React.FC<HeaderProp> = ({ logoPath }) => {
         "/appointment",
         "/appointment/confirmation",
         "/barangay/login",
-        "/admin/login"
+        "/admin/login",
+        "/forgot-password",
     ];
 
     // Explicitly allow sidebar on /admin and /barangay
@@ -33,9 +34,11 @@ const Header: React.FC<HeaderProp> = ({ logoPath }) => {
         "/barangay"
     ];
 
-    // Check if the current route is in routesWithoutSidebar, but also allow sidebar on /admin and /barangay
-    const isWithoutSidebar = routesWithoutSidebar.some(route => location.pathname.startsWith(route));
-    const isWithSidebar = routesWithSidebar.some(route => location.pathname.startsWith(route));
+    // Check if the current route is in routesWithoutSidebar
+    const isWithoutSidebar = routesWithoutSidebar.includes(location.pathname);
+
+    // Check if the current route is in routesWithSidebar, but avoid login routes
+    const isWithSidebar = routesWithSidebar.some(route => location.pathname.startsWith(route)) && !location.pathname.includes("/login");
 
     return (
         <header
