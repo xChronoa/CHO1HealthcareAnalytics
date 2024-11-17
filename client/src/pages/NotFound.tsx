@@ -17,7 +17,16 @@ const NotFound: React.FC = () => {
                     </p>
                     <a
                         onClick={() => {
-                            navigate(-1);
+                            const from = sessionStorage.getItem("from");
+
+                            if (from) {
+                                // If 'from' exists in sessionStorage, navigate to the stored path
+                                sessionStorage.removeItem("from");
+                                navigate(from);
+                            } else {
+                                // Otherwise, go back to the previous page in the history stack
+                                navigate(-1);
+                            }
                         }}
                         className="relative z-50 px-6 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out bg-gray-200 border-2 border-gray-300 rounded-full shadow-lg cursor-pointer shadow-gray-400 hover:bg-gray-300"
                     >
