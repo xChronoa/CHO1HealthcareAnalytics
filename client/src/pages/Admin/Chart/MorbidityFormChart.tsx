@@ -373,7 +373,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                         <select 
                                             value={selectedOptionMale} 
                                             onChange={(e) => setSelectedOptionMale(e.target.value)} 
-                                            className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                            className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
                                             {aggregateDataByDisease("male").map((dataset, index) => (
@@ -433,7 +433,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                         <select 
                                             value={selectedOptionFemale} 
                                             onChange={(e) => setSelectedOptionFemale(e.target.value)} 
-                                            className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                            className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
                                             {aggregateDataByDisease("female").map((dataset, index) => (

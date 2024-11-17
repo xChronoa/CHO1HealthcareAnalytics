@@ -349,7 +349,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     ...prevOptions,
                                     "Teenage Pregnancy": e.target.value,
                                 }))} 
-                                className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                             >
                                 <option value="All">All</option>
                                 {fullDatasets.map(({ label }, index) => (
@@ -461,7 +461,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                                 ...selectedOptions,
                                                 [ageCategory]: e.target.value,
                                             })} 
-                                            className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                            className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
@@ -546,7 +546,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                                 ...selectedOptions,
                                                 [valueType]: e.target.value,
                                             })} 
-                                            className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                            className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
                                             {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (
@@ -634,7 +634,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         ...selectedOptions,
                                         [ageCategory]: e.target.value,
                                     })} 
-                                    className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                    className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
                                     <option value="All">All</option>
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
@@ -718,7 +718,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         ...selectedOptions,
                                         [valueType]: e.target.value,
                                     })} 
-                                    className="flex-1 px-2 py-2 text-[9.5px] lg:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                    className="flex-1 px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
                                     <option value="All">All</option>
                                     {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (

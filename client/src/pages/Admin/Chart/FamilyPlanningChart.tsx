@@ -352,7 +352,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                                     ...selectedOptions,
                                                     [ageCategory]: e.target.value,
                                                 })} 
-                                                className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d]"
+                                                className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                             >
                                                 <option value="All">All</option>
                                                 {getLabels(filteredData).map(({ label }, index) => (

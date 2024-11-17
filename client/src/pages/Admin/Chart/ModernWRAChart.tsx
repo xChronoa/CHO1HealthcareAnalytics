@@ -198,7 +198,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                     <select 
                                         value={selectedOption} 
                                         onChange={(e) => setSelectedOption(e.target.value)} 
-                                        className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-white rounded-lg w-full sm:w-fit bg-green shadow-md shadow-[#a3a19d] "
+                                        className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                                     >
                                         <option value="All">All</option>
                                         {ageCategories.map((category, index) => (
