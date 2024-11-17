@@ -11,6 +11,7 @@ import { useAgeCategory } from "../../hooks/useAgeCategory";
 import { IncompleteUpdate } from "../../types/IncompleteForm";
 import { InputValues } from "../../types/M2FormData";
 import Swal from "sweetalert2";
+import "../../styles/form.css";
 
 interface M2ReportProps {
     setReportDatas: (type: 'm1' | 'm2', data: any) => void;
@@ -51,16 +52,22 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
         gender: "M" | "F",
         value: number | string
     ) => {
-        setFormData(prevValues => ({
-            ...prevValues,
-            [disease]: {
-                ...prevValues[disease],
-                [ageCategory]: {
-                    ...prevValues[disease]?.[ageCategory],
-                    [gender]: value === "" ? "" : Number(value),
+        // Check if the value is empty to clear the field
+        const newValue = value === "" ? undefined : Number(value);
+
+        // Only proceed if the new value is valid (non-negative and an integer)
+        if (newValue === undefined || (newValue >= 0 && Number.isInteger(newValue))) {
+            setFormData(prevValues => ({
+                ...prevValues,
+                [disease]: {
+                    ...prevValues[disease],
+                    [ageCategory]: {
+                        ...prevValues[disease]?.[ageCategory],
+                        [gender]: newValue,
+                    },
                 },
-            },
-        }));
+            }));
+        }
     };
 
     // Check if all required fields for a disease are complete
@@ -78,7 +85,8 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                     return value.trim() !== "";
                 }
                 if (typeof value === "number") {
-                    return !isNaN(value);
+                    // Ensure the value is a non-negative integer
+                    return value >= 0 && Number.isInteger(value);
                 }
                 return false;
             };
@@ -86,7 +94,6 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
             return isValid(maleValue) && isValid(femaleValue);
         });
     };
-
 
     // Fetch initial data on component mount
     useEffect(() => {
@@ -158,7 +165,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center w-11/12 pt-16">
+        <section className="flex flex-col items-center justify-center w-11/12 pt-16">
             <header className="w-full mb-4">
                 <h1 className="mb-2 text-2xl font-bold">M2 Report <span className="italic font-light">(Morbidity Diseases)</span></h1>
                 <div className="dividing-line w-full h-[2px] bg-black"></div>
@@ -305,6 +312,6 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                     </div>
                 ))}
             </div>
-        </div>
+        </section>
     );
 };

@@ -113,7 +113,8 @@ export const M1Report: React.FC<M1ReportProps> = ({
         return wra.every((entry) => {
             return (
                 entry.unmet_need_modern_fp !== undefined &&
-                entry.unmet_need_modern_fp >= 0 // Non-negative number
+                entry.unmet_need_modern_fp >= 0 &&
+                Number.isInteger(Number(entry.unmet_need_modern_fp))// Non-negative number
             );
         });
     };
@@ -124,12 +125,23 @@ export const M1Report: React.FC<M1ReportProps> = ({
     ): boolean => {
         return familyplanning.every((entry) => {
             return (
-                    (entry.current_users_beginning_month !== undefined && entry.current_users_beginning_month >= 0) &&
-                    (entry.new_acceptors_prev_month !== undefined && entry.new_acceptors_prev_month >= 0) &&
-                    (entry.other_acceptors_present_month !== undefined && entry.other_acceptors_present_month >= 0) &&
-                    (entry.drop_outs_present_month !== undefined && entry.drop_outs_present_month >= 0) &&
-                    (entry.current_users_end_month !== undefined && entry.current_users_end_month >= 0) &&
-                    (entry.new_acceptors_present_month !== undefined && entry.new_acceptors_present_month >= 0)
+                Number(entry.current_users_beginning_month) >= 0 &&
+                Number.isInteger(Number(entry.current_users_beginning_month)) &&
+
+                Number(entry.new_acceptors_prev_month) >= 0 &&
+                Number.isInteger(Number(entry.new_acceptors_prev_month)) &&
+
+                Number(entry.other_acceptors_present_month) >= 0 &&
+                Number.isInteger(Number(entry.other_acceptors_present_month)) &&
+
+                Number(entry.drop_outs_present_month) >= 0 &&
+                Number.isInteger(Number(entry.drop_outs_present_month)) &&
+
+                Number(entry.current_users_end_month) >= 0 &&
+                Number.isInteger(Number(entry.current_users_end_month)) &&
+
+                Number(entry.new_acceptors_present_month) >= 0 &&
+                Number.isInteger(Number(entry.new_acceptors_present_month))
             );
         });
     };
@@ -137,7 +149,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
     // Validate Service Data section including Teenage Pregnancy
     const isServiceDataComplete = (servicedata: ServiceData[]): boolean => {
         return servicedata.every((entry) => {
-            return entry.value !== undefined && entry.value >= 0; // Non-negative number
+            return entry.value !== undefined && entry.value >= 0 && Number.isInteger(Number(entry.value)); // Non-negative number
         });
     };
 
@@ -145,13 +157,13 @@ export const M1Report: React.FC<M1ReportProps> = ({
     const checkIncompleteSections = (formData: FormData) => {
         const incompleteSections: string[] = [];
 
-        if (formData.projectedPopulation === null || formData.projectedPopulation === undefined) {
+        if (formData.projectedPopulation === null || formData.projectedPopulation === undefined || formData.projectedPopulation < 0) {
             incompleteSections.push("Projected Population");
         }
 
         // Check WRA section
         if (formData.wra.length !== 3 || !isWRAComplete(formData.wra)) {
-            incompleteSections.push("WRA");
+            incompleteSections.push("Modern FP Unmet Need");
         }
 
         // Check Family Planning section
@@ -317,7 +329,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
     }, []);
 
     const sectionNames = [
-        "WRA",
+        "Modern FP Unmet Need",
         "Family Planning",
         ...Object.values(services).map((s) => s.service_name), // Service names
     ];
@@ -338,8 +350,8 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
                             // Custom logic for WRA step
                             const isIncomplete =
-                                sectionName === "WRA"
-                                    ? incompleteSections.includes("WRA") || incompleteSections.includes("Projected Population")
+                                sectionName === "Modern FP Unmet Need"
+                                    ? incompleteSections.includes("Modern FP Unmet Need") || incompleteSections.includes("Projected Population")
                                     : incompleteSections.includes(sectionName);
 
                             // Determine the circle's color
@@ -393,7 +405,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
                 {/* Navigation Buttons */}
                 <div
-                    className={`w-full navigation-buttons flex ${
+                    className={`relative w-full navigation-buttons flex ${
                         step !== 1 ? "justify-between" : "justify-end"
                     } mt-6 sticky`}
                 >
@@ -423,7 +435,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
                                 localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
                             }
                         }}
-                        className="w-16 px-2 py-1 mx-2 text-center border border-gray-300 rounded"
+                        className="absolute left-1/2 transform -translate-x-1/2 w-16 p-2 mx-2 text-center border rounded-md shadow-md shadow-[#a3a19d] placeholder-gray-300 border-gray-600 outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"
                         placeholder="Step"
                     />
                     
@@ -453,10 +465,10 @@ export const M1Report: React.FC<M1ReportProps> = ({
                                     onChange={(e) =>
                                         setFormData((prev) => ({
                                             ...prev,
-                                            projectedPopulation: e.target.value === "" ? undefined : Number(e.target.value),
+                                            projectedPopulation: e.target.value === "" ? undefined : Math.floor(Number(e.target.value)),
                                         }))
                                     }
-                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d] "
                                     pattern="\d+"
                                     required
                                 />
@@ -851,7 +863,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
                                 localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
                             }
                         }}
-                        className="w-16 px-2 py-1 mx-2 text-center border border-gray-300 rounded"
+                        className="absolute left-1/2 transform -translate-x-1/2 w-16 p-2 mx-2 text-center border rounded-md shadow-md shadow-[#a3a19d] placeholder-gray-300 border-gray-600 outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"
                         placeholder="Step"
                     />
                     
