@@ -498,7 +498,7 @@ const Report: React.FC = () => {
         <>  
             <div className="container flex flex-col items-center justify-center py-8">
                 {!maxDate ? (
-                    <div className="flex flex-col w-11/12 min-h-screen py-16">
+                    <div className="flex flex-col w-11/12 min-h-screen">
                         <header className="mb-4">
                             <h1 className="mb-2 text-2xl font-bold">Report Submission</h1>
                             <div className="w-full h-[2px] bg-black"></div>
@@ -517,12 +517,15 @@ const Report: React.FC = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="flex flex-col items-center justify-between w-11/12 gap-5 transition-all sm:flex-row toggle-sections">
-                            <div className="order-3 tab-container sm:-order-none ">
+                        <div className="flex flex-row flex-wrap items-center justify-between w-11/12 gap-5 transition-all toggle-sections">
+                            <h1 className="block w-full mb-6 text-2xl font-bold text-center">
+                                Report Submission
+                            </h1>
+                            <div className="flex flex-row order-2 w-full sm:w-fit sm:order-none tab-container flex-nowrap">
                                 <button
                                     type="button"
                                     onClick={() => handleToggle("m1")}
-                                    className={`${getButtonClass(
+                                    className={`flex-1 ${getButtonClass(
                                         "m1"
                                     )} rounded-l-lg`}
                                 >
@@ -531,18 +534,15 @@ const Report: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => handleToggle("m2")}
-                                    className={`${getButtonClass(
+                                    className={`flex-1 ${getButtonClass(
                                         "m2"
                                     )} rounded-r-lg`}
                                 >
                                     M2 Data
                                 </button>
                             </div>
-                            <h1 className="order-1 text-2xl font-bold sm:-order-none">
-                                Report Submission
-                            </h1>
-                            <div className="flex flex-col order-2 sm:-order-none justify-self-end">
-                                <label htmlFor="report-date" className="text-center text-gray-500">Report Date</label>
+                            <div className="relative flex flex-col order-1 w-full sm:w-fit sm:order-none sm:flex-none">
+                                <label htmlFor="report-date" className="absolute text-left text-gray-500 -inset-y-6">Report Date</label>
                                 <input
                                     name="report-date"
                                     type="month"
@@ -554,7 +554,7 @@ const Report: React.FC = () => {
                                 />
                             </div>
                         </div>
-                        <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full px-4 py-6">
+                        <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full px-4">
                             {section === "m1" && <M1Report setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} />}
                             {section === "m2" && <MorbidityForm setReportDatas={setReportDatas} onCheckIncomplete={handleCheckIncomplete} diseases={diseases}/>}
                             
