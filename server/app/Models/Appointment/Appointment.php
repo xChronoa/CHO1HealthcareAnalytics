@@ -9,6 +9,10 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETE = 'complete';
+    const STATUS_NO_SHOW = 'no-show';
+
     protected $primaryKey = 'appointment_id';
 
     protected $fillable = [
@@ -16,7 +20,8 @@ class Appointment extends Model
         'appointment_date', 
         'appointment_category_id', 
         'patient_note', 
-        'queue_number'
+        'queue_number',
+        'status'
     ];
 
     /**

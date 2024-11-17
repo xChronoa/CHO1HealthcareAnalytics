@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('appointment_category_id')->constrained('appointment_categories', 'appointment_category_id');
             $table->text('patient_note')->nullable();
             $table->integer('queue_number')->nullable();
+            $table->enum('status', ['pending', 'complete', 'no-show'])->default('pending');
             $table->timestamps();
         });
     }
