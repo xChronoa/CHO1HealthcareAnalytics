@@ -120,17 +120,37 @@ const Appointment: React.FC = () => {
             }
         });
     
-        // Ensure the appointment_date is in the correct format for comparison
+        // Validate appointment_date
         const appointmentDate = new Date(formData.appointment_date);
-        
-        // If appointment_date is not a valid date object
         if (isNaN(appointmentDate.getTime())) {
             errors["appointment_date"] = "Invalid appointment date.";
         } else if (appointmentDate <= minDate) {
             errors["appointment_date"] = "Appointment date must be later than today's date.";
         }
     
+        // Validate birthdate
+        const birthdate = new Date(formData.birthdate);
+        if (isNaN(birthdate.getTime())) {
+            errors["birthdate"] = "Invalid birthdate.";
+        } else {
+            const age = calculateAge(birthdate);
+            if (age < 18) {
+                errors["birthdate"] = "You must be at least 18 years old.";
+            }
+        }
+    
         return errors;
+    };
+    
+    // Helper function to calculate age based on birthdate
+    const calculateAge = (birthdate: Date): number => {
+        const today = new Date();
+        let age = today.getFullYear() - birthdate.getFullYear();
+        const monthDifference = today.getMonth() - birthdate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+            age--;
+        }
+        return age;
     };
 
     const scrollToError = (fieldId: string) => {
@@ -183,6 +203,7 @@ const Appointment: React.FC = () => {
             if (!confirmationResult) {
                 setErrors((prev) => ({ ...prev, otp: "You must request an OTP before verifying." }));
                 scrollToError('otp');
+                decrementLoading();
                 return false;
             }
 
@@ -228,7 +249,7 @@ const Appointment: React.FC = () => {
         const result = await Swal.fire({
             title: "Confirm Appointment Details",
             html: `
-            <p>Are you sure you want to book this appointment?</p>
+            <p class="mb-4">Are you sure you want to book this appointment?</p>
                 <div class="border-2 border-black rounded-lg text-xs text-left p-4">
                     <h3 class="text-lg font-bold mb-2">
                         ${first_name} ${last_name}
@@ -254,7 +275,7 @@ const Appointment: React.FC = () => {
                         <span class="font-semibold">Appointment Date:</span>
                         <span>${appointment_date}</span>
 
-                        <span class="font-semibold">Category:</span>
+                        <span class="font-semibold">Appointment Type:</span>
                         <span>${appointment_category_name}</span>
                     </div>
                 </div>
@@ -582,6 +603,7 @@ const Appointment: React.FC = () => {
                             id="birthdate"
                             value={formData.birthdate}
                             onChange={handleChange}
+                            max={new Date().toISOString().split("T")[0]}
                             required
                         />
                         {errors.birthdate && (
