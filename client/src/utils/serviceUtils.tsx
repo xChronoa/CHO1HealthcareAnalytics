@@ -50,7 +50,7 @@ export const handleInputChange = (
             ? value // Keep the value as-is for remarks
             : value === ""
             ? undefined // Handle empty string case
-            : Number(value); // Convert to number if not empty
+            : Math.floor(Number(value)); // Convert to number if not empty
 
     // If the fieldKey is "remarks", repeat for each valueType
     if (fieldKey === "remarks") {
