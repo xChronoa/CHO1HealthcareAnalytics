@@ -24,7 +24,7 @@ const PendingReportNotice: React.FC<PendingReportNoticeProps> = ({
                 <div className="relative bg-white rounded-lg shadow">
                     {/* Modal header */}
                     <div className="flex items-center justify-between p-4 border-b rounded-t md:p-5 bg-[#FFCB3C]">
-                        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                             <FontAwesomeIcon
                                 icon={faCircleInfo}
                                 className="color-[#ffffff]"
@@ -55,7 +55,7 @@ const PendingReportNotice: React.FC<PendingReportNoticeProps> = ({
                         </button>
                     </div>
                     {/* Modal body */}
-                    <div className="p-4 md:p-5 flex flex-col gap-4 items-center">
+                    <div className="flex flex-col items-center gap-4 p-4 md:p-5">
                         <p className="text-justify">
                             This is a reminder that the barangay reports have
                             not yet been submitted. It is crucial that these
