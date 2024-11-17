@@ -73,7 +73,7 @@ function App() {
                             <Route element={<PrivateRoute allowedRoles={['admin']} />}>
                                 <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }} />}>
                                     <Route index element={<Dashboard />} />
-                                    <Route path="transactions" element={<Transaction />} />
+                                    <Route path="reports" element={<Transaction />} />
                                     <Route path="barangays" element={<BarangayList />} />
                                     <Route path="appointments" element={<AppointmentList />} />
                                     <Route path="manage" element={<ManageAccountLayout />}>
@@ -82,7 +82,7 @@ function App() {
                                         <Route path="update" element={<UpdateAccount />} />
                                         <Route path="accounts" element={<AccountList />} />
                                     </Route>
-                                    <Route path="report/submitted/:barangayName" element={<SubmittedReports />} />
+                                    <Route path="barangays/:barangayName/submitted" element={<SubmittedReports />} />
                                 </Route>
                             </Route>
 
@@ -90,9 +90,8 @@ function App() {
                             <Route element={<PrivateRoute allowedRoles={['encoder']} />}>
                                 <Route path="barangay" element={<MainLayout sidebarConfig={{ type: 'barangay' }} />}>
                                     <Route index element={<History />} />
-                                    <Route path="history" element={<History />} />
                                     <Route path="report" element={<Report />} />
-                                    <Route path="report/submitted" element={<SubmittedReports />} />
+                                    <Route path="submitted" element={<SubmittedReports />} />
                                     <Route path="edit/account" element={<UpdateAccount />} />
                                 </Route>
                             </Route>
