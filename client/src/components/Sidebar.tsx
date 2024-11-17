@@ -80,13 +80,13 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     icon={faHistory}
                                     labelText="Submittal History"
                                     isMinimized={isMinimized}
-                                    destination="history"
+                                    destination=""
                                 />
                                 <SidebarButton
                                     icon={faArchive}
                                     labelText="Submitted Reports"
                                     isMinimized={isMinimized}
-                                    destination="report/submitted"
+                                    destination="submitted"
                                 />
                                 <SidebarButton
                                     icon={faUserPen}
@@ -108,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     icon={faFileContract}
                                     labelText="Reports"
                                     isMinimized={isMinimized}
-                                    destination="transactions"
+                                    destination="reports"
                                 />
                                 <SidebarButton
                                     icon={faTent}
