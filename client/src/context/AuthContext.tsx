@@ -42,22 +42,20 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const privateRoutes = [
         "/admin/login",
         "/admin",
-        "/admin/transactions",
         "/admin/barangays",
         "/admin/appointments",
         "/admin/manage",
         "/admin/manage/create",
         "/admin/manage/update",
         "/admin/manage/accounts",
-        "/admin/report",
-        "/admin/report/submitted/",
+        "/admin/reports",
+        "/admin/barangays/:barangayName/submitted/",
 
-
-        "/barangay/login",
         "/barangay",
+        "/barangay/login",
         "/barangay/history",
         "/barangay/report",
-        "/barangay/report/submitted",
+        "/barangay/submitted",
         "/barangay/edit/account"
     ];
 
@@ -68,57 +66,80 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             const currentPath = window.location.pathname;
-            const isPrivateRoute = privateRoutes.some(route => currentPath.startsWith(route));
-
-            if(!isPrivateRoute) {
-                setLoading(false);
+    
+            // List of Guest Routes that should NOT trigger checkAuth
+            const guestRoutes = [
+                "/privacy",
+                "/terms",
+                "/appointment",
+                "/appointment/confirmation",
+                "/forgot-password"
+            ];
+    
+            // If the current route is in the guestRoutes, don't check auth
+            if (guestRoutes.some(route => currentPath.startsWith(route))) {
+                setLoading(false); // Don't do auth check for guest routes
                 return;
             }
-
-            try {
-                const response = await fetch(`${baseAPIUrl}/auth/check`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json", Accept: "application/json" },
-                    credentials: "include",
-                });
     
-                if (response.ok) {
-                    const data = await response.json();
+            // Function to check if the current path matches any private route, including dynamic ones
+            const matchPrivateRoute = (route: string) => {
+                // Convert dynamic routes like /admin/barangays/:barangayName to a regex pattern
+                const routePattern = route.replace(/:[a-zA-Z0-9]+/g, '[^/]+');
+                const regex = new RegExp(`^${routePattern}(/|$)`);
+                return regex.test(currentPath);
+            };
     
-                    // Successfully fetched user data, update the state
-                    setUser({
-                        role: data.role,
-                        barangay_name: data.barangay_name,
-                        username: data.username,
-                        email: data.email,
-                        user_id: data.user_id,
+            // Check if the current path matches any protected (private) route
+            const isPrivateRoute = privateRoutes.some(matchPrivateRoute);
+    
+            // If it's a valid private route, check authentication
+            if (isPrivateRoute) {
+                try {
+                    const response = await fetch(`${baseAPIUrl}/auth/check`, {
+                        method: "GET",
+                        headers: { "Content-Type": "application/json", Accept: "application/json" },
+                        credentials: "include",
                     });
-                } else {
-                    // If the response is not ok, handle the server-side failure
-                    const { message, status } = await response.json();
-                    // Display a generic message if status is "not_logged"
-                    if (status !== "not_logged") {
-                        setError(message || "An unexpected error occurred. Please try again later.");
-                    }
-                }
-            } catch (error) {
-                // Handle errors that occur during the network request
-                if (error instanceof TypeError) {
-                    // Network error (e.g., no internet connection)
-                    setError("Network error: Unable to connect. Please check your internet connection.");
-                } else {
-                    // General unexpected error (e.g., fetch failure, API issues)
-                    setError("An error occurred while checking authentication. Please try again later.");
-                }
     
-            } finally {
-                decrementLoading(); // Hide loading indicator after request
-                setLoading(false); // Stop loading state
+                    if (response.ok) {
+                        const data = await response.json();
+    
+                        // Successfully fetched user data, update the state
+                        setUser({
+                            role: data.role,
+                            barangay_name: data.barangay_name,
+                            username: data.username,
+                            email: data.email,
+                            user_id: data.user_id,
+                        });
+                    } else {
+                        // If the response is not ok, handle the server-side failure
+                        const { message, status } = await response.json();
+                        if (status !== "not_logged") {
+                            setError(message || "An unexpected error occurred. Please try again later.");
+                        }
+                    }
+                } catch (error) {
+                    // Handle errors that occur during the network request
+                    if (error instanceof TypeError) {
+                        setError("Network error: Unable to connect. Please check your internet connection.");
+                    } else {
+                        setError("An error occurred while checking authentication. Please try again later.");
+                    }
+                } finally {
+                    decrementLoading(); // Hide loading indicator after request
+                    setLoading(false); // Stop loading state
+                }
+            } else {
+                setLoading(false); // If it's not a valid private route, just set loading to false
             }
         };
-
+    
+        // Run the checkAuth function on initial mount
         checkAuth();
-    }, []);
+    }, []); // Empty dependency array ensures this runs only once when the component mounts
+    
 
     /**
      * Handles making fetch requests and common error handling.
