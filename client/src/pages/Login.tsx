@@ -4,7 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "../context/AuthContext";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 
 // For specifying the logo to be displayed based on inputted department.
@@ -16,8 +16,24 @@ const Login: React.FC<LoginProp> = ({ image }) => {
     const { user, login, error } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { isLoading } = useLoading();
+    const { incrementLoading, isLoading } = useLoading();
     const location = useLocation();
+
+    const navigate = useNavigate();
+
+    // Function to handle the forgot password navigation
+    const goToForgotPassword = () => {
+        // Determine the login path based on the current location path
+        const loginPath = location.pathname.includes("admin") ? "/admin/login" : "/barangay/login";
+
+        // Store the determined login path in sessionStorage
+        sessionStorage.setItem("from", loginPath);
+
+        incrementLoading();
+
+        // Navigate to forgot-password page
+        navigate("/forgot-password");
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -119,13 +135,17 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                 )}
                             </div>
                         </div>
-
-                        <button
-                            type="submit"
-                            className="w-full py-2 mt-5 font-bold text-white uppercase rounded-lg shadow-lg bg-green"
-                        >
-                            {isLoading ? "Logging in..." : "Login"}
-                        </button>
+                        <section className="flex flex-col gap-2 buttons">
+                            <button
+                                type="submit"
+                                className="border border-black w-full py-2 mt-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg bg-green hover:opacity-75 active:scale-[98%]"
+                            >
+                                {isLoading ? "Logging in..." : "Login"}
+                            </button>
+                            <button type="button" onClick={goToForgotPassword} className="text-left text-gray-500 transition w-fit hover:underline">
+                                Forgot your password?
+                            </button>
+                        </section>
                     </div>
                 </form>
             </div>
