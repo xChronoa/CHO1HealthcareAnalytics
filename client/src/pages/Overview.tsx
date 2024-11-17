@@ -35,7 +35,7 @@ const Overview: React.FC = () => {
                         never been easier to stay on top of your well-being!
                     </p>
                     <Link
-                        to={"/appointment/"}
+                        to={"/appointment"}
                         className="lg:mt-8 lg:text-xl transition-all text-[.7rem] sm:text-sm text-white inline-flex items-center bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-fit shadow-md shadow-gray-500"
                     >
                         Make an Appointment
