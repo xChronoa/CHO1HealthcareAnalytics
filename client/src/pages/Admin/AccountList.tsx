@@ -130,7 +130,7 @@ const AccountList: React.FC = () => {
                                                             onClick={() =>
                                                                 handleUpdateClick(user)
                                                             }
-                                                            className="flex-1 p-2 text-white bg-blue-400 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                            className="flex-1 p-2 text-white transition-all bg-blue-500 border-black rounded-lg shadow-md border-1 shadow-gray-400 hover:bg-blue-300 active:scale-95"
                                                         >
                                                             Update
                                                         </button>
@@ -138,7 +138,8 @@ const AccountList: React.FC = () => {
                                                             onClick={() =>
                                                                 handleDisable(user)
                                                             }
-                                                            className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                            className="flex-1 p-2 text-white transition-all bg-red-500 border-black rounded-lg shadow-md border-1 shadow-gray-400 disabled:opacity-50 disabled:scale-100 active:scale-95 hover:bg-red-300 disabled:hover:bg-red-500 disabled:cursor-not-allowed"
+                                                            disabled={user?.status?.toLowerCase() === "disabled" || !user}
                                                         >
                                                             Disable
                                                         </button>
@@ -218,6 +219,7 @@ const AccountList: React.FC = () => {
                                                             handleDisable(user)
                                                         }
                                                         className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                        disabled={user?.status?.toLowerCase() === "disabled" || !user}
                                                     >
                                                         Disable
                                                     </button>
@@ -237,22 +239,31 @@ const AccountList: React.FC = () => {
 
                         {/* Pagination Controls */}
                         <div className="flex items-center justify-between mt-16 text-xs sm:justify-center sm:text-base">
-                            <button
-                                onClick={prevPage}
-                                disabled={currentPage <= 1}
-                                className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
-                            >
-                                Previous
-                            </button>
-                            <span className="px-4 py-2 text-center align-middle text-nowrap sm:text-wrap">
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <button
-                                onClick={nextPage}
-                                disabled={currentPage >= totalPages}
-                                className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white  bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"                            >
-                                Next
-                            </button>
+                            {currentPage > 1 && (
+                                <button
+                                    onClick={prevPage}
+                                    disabled={currentPage <= 1}
+                                    className="shadow-gray-400 shadow-md w-24 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                                >
+                                    Previous
+                                </button>
+                            )}
+
+                            {totalPages > 1 && (
+                                <span className="px-4 py-2 text-center align-middle">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                            )}
+
+                            {currentPage < totalPages && (
+                                <button
+                                    onClick={nextPage}
+                                    disabled={currentPage >= totalPages}
+                                    className="w-24 disabled:opacity-50 shadow-gray-400 shadow-md disabled:cursor-not-allowed disabled:hover:bg-green transition-all text-[.7rem] sm:text-sm text-white bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                                >
+                                    Next
+                                </button>
+                            )}
                         </div>
                     </div>
                 </section>
