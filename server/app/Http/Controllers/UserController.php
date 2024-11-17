@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\User;
 use App\Models\Barangay;
@@ -150,10 +151,10 @@ class UserController extends Controller
                 $data['status'] = 'active';
             }
 
-             // Update the user in a transaction
+            // Update the user in a transaction
             $user = User::findOrFail($id);
             $user->update($data);
-            
+
             // Invalidate tokens if status is changed to disabled
             if (isset($data['status']) && $data['status'] === 'disabled') {
                 $user->tokens()->delete();
@@ -167,7 +168,6 @@ class UserController extends Controller
         }
     }
 
-    // Remove the specified resource from storage.
     public function disable($id)
     {
         try {
@@ -176,11 +176,13 @@ class UserController extends Controller
 
             // Check if the user is already disabled
             if ($user->status === 'disabled') {
-                return response()->json(['message' => 'User is already disabled.'], 200);
+                return response()->json([
+                    'message' => 'User is already disabled.'
+                ], 200); // Return a 200 OK response
             }
 
             // Update the user's status to 'disabled'
-            $user->status = ucfirst('disabled');
+            $user->status = 'disabled';  // 'ucfirst' is not needed because 'disabled' is already in lowercase.
 
             // Invalidate all tokens for the user
             $user->tokens()->delete();
@@ -188,15 +190,30 @@ class UserController extends Controller
             // Save the user status update
             $user->save();
 
-            return response()->json(['message' => 'User status updated to disabled successfully']);
+            return response()->json([
+                'message' => 'User status updated to disabled successfully.'
+            ], 200); // Success response with status code 200
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // If the user is not found, return a 404 error response
-            return response()->json(['error' => 'User not found'], 404);
+            // Log the exception and return a 404 error response
+            Log::error("User not found. ID: $id", ['error' => $e->getMessage()]);
+            return response()->json([
+                'error' => 'User not found'
+            ], 404);
         } catch (\Exception $e) {
-            // Handle any other exceptions and return a 500 error response
-            return response()->json(['error' => 'Something went wrong!'], 500);
+            // Log the exception details for debugging
+            Log::error('Error disabling user', [
+                'user_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return a 500 error response
+            return response()->json([
+                'error' => 'Something went wrong. Please try again later.'
+            ], 500);
         }
     }
+
 
     /**
      * Log in the user and issue a token.
@@ -305,7 +322,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User successfully logged out.'], 200)->cookie($cookie);
     }
-    
+
     // Get the authenticated user's details
     public function user(Request $request)
     {
