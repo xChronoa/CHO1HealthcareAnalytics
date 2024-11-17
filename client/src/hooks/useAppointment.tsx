@@ -19,13 +19,14 @@ interface AppointmentCategory {
     name: string;
 }
 
-interface Appointment {
-    id?: number;
+export interface Appointment {
+    id: number;
     patient: Patient;
     appointment_date: string;
     appointment_category: AppointmentCategory;
     patient_note?: string;
     queue_number?: number;
+    status: string;
 }
 
 // Custom hook for managing appointments
@@ -222,8 +223,13 @@ export const useAppointment = () => {
                     throw new Error("Failed to update appointment. Please check your data.");
                 }
 
-                const data: Appointment = await response.json();
-                setAppointments((prev) => prev.map((appointment) => (appointment.id === id ? data : appointment)));
+                // Updating the appointments state optimistically
+                setAppointments((prev) => {
+                    const updatedAppointments = prev.map((appointment) =>
+                        appointment.id === id ? { ...appointment, ...appointments } : appointment
+                    );
+                    return updatedAppointments;
+                });
             } catch (err: any) {
                 handleError(err.message || "An error occurred while updating the appointment. Please try again.");
             } finally {
@@ -233,9 +239,9 @@ export const useAppointment = () => {
         []
     );
 
-    // Fetch appointments by category name and date
+    // Fetch appointments by category name, status, and date
     const fetchAppointmentsByCategory = useCallback(
-        async (categoryName: string, date?: string) => {
+        async (status: string, categoryName: string, date?: string) => {
             incrementLoading();
             setError(null);
 
@@ -243,6 +249,11 @@ export const useAppointment = () => {
             const queryParams = new URLSearchParams();
             if (date) {
                 queryParams.append("date", date);
+            }
+
+            // If status is not 'all', include it in the query parameters
+            if (status && status !== "all") {
+                queryParams.append("status", status);
             }
 
             try {
@@ -320,7 +331,8 @@ export const useAppointment = () => {
         fetchAppointmentById,
         createAppointment,
         updateAppointment,
+        setAppointments,
         fetchAppointmentsByCategory,
-        fetchEarliestAndLatestAppointments
+        fetchEarliestAndLatestAppointments,
     };
 };
