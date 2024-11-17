@@ -223,7 +223,7 @@ const Transaction: React.FC = () => {
                                                 </span>
                                                 </>
                                             </td>
-                                            <td className={`px-4 py-2 font-semibold uppercase ${submission.status.toLowerCase() === "pending" ? "text-red-500" : submission.status.toLowerCase() === "submitted late" ? "text-yellow-600" : "text-green-500"}`}>
+                                            <td className={`px-4 py-2 font-semibold uppercase ${submission.status.toLowerCase() === "pending" ? "text-red-500" : submission.status.toLowerCase() === "submitted late" ? "text-yellow-600" : "text-green"}`}>
                                                 {submission.status}
                                             </td>
                                         </tr>
