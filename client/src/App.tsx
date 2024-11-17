@@ -31,6 +31,7 @@ const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Appointment = React.lazy(() => import("./pages/Appointment"));
 const AppointmentConfirmation = React.lazy(() => import("./pages/AppointmentConfirmation"));
+const ForgotPassword = React.lazy(() => import("./pages/ForgetPassword"));
 
 // Lazy-load Barangay Pages
 const History = React.lazy(() => import("./pages/Barangay/History"));
@@ -67,6 +68,7 @@ function App() {
                                 <Route path="/appointment/confirmation" element={<AppointmentConfirmation />} />
                                 <Route path="/barangay/login" element={<Login image={cabuyao_logo} />} />
                                 <Route path="/admin/login" element={<Login image={cho_logo} />} />
+                                <Route path="/forgot-password" element={<ForgotPassword />} />
                             </Route>
 
                             {/* Admin Routes */}
