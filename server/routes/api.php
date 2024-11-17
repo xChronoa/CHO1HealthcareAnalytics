@@ -9,6 +9,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 // User Management
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ResetPasswordController;
 
 // Barangay Management
 use App\Http\Controllers\BarangayController;
@@ -44,6 +45,18 @@ use App\Http\Controllers\AgeCategoryController;
 Route::post('login', [UserController::class, 'login'])->name('login');
 Route::post('appointment-categories', [AppointmentCategoryController::class, 'index']);
 Route::post('appointments', [AppointmentController::class, 'store']);
+
+Route::prefix('auth')->group(function () {
+    // Route to find a user by their email (to check if the email exists in the system)
+    Route::post('search/email', [ResetPasswordController::class, 'findUserByEmail']);
+
+    // Route to send the password reset link to the user's email
+    Route::post('email/send/reset', [ResetPasswordController::class, 'sendPasswordResetLink']);
+
+    // Route to reset the user's password
+    Route::post('reset', [ResetPasswordController::class, 'resetPassword']);
+    Route::post("check/token/", [ResetPasswordController::class, 'isTokenValid']);
+});
 
 /**
  * Public route to check if the user is authenticated.
