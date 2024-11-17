@@ -80,7 +80,7 @@ const Report: React.FC = () => {
         fetchAgeCategories();
         fetchFormDiseases();
     }, [fetchAgeCategories, fetchFormDiseases])
-
+    
     // Fetch services and diseases if incompleteSections is not found in localStorage
     useEffect(() => {
         const storedIncompleteSections = localStorage.getItem("incompleteSections");
@@ -304,6 +304,49 @@ const Report: React.FC = () => {
         const m2Incomplete = incompleteSections["M2"] || [];
 
         if (m1Incomplete.length > 0 || m2Incomplete.length > 0) {
+            // Define a dynamic section order object based on the services array
+            const sectionOrder: { [key: string]: number } = {};
+
+            // Start with predefined services
+            sectionOrder["Projected Population"] = 1;
+            sectionOrder["Modern FP Unmet Need"] = 1;
+            sectionOrder["Family Planning"] = 2;
+
+            // List of all services to be dynamically ordered
+            const serviceOrder = [
+                "B1. Prenatal Care",
+                "B2. Intrapartum Care and Delivery Outcome",
+                "B3. Postpartum and Newborn Care",
+                "C1. Immunization Services for Newborns, Infants and School-Aged Children/Adolescents",
+                "C2. Nutrition Services for Infants and Children",
+                "Nutritional Assessment of Children 0-59 mos. Old",
+                "Deworming Services for Infants, Children and Adolescents (Community Based)",
+                "School-Based Deworming Services (Annual Reporting)",
+                "Soil Transmitted Helminthiasis Prevention and Control",
+                "E8. Rabies Prevention and Control",
+                "Part 2. Natality",
+                "Management of Sick Infants and Children",
+                "Non-Communicable Disease Prevention and Control Services",
+                "Teenage Pregnancy"
+            ];
+
+            // Loop over serviceOrder and assign section numbers if not already assigned
+            serviceOrder.forEach((service) => {
+                // If the service is not already in sectionOrder, assign a section number
+                if (!sectionOrder[service]) {
+                    // Assign next available section number based on current sectionOrder size
+                    sectionOrder[service] = Object.keys(sectionOrder).length;
+                }
+            });
+
+            // Prepare incomplete sections with section numbers
+            const incompleteSectionsWithNumbers = (incompleteSections: string[]) => {
+                return incompleteSections.map((sectionName) => {
+                    const sectionNumber = sectionOrder[sectionName] || "N/A"; // Default to "N/A" if not found in order
+                    return `<li class="mb-2">Section ${sectionNumber}: ${sectionName}</li>`;
+                }).join('');
+            };
+
             Swal.fire({
                 icon: "warning",
                 title: "Incomplete Sections",
@@ -315,8 +358,8 @@ const Report: React.FC = () => {
                             ${m1Incomplete.length > 0 ? `
                             <div class="flex-1">
                                 <h3 class="mb-3 font-semibold">M1 Report</h3>
-                                <ul class="text-left mb-3 list-disc text-xs md:text-sm">
-                                    ${m1Incomplete.map(section => `<li class="mb-2">${section}</li>`).join("")}
+                                <ul class="text-left mb-3 text-xs md:text-sm">
+                                    ${incompleteSectionsWithNumbers(m1Incomplete)}
                                 </ul>
                             </div>` : ""}
 
@@ -334,7 +377,7 @@ const Report: React.FC = () => {
                     title: "text-sm md:text-base",
                     popup: 'incomplete-section alert',
                 },
-                confirmButtonText: "Review Sections",
+                confirmButtonText: "Check and Complete Incomplete Sections",
             });
             
             return;
@@ -373,7 +416,7 @@ const Report: React.FC = () => {
                     });
                 } else {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || "Something went wrong while submitting the report!");
+                    throw new Error(errorData.message || "Something went wrong while submitting the report!");
                 }
                 return; // Exit the function after handling the error
             }
