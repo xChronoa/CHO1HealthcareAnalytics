@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const ManageAccount: React.FC = () => {
     return (
-        <div className="flex flex-col w-11/12 min-h-screen py-16">
+        <div className="flex flex-col w-11/12 min-h-screen py-12">
             <header className="mb-4">
                 <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
                 <div className="w-full h-[2px] bg-black"></div>

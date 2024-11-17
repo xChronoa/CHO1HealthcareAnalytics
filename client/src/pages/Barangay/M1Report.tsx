@@ -336,7 +336,7 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
     return (
         <>
-            <div className="w-11/12 py-16">
+            <div className="w-11/12 pb-12 pt-6">
                 <header className="w-full mb-4" ref={topRef}>
                     <h1 className="mb-2 text-2xl font-bold">M1 Report</h1>
                     <div className="dividing-line w-full h-[2px] bg-black"></div>

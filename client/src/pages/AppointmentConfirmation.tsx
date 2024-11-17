@@ -18,7 +18,7 @@ const AppointmentConfirmation: React.FC = () => {
     if (!patientDetails) return null;
 
     return (
-        <div className="flex flex-col items-center w-11/12 px-4 py-16 bg-white border-2 rounded-lg shadow-md sm:px-8 lg:w-1/2 justify-evenly">
+        <div className="flex flex-col items-center w-11/12 px-4 py-12 bg-white border-2 rounded-lg shadow-md sm:px-8 lg:w-1/2 justify-evenly">
             <h1 className="mb-6 text-3xl font-bold text-center text-thin">
                 Appointment Confirmed
             </h1>

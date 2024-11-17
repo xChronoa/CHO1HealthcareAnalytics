@@ -169,7 +169,7 @@ const Overview: React.FC = () => {
 
             <section
                 id="programs-events"
-                className="flex flex-col items-center justify-center w-full py-4 bg-gray-200 sm:py-16"
+                className="flex flex-col items-center justify-center w-full py-4 bg-gray-200 sm:py-12"
             >
                 <div className="flex flex-row items-center w-full gap-4 px-8 sm:px-12 title">
                     <h1 className="text-xl font-bold text-black uppercase text-nowrap">

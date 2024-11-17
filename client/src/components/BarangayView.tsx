@@ -10,7 +10,7 @@ const BarangayView: React.FC<BarangayViewProp> = ({ logoPath, barangayId, barang
     const navigate = useNavigate();
 
     const handleViewClick = () => {
-        navigate(`/admin/report/submitted/${barangayName.toLowerCase()}`, { state: { barangayId, barangayName } }); // Pass barangayId in state
+        navigate(`/admin/barangays/${barangayName.toLowerCase()}/submitted/`, { state: { barangayId, barangayName } }); // Pass barangayId in state
     };
 
     return (

@@ -13,7 +13,7 @@ const BarangayList: React.FC = () => {
 
     return (
     <>
-        <div className="w-11/12 py-16">
+        <div className="w-11/12 pb-12 pt-6">
             <header className="mb-4 ">
                 <h1 className="mb-2 text-2xl font-bold">List of Barangays</h1>
                 <div className="dividing-line w-full h-[2px] bg-black"></div>
