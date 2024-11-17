@@ -8,6 +8,7 @@ import cabuyao_logo from "../assets/images/cabuyao_logo.png";
 import { useAuth } from "../context/AuthContext";
 import logos from "../assets/logoImports";
 import { useSidebarContext } from "../context/SidebarContext";
+import Breadcrumb from "./Breadcrumb";
 
 // Interface for Sidebar Configuration
 interface SidebarConfig {
@@ -41,6 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
             />
             <Header logoPath={cabuyao_logo} />
             <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized ? "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
+                <Breadcrumb />
                 <Outlet />
             </main>
             <Footer />
