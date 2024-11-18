@@ -22,6 +22,7 @@ interface Errors {
     email?: string;
     username?: string;
     password?: string;
+    password_confirmation?: string;
     barangay_name?: string;
 }
 
