@@ -21,7 +21,7 @@ const GuestLayout: React.FC = () => {
     return (
         <>
             <Header />
-            <main className="flex flex-col items-center justify-center w-full min-h-screen bg-almond">
+            <main className="flex flex-col items-center w-full min-h-screen bg-almond">
                 <Outlet />
             </main>
             <Footer />
