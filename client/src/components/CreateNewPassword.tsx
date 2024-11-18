@@ -7,6 +7,7 @@ import { useLoading } from "../context/LoadingContext";
 interface CreateNewPasswordProps {
     token: string | null;
     setToken: React.Dispatch<React.SetStateAction<string | null>>;
+    setRole: React.Dispatch<React.SetStateAction<string>>;
     setStep: (step: number) => void;
     goHome: () => void;
 }
@@ -14,7 +15,8 @@ interface CreateNewPasswordProps {
 const CreateNewPassword: React.FC<CreateNewPasswordProps> = ({ 
     token, 
     setToken, 
-    setStep, 
+    setStep,
+    setRole, 
     goHome 
 }) => {
     const { incrementLoading, decrementLoading } = useLoading();
@@ -55,8 +57,12 @@ const CreateNewPassword: React.FC<CreateNewPasswordProps> = ({
             });
     
             if (response.ok) {
+                const data = await response.json();
+
                 setStep(4); // Proceed to the success step
                 setToken(null); // Clear the token in the state
+                
+                setRole(data.role)
     
                 // Clear the token from the URL
                 const url = new URL(window.location.href);
