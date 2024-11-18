@@ -8,7 +8,7 @@ import { useLoading } from "./LoadingContext";
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (emailOrUsername: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     error: string | null;
     setError: (error: string | null) => void;
@@ -189,12 +189,19 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
      * @param email - The email address of the user.
      * @param password - The password of the user.
      */
-    const login = async (email: string, password: string) => {
+    const login = async (emailOrUsername: string, password: string) => {
         const previousPath = window.location.pathname;
 
-        const data = await handleFetch(`${baseAPIUrl}/login`, "POST", { email, password, previousPath });
-        if (data) {
+        // Determine if the input is an email or username
+        const isEmail = emailOrUsername.includes('@');
 
+        const data = await handleFetch(`${baseAPIUrl}/login`, "POST", {
+            [isEmail ? 'email' : 'username']: emailOrUsername,
+            password,
+            previousPath
+        });
+
+        if (data) {
             setUser(data.user);
         }
     };
