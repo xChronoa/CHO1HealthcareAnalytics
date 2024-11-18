@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProp> = ({ logoPath }) => {
                     : "py-8"
             } shadow-lg bg-green`}
         >
-            <div className="container flex flex-row wrap">
+            <div className="container flex flex-row px-4 wrap sm:px-0">
                 {" "}
                 {(!isWithoutSidebar || isWithSidebar) && (
                     <FontAwesomeIcon
