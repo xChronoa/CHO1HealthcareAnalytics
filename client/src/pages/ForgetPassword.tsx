@@ -13,6 +13,7 @@ const ForgotPassword: React.FC = () => {
     const [step, setStep] = useState(1); // Track the current step (1 = SearchEmail, 2 = SendEmail, etc.)
     const [token, setToken] = useState<string | null>(null); // Token state for password reset
     const { incrementLoading, decrementLoading } = useLoading();
+    const [role, setRole] = useState<string>("");
 
     // Function to navigate to the correct route when closing the modal
     const goHome = () => {
@@ -101,10 +102,11 @@ const ForgotPassword: React.FC = () => {
                     token={token}
                     setToken={setToken}
                     setStep={setStep}
+                    setRole={setRole}
                     goHome={goHome}
                 />
             )}
-            {step === 4 && <SuccessNewPassword goHome={goHome} />}
+            {step === 4 && <SuccessNewPassword role={role} />}
         </div>
     );
 };
