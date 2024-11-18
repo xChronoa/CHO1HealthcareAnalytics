@@ -14,7 +14,7 @@ type LoginProp = {
 
 const Login: React.FC<LoginProp> = ({ image }) => {
     const { user, login, error } = useAuth();
-    const [email, setEmail] = useState("");
+    const [emailOrUsername, setEmailOrUsername] = useState("");
     const [password, setPassword] = useState("");
     const { incrementLoading, isLoading } = useLoading();
     const location = useLocation();
@@ -37,7 +37,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await login(email, password);
+        await login(emailOrUsername, password);
     };
 
     // Stores password visibility state
@@ -89,17 +89,19 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                 </div>
                             </div>
                         )}
-                        {/* Username */}
+                        
+                        {/* Email or Username */}
                         <div className="flex flex-col input-group">
-                            <label htmlFor="username">Email</label>
+                            <label htmlFor="emailOrUsername">Email or Username</label>
                             <input
                                 className="px-4 py-2 bg-gray-100 shadow-xl border-gray-300 rounded-md border-[1px]"
-                                type="email"
-                                name="username"
-                                id="username"
-                                placeholder="Email"
+                                type="text"
+                                name="emailOrUsername"
+                                placeholder="Enter your email or username"
+                                id="emailOrUsername"
                                 required
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setEmailOrUsername(e.target.value)}
+                                autoComplete="email"
                             />
                         </div>
 
@@ -120,19 +122,11 @@ const Login: React.FC<LoginProp> = ({ image }) => {
                                     }
                                     autoComplete=""
                                 />
-                                {showPassword ? (
-                                    <FontAwesomeIcon
-                                        onClick={togglePassword}
-                                        icon={faEye}
-                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                    />
-                                ) : (
-                                    <FontAwesomeIcon
-                                        onClick={togglePassword}
-                                        icon={faEyeSlash}
-                                        className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                    />
-                                )}
+                                <FontAwesomeIcon
+                                    onClick={togglePassword}
+                                    icon={showPassword ? faEye : faEyeSlash}
+                                    className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                />
                             </div>
                         </div>
                         <section className="flex flex-col gap-2 buttons">
