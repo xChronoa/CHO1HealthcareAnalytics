@@ -13,7 +13,7 @@ const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({
         // Navigate based on role
         if (role === "admin") {
             navigate("/admin/login");
-        } else if (role === "barangay") {
+        } else if (role === "encoder") {
             navigate("/barangay/login");
         } else {
             navigate("/"); // Default route if role doesn't match
