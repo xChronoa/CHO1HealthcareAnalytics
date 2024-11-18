@@ -158,7 +158,7 @@ class ResetPasswordController extends Controller
 
             DB::commit(); // Commit the transaction
 
-            return response()->json(['message' => 'Password successfully updated. You can now log in with your new password.'], 200);
+            return response()->json(['role' => $user->role, 'message' => 'Password successfully updated. You can now log in with your new password.'], 200);
         } catch (Exception $e) {
             DB::rollBack(); // Rollback the transaction in case of failure
             return response()->json(['error' => 'Failed to reset password. Please try again later.'], 500);
