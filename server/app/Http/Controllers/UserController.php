@@ -114,7 +114,8 @@ class UserController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'username' => 'sometimes|required|string|max:255|unique:users,username,' . $id . ',user_id',
-            'password' => 'sometimes|required|string|min:8',
+            'password' => 'sometimes|required|string|min:8|confirmed', // Use Laravel's built-in `confirmed` rule
+            'password_confirmation' => 'sometimes|required_with:password', // Ensure confirmPassword exists if password is provided
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id . ',user_id',
             'barangay_name' => 'sometimes|nullable|string|exists:barangays,barangay_name',
             'status' => 'sometimes|required|string|in:active,disabled',
@@ -130,6 +131,7 @@ class UserController extends Controller
         // Hash the password if it is present in the data
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
+            unset($data['password_confirmation']); // Remove confirmPassword after validation
         }
 
         try {
@@ -215,16 +217,11 @@ class UserController extends Controller
     }
 
 
-    /**
-     * Log in the user and issue a token.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login(Request $request)
     {
         $rules = [
-            'email' => 'required|string|email',
+            'username' => 'required_without:email|string', // Allow username if email is not provided
+            'email' => 'required_without:username|string|email', // Allow email if username is not provided
             'password' => 'required|string',
             'previousPath' => 'nullable|string',
         ];
@@ -235,19 +232,37 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Attempt to authenticate the user
-        $credentials = $validator->validated(); // Use validated data directly
+        // Get the credentials
+        $credentials = $validator->validated();
         $previousPath = $credentials['previousPath'] ?? '/';
 
         // Remove previousPath from credentials
         unset($credentials['previousPath']);
 
-        if (Auth::attempt($credentials)) {
-            // Retrieve the authenticated user's ID
-            $userId = Auth::id(); // Or Auth::user()->user_id if using a custom primary key
+        // Find the user by email or username
+        $user = null;
+        if (isset($credentials['email'])) {
+            $user = User::where('email', $credentials['email'])->first();
+        } elseif (isset($credentials['username'])) {
+            $user = User::where('username', $credentials['username'])->first();
+        }
 
-            // Retrieve the user using the ID
-            $user = User::findOrFail($userId);
+        // If no user is found, return an error
+        if (!$user) {
+            return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
+        }
+
+        // Attempt to authenticate the user
+        if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
+            // Check if the user is active
+            if ($user->status === "disabled") {
+                return response()->json([
+                    "error" => [
+                        'code' => 'ACCOUNT_DISABLED',
+                        'message' => "The account has been disabled. Please contact the administrator to resolve this issue.",
+                    ],
+                ], 403);
+            }
 
             // Define the path based on role
             $validPaths = [
@@ -256,7 +271,6 @@ class UserController extends Controller
             ];
 
             // Check if previousPath matches the user's role
-            $previousPath = $request->input('previousPath', '/');
             if (array_key_exists($user->role, $validPaths) && !in_array($previousPath, $validPaths[$user->role])) {
                 return response()->json([
                     'error' => [
@@ -264,15 +278,6 @@ class UserController extends Controller
                         'message' => 'Unauthorized access to the previous path.',
                         'role' => $user->role,
                         'path' => $previousPath
-                    ],
-                ], 403);
-            }
-
-            if ($user->status === "disabled") {
-                return response()->json([
-                    "error" => [
-                        'code' => 'ACCOUNT_DISABLED',
-                        'message' => "The account has been disabled. Please contact the administrator to resolve this issue.",
                     ],
                 ], 403);
             }
@@ -305,7 +310,6 @@ class UserController extends Controller
 
         return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
     }
-
 
     // Log out the user and invalidate the session
     public function logout(Request $request)
