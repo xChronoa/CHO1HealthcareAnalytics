@@ -427,7 +427,7 @@ const Report: React.FC = () => {
                     text: 'Report submitted successfully.',
                     icon: 'success',
                     confirmButtonText: 'OK'
-                }).then(() => navigate("/barangay/history"));
+                }).then(() => navigate("/barangay"));
             }
 
             localStorage.clear();
