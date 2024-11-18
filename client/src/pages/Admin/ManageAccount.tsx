@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 
 const ManageAccount: React.FC = () => {
     return (
-        <div className="flex flex-col w-11/12 min-h-screen py-12">
+        <div className="container flex flex-col w-11/12 min-h-screen py-12">
             <header className="mb-4">
                 <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
                 <div className="w-full h-[2px] bg-black"></div>
             </header>
 
-            <div className="flex items-center justify-center flex-1 w-full">
+            <div className="flex items-center justify-center w-full mt-8">
                 <section className="flex flex-col items-center w-10/12 gap-16 sm:flex-row">
                     <div className="rounded-lg border border-1 border-black sm:w-1/2 bg-white shadow-lg h-1/2 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] transition-all">
                         <Link

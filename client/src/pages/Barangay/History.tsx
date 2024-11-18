@@ -59,7 +59,7 @@ const History: React.FC = () => {
 
     return (
         <>
-            <div className="w-11/12 pb-12 pt-6">
+            <div className="container w-11/12 pt-6 pb-12">
                 <header className="mb-4">
                     <h1 className="mb-2 text-2xl font-bold">
                         Submittals History

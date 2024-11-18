@@ -39,7 +39,7 @@ const Breadcrumb: React.FC = () => {
     return (
         <nav
             aria-label="breadcrumb"
-            className={`text-nowrap text-xs sm:text-sm md:text-base ${
+            className={`container text-nowrap text-xs sm:text-sm md:text-base ${
                 location.pathname.includes("submitted")
                     ? "px-2 sm:px-10 w-full"
                     : "w-11/12"

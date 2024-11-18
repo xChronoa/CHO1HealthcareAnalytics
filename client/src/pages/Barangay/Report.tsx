@@ -561,7 +561,7 @@ const Report: React.FC = () => {
                             <button 
                                 type='submit' 
                                 disabled={isLoading} 
-                                className="uppercase w-full py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500"
+                                className="uppercase w-11/12 py-2 font-bold text-white transition-all bg-blue-500 rounded-lg shadow-md active:scale-[98%] hover:bg-blue-600 shadow-gray-500"
                             >
                                 {isLoading ? "Submitting..." : "submit"}
                             </button>

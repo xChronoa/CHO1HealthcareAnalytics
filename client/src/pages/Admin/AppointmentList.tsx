@@ -122,7 +122,7 @@ const AppointmentList: React.FC = () => {
 
     return (
         <>
-            <div className="w-11/12 pb-12 pt-6">
+            <div className="container w-11/12 pt-6 pb-12">
                 <header className="mb-4">
                     <div className="flex flex-col items-center justify-center gap-4 mb-2 md:gap-2 lg:gap-0 md:flex-row group">
                         <h1 className="self-center mb-2 text-2xl font-bold sm:mb-0 sm:text-xl md:self-end text-nowrap w-fit">

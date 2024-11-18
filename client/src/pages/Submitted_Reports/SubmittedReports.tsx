@@ -76,7 +76,7 @@ const SubmittedReports: React.FC = () => {
     }, [fetchEarliestAndLatestDates, barangayId]);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full px-2 py-12 sm:px-10">
+        <div className="container flex flex-col items-center justify-center w-full px-2 py-12 sm:px-10">
             <header className="w-full">
                 <h1 className="mb-2 text-2xl font-bold">Submitted Reports</h1>
                 <div className="dividing-line w-full h-[2px] bg-black"></div>
