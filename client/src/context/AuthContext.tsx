@@ -42,18 +42,17 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const privateRoutes = [
         "/admin/login",
         "/admin",
+        "/admin/reports",
         "/admin/barangays",
+        "/admin/barangays/:barangayName/submitted",
         "/admin/appointments",
         "/admin/manage",
         "/admin/manage/create",
         "/admin/manage/update",
         "/admin/manage/accounts",
-        "/admin/reports",
-        "/admin/barangays/:barangayName/submitted/",
 
         "/barangay",
         "/barangay/login",
-        "/barangay/history",
         "/barangay/report",
         "/barangay/submitted",
         "/barangay/edit/account"

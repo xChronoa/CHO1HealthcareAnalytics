@@ -8,20 +8,19 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
     const protectedRoutes = [
         "/admin/login",
         "/admin",
-        "/admin/transactions",
+        "/admin/reports",
         "/admin/barangays",
+        "/admin/barangays/:barangayName/submitted",
         "/admin/appointments",
         "/admin/manage",
         "/admin/manage/create",
         "/admin/manage/update",
         "/admin/manage/accounts",
-        "/admin/report",
 
-        "/barangay/login",
         "/barangay",
-        "/barangay/history",
+        "/barangay/login",
         "/barangay/report",
-        "/barangay/report/submitted",
+        "/barangay/submitted",
         "/barangay/edit/account"
     ];
 
