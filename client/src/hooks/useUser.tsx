@@ -16,6 +16,7 @@ interface UseUser {
     success: boolean;
     error: string | null;
     errorMessage?: Errors;
+    setErrorMessage: React.Dispatch<React.SetStateAction<Errors>>;
 }
 
 interface Errors {
@@ -210,5 +211,6 @@ export const useUser = (): UseUser => {
         success,
         error,
         errorMessage,
+        setErrorMessage,
     };
 };
