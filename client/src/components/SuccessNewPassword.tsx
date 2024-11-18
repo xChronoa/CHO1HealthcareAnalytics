@@ -1,8 +1,25 @@
+import { useNavigate } from "react-router-dom";
+
 interface SuccessNewPasswordProps {
-    goHome: () => void;
+    role: string;
 }
 
-const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({ goHome }) => {
+const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({
+    role
+}) => {
+    const navigate = useNavigate();
+
+    const handleLoginRedirect = () => {
+        // Navigate based on role
+        if (role === "admin") {
+            navigate("/admin/login");
+        } else if (role === "barangay") {
+            navigate("/barangay/login");
+        } else {
+            navigate("/"); // Default route if role doesn't match
+        }
+    };
+
     return (
         <div className="relative w-full max-w-md max-h-full p-4">
             <div className="relative bg-white rounded-lg shadow">
@@ -13,7 +30,7 @@ const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({ goHome }) => {
                     </h3>
                     <button
                         type="button"
-                        onClick={goHome}
+                        onClick={handleLoginRedirect}
                         className="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 "
                     >
                         <svg
@@ -48,6 +65,7 @@ const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({ goHome }) => {
                     <div className="flex justify-between gap-2">
                         <button
                             type="button"
+                            onClick={handleLoginRedirect}
                             className="transition-all text-[.7rem] sm:text-sm text-white w-full bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         >
                             Continue to Login
