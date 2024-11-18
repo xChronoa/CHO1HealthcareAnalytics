@@ -44,7 +44,13 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
             });
 
             // Handle 401 Unauthorized and redirect if needed
-            if (response.status === 401 && currentPath !== "/barangay/login" && currentPath !== "/admin/login") {
+            if (
+                response.status === 401 &&
+                currentPath !== "/barangay/login" &&
+                currentPath !== "/admin/login" &&
+                currentPath !== "/admin" &&
+                currentPath !== "/barangay"
+            ) {
                 const loginPath = currentPath.startsWith("/barangay") ? "/barangay/login" : "/admin/login"; // Defaults to admin login if not "barangay"
                 window.location.href = loginPath;
                 return Promise.reject(new Error("Unauthenticated: Redirecting to login."));
