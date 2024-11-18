@@ -273,7 +273,7 @@ const Appointment: React.FC = () => {
                         <span>${phone_number}</span>
 
                         <span class="font-semibold">Appointment Date:</span>
-                        <span>${appointment_date}</span>
+                        <span>${formatDateForDisplay(appointment_date)}</span>
 
                         <span class="font-semibold">Appointment Type:</span>
                         <span>${appointment_category_name}</span>
@@ -483,8 +483,24 @@ const Appointment: React.FC = () => {
         }
     }, []);
 
+    const formatDateForDisplay = (dateStr: string) => {
+        if(!dateStr) return "";
+        
+        const [year, month, day] = dateStr.split("-");
+
+        return new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day)
+        ).toLocaleDateString("en-PH", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
+
     return (
-        <>
+        <div className="container">
             <div className="flex flex-col items-center justify-center gap-2 my-5 title">
                 <img
                     className="size-44"
@@ -496,19 +512,16 @@ const Appointment: React.FC = () => {
                 </h2>
             </div>
 
-            <div
-                id="dividing-line"
-                className="w-11/12 h-1 bg-black rounded"
-            ></div>
+            <div id="dividing-line" className="w-full h-1 bg-black rounded" />
 
-            <div className="flex flex-col items-center justify-center w-full px-2 sm:w-3/4 appointment-details">
+            <div className="flex flex-col items-center justify-center w-full px-2 appointment-details">
                 <h2 className="self-center my-5 text-lg font-bold uppercase md:self-start">
                     Personal Information
                 </h2>
 
                 <form
                     id="appointment"
-                    className="flex flex-col justify-center w-full p-5 mt-2 mb-16 bg-white border-2 border-black rounded sm:w-3/4"
+                    className="flex flex-col justify-center w-full p-5 mt-2 mb-16 bg-white border-2 border-black rounded lg:w-3/4"
                     onSubmit={handleSubmit}
                 >
                     <section className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
@@ -606,6 +619,12 @@ const Appointment: React.FC = () => {
                             max={new Date().toISOString().split("T")[0]}
                             required
                         />
+                        <p
+                            id="birthdate-display"
+                            className="mt-2 text-sm text-gray-600"
+                        >
+                            {formatDateForDisplay(formData.birthdate)}
+                        </p>
                         {errors.birthdate && (
                             <span className="text-red-600">
                                 {errors.birthdate}
@@ -646,6 +665,12 @@ const Appointment: React.FC = () => {
                             min={minDate}
                             required
                         />
+                        <p
+                            id="appointment-date-display"
+                            className="mt-2 text-sm text-gray-600"
+                        >
+                            {formatDateForDisplay(formData.appointment_date)}
+                        </p>
                         {errors.appointment_date && (
                             <span className="text-red-600">
                                 {errors.appointment_date}
@@ -837,7 +862,7 @@ const Appointment: React.FC = () => {
                     </button>
                 </form>
             </div>
-        </>
+        </div>
     );
 };
 

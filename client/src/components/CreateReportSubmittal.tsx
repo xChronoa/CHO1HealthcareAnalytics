@@ -64,7 +64,10 @@ const CreateReportSubmittal: React.FC<CreateReportSubmittalProps> = ({
     const [minDate, setMinDate] = useState<string>(formattedToday);
 
     const formatDateForDisplay = (dateStr: string) => {
+        if(!dateStr) return "";
+
         const [year, month, day] = dateStr.split("-");
+        
         return new Date(
             Number(year),
             Number(month) - 1,

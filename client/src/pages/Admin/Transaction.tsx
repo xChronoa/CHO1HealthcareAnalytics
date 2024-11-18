@@ -53,7 +53,10 @@ const Transaction: React.FC = () => {
     };
 
     const formatDateForDisplay = (dateStr: string) => {
+        if(!dateStr) return "";
+
         const [year, month, day] = dateStr.split("-");
+        
         return new Date(
             Number(year),
             Number(month) - 1,
@@ -67,7 +70,7 @@ const Transaction: React.FC = () => {
 
     return (
         <>
-            <div className="w-11/12 pt-6 pb-12">
+            <div className="container w-11/12 pt-6 pb-12">
                 <header className="flex flex-col gap-1 mb-4">
                     <div className="flex flex-row items-center justify-between">
                         <h1 className="mb-2 text-2xl font-bold">Reports</h1>
