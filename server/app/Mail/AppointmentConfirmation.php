@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Appointment\Patient;
 use App\Models\Appointment\Appointment;
 
-class AppointmentConfirmation extends Mailable
+class AppointmentConfirmation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
