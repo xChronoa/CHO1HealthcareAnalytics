@@ -9,11 +9,13 @@ import { useUser } from "../../hooks/useUser";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
+import "../../styles/inputs.css";
 
 const UpdateAccount: React.FC = () => {
     const location = useLocation();
     const { getUser, updateUser, success, errorMessage } = useUser();
     const { fetchBarangays, barangays} = useBarangay();
+    
     const { user: userDetails } = useAuth();
     
     const isFromManageUpdate = location.pathname === '/admin/manage/update';
@@ -44,10 +46,14 @@ const UpdateAccount: React.FC = () => {
 
     // Stores password visibility state
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // Handles toggling of password visibility
     const togglePassword = () => {
         setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -96,7 +102,7 @@ const UpdateAccount: React.FC = () => {
                     customClass: {
                         confirmButton: "transition-all bg-blue-400 text-white px-4 py-2 rounded-md hover:opacity-75",
                     }
-                }).then(() => navigate(`${userDetails && userDetails.role === "admin" ? "/admin/manage/accounts" : "/barangay/history"}`));
+                }).then(() => navigate(`${userDetails && userDetails.role === "admin" ? "/admin/manage/accounts" : "/barangay"}`));
             }
         }
     };
@@ -107,12 +113,12 @@ const UpdateAccount: React.FC = () => {
         event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = event.target;
-
-        // Check if the field is not editable, but allow password field to be editable
-        if (isNotEditable && name !== "password") {
-            return; // Prevent editing if not allowed, except for the password field
+        
+        // Allow both password and confirmPassword to be editable
+        if (isNotEditable && name !== "password" && name !== "password_confirmation") {
+            return; // Prevent editing of non-password fields if not allowed
         }
-
+    
         setUser((prevUser) => ({
             ...prevUser,
             [name]: value,
@@ -146,18 +152,22 @@ const UpdateAccount: React.FC = () => {
                                 />
                                 <span className="sr-only">Info</span>
                                 <div>
-                                    {errorMessage.email && (
-                                        <p>{errorMessage.email}</p>
-                                    )}
-                                    {errorMessage.username && (
-                                        <p>{errorMessage.username}</p>
-                                    )}
-                                    {errorMessage.password && (
-                                        <p>{errorMessage.password}</p>
-                                    )}
-                                    {errorMessage.barangay_name && (
-                                        <p>{errorMessage.barangay_name}</p>
-                                    )}
+                                {errorMessage.email && (
+                                    <p className="whitespace-pre-line">{Array.isArray(errorMessage.email) ? errorMessage.email.join("\n") : errorMessage.email}</p>
+                                )}
+                                {errorMessage.username && (
+                                    <p className="whitespace-pre-line">{Array.isArray(errorMessage.username) ? errorMessage.username.join("\n") : errorMessage.username}</p>
+                                )}
+                                {errorMessage.password && (
+                                    <p className="whitespace-pre-line">{Array.isArray(errorMessage.password) ? errorMessage.password.join("\n") : errorMessage.password}</p>
+                                )}
+                                {errorMessage.password_confirmation && (
+                                    <p className="whitespace-pre-line">{Array.isArray(errorMessage.password_confirmation) ? errorMessage.password_confirmation.join("\n") : errorMessage.password_confirmation}</p>
+                                )}
+                                {errorMessage.barangay_name && (
+                                    <p className="whitespace-pre-line">{Array.isArray(errorMessage.barangay_name) ? errorMessage.barangay_name.join("\n") : errorMessage.barangay_name}</p>
+                                )}
+
                                 </div>
                             </div>
                         )}
@@ -209,34 +219,56 @@ const UpdateAccount: React.FC = () => {
                         </div>
 
                         {userDetails && userDetails?.role === "encoder" ? (
-                            <div className="flex flex-col mb-3 input-group">
-                                <label htmlFor="password">Password</label>
-                            
-                                <div className="relative w-full input">
-                                    <input
-                                        className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1 pr-12"
-                                        type={showPassword ? "text" : "password"}
-                                        name="password"
-                                        id="password"
-                                        value={user.password || ""}
-                                        onChange={handleChange}
-                                        placeholder="Password"
-                                    />
-                                    {showPassword ? (
+                            <>
+                                <div className="flex flex-col mb-3 input-group">
+                                    <label htmlFor="password">Password</label>
+                                
+                                    <div className="relative w-full input">
+                                        <input
+                                            className="w-full pr-12 rounded-lg shadow-lg"
+                                            type={showPassword ? "text" : "password"}
+                                            name="password"
+                                            id="password"
+                                            value={user.password || ""}
+                                            onChange={handleChange}
+                                            placeholder="Password"
+                                        />
                                         <FontAwesomeIcon
                                             onClick={togglePassword}
-                                            icon={faEye}
-                                            className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                            icon={showPassword ? faEye : faEyeSlash}
+                                            className="absolute w-6 h-6 mr-1 text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2"
                                         />
-                                    ) : (
-                                        <FontAwesomeIcon
-                                            onClick={togglePassword}
-                                            icon={faEyeSlash}
-                                            className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                        />
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
+
+                                {user.password && (
+                                    <div className="flex flex-col mb-3 input-group">
+                                        <label htmlFor="confirmPassword">
+                                            Confirm Password
+                                        </label>
+                                        <div className="relative w-full input">
+                                            <input
+                                                className="w-full pr-12 rounded-lg shadow-lg"
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                name="password_confirmation"
+                                                id="password_confirmation"
+                                                value={user.password_confirmation || ""}
+                                                onChange={handleChange}
+                                                placeholder="Confirm Password"
+                                            />
+                                            <FontAwesomeIcon
+                                                onClick={toggleConfirmPassword}
+                                                icon={
+                                                    showConfirmPassword
+                                                        ? faEye
+                                                        : faEyeSlash
+                                                }
+                                                className="absolute w-6 h-6 mr-1 text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         ) : null} 
 
                         <div className="flex flex-col mb-3 input-group">
