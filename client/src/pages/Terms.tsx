@@ -155,7 +155,7 @@ const Terms: React.FC = () => {
                         Email:{" "}
                         <a
                             href="mailto:cabuyao-cho1@cho1.site"
-                            className="text-blue-600"
+                            className="text-green hover:underline"
                         >
                             cabuyao-cho1@cho1.site
                         </a>
