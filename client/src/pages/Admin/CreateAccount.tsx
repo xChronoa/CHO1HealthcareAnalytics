@@ -8,9 +8,11 @@ import { User } from "../../types/User";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
+import "../../styles/inputs.css";
+import GeneratePasswordIcon from "../../components/GeneratePasswordIcon";
 
 const CreateAccount: React.FC = () => {
-    const { createUser, success, errorMessage } = useUser();
+    const { createUser, success, errorMessage, setErrorMessage } = useUser();
     const { barangays, fetchBarangays } = useBarangay();
     const [user, setUser] = useState<User>({
         username: "",
@@ -38,10 +40,68 @@ const CreateAccount: React.FC = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setErrorMessage({});
+
+        // 1. Validate required fields
+        const missingFields: string[] = [];
+        const formFields = [
+            { name: "username", value: user.username! },
+            { name: "email", value: user.email! },
+            { name: "password", value: user.password! },
+            { name: "barangay_name", value: user.barangay_name! },
+        ];
+
+        // 2. Reset previous error messages
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach((errorMessage) => {
+            errorMessage.remove();
+        });
+
+        formFields.forEach((field) => {
+            if (!field.value.trim()) {
+                missingFields.push(field.name); // Collect names of incomplete fields
+            }
+        });
+
+        if (missingFields.length > 0) {
+            // 3. Scroll to first missing field
+            const firstMissingField = document.getElementById(missingFields[0]);
+            if (firstMissingField) {
+                firstMissingField.scrollIntoView({ behavior: "smooth", block: "center" });
+                firstMissingField.focus();
+            }
+
+            // 4. Show error message under the first missing field
+            const firstField = document.getElementById(missingFields[0]);
+            if (firstField) {
+                const errorMessage = document.createElement('p');
+                errorMessage.textContent = 'This field is required.';
+                errorMessage.className = 'text-sm text-red-500 error-message'; // Styling the error message
+                firstField.parentElement?.appendChild(errorMessage);
+            }
+            return; // Stop further processing
+        }
 
         const result = await Swal.fire({
-            title: "Are you sure?",
-            text: "Are you sure you want to create this account?",
+            title: "Create Account?",
+            html: `
+                <p class="mb-4">Are you sure you want to create this account?</p>
+                <div class="border-2 border-black rounded-lg text-xs text-left p-4">
+                    <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
+                        <span class="font-semibold">Username:</span>
+                        <span>${user.username}</span>
+
+                        <span class="font-semibold">Email:</span>
+                        <span>${user.email}</span>
+
+                        <span class="font-semibold">Password:</span>
+                        <span class="break-words">${user.password}</span>
+
+                        <span class="font-semibold">Barangay:</span>
+                        <span class="break-words">${user.barangay_name}</span>
+                    </div>
+                </div>
+            `,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Yes, create it!",
@@ -55,9 +115,11 @@ const CreateAccount: React.FC = () => {
                     "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
             buttonsStyling: false,
+            allowOutsideClick: false,  // Disable closing the modal by clicking outside
+            allowEscapeKey: false,     // Disable closing the modal with the ESC key
         });
-
-        if (!result.isConfirmed) return false;
+        
+        if (!result.isConfirmed) return;
 
         if (user === null) return;
 
@@ -108,6 +170,21 @@ const CreateAccount: React.FC = () => {
         setUser((prevUser) => ({
             ...prevUser,
             [name]: value,
+        }));
+    };
+
+    const generatePassword = () => {
+        if(!showPassword) setShowPassword(true);
+        
+        const length = 12; // You can adjust the length as needed
+        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+        let password = "";
+        for (let i = 0; i < length; i++) {
+            password += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        setUser((prevUser) => ({
+            ...prevUser,
+            password: password,
         }));
     };
 
@@ -204,9 +281,9 @@ const CreateAccount: React.FC = () => {
                     <div className="flex flex-col mb-3 input-group">
                         <label htmlFor="password">Password</label>
 
-                        <div className="relative w-full input">
+                        <div className="flex flex-row items-center w-full shadow-lg input">
                             <input
-                                className="w-full bg-gray-100 border border-gray-300 rounded-lg shadow-lg border-1"
+                                className="w-full bg-gray-100 border border-r-0 border-gray-300 rounded-lg rounded-r-none border-1"
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 id="password"
@@ -214,25 +291,24 @@ const CreateAccount: React.FC = () => {
                                 value={user.password}
                                 onChange={handleChange}
                                 placeholder="Password"
+                                style={{ boxShadow: "none" }} // Correct inline style
                             />
-                            {showPassword ? (
+                            <GeneratePasswordIcon 
+                                className="cursor-pointer transition hover:bg-gray-200 py-[.63rem] px-3 border-gray-300 border bg-gray-100"
+                                onClick={generatePassword} 
+                            />
+                            <div className="cursor-pointer flex justify-center items-center icon py-[.5rem] px-2 border-gray-300 border bg-gray-100 hover:bg-gray-200 transition" onClick={togglePassword}>
                                 <FontAwesomeIcon
-                                    onClick={togglePassword}
-                                    icon={faEye}
-                                    className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
+                                    
+                                    icon={showPassword ? faEye : faEyeSlash}
+                                    className="w-6 h-6 text-gray-500"
                                 />
-                            ) : (
-                                <FontAwesomeIcon
-                                    onClick={togglePassword}
-                                    icon={faEyeSlash}
-                                    className="absolute transition-all right-2 top-1 size-8 hover:cursor-pointer hover:scale-95"
-                                />
-                            )}
+                            </div>
                         </div>
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="barangay_name">Barangay</label>
+                        <label htmlFor="barangay_name" className="select-none">Barangay</label>
                         <select
                             className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
                             name="barangay_name"
