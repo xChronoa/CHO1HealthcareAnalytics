@@ -18,10 +18,12 @@ export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
         return <Navigate to={loginPath} state={{ from: location }} replace />;
     }
 
-    // Check if the user's role is allowed
     if (user && !allowedRoles.includes(user.role)) {
-        // If the user is authenticated but doesn't have the required role, redirect them to a not authorized page
-        return <Navigate to="/not-found" />;
+        const targetPath = location.pathname.endsWith("/")
+            ? `${location.pathname}not-found`
+            : `${location.pathname}/not-found`;
+            
+        return <Navigate to={targetPath} />;
     }
 
     return <Outlet />;
