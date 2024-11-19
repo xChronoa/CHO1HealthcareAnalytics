@@ -66,7 +66,8 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
                     icon: "error",
                     title: "Network Error",
                     text: "Unable to connect. Please check your internet connection and try again.",
-                    confirmButtonText: "Retry"
+                    confirmButtonText: "Retry",
+                    scrollbarPadding: false,
                 });
             } else {
                 // Generic error handling for non-network errors
@@ -74,7 +75,8 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
                     icon: "error",
                     title: "An Error Occurred",
                     text: "Something went wrong. Please try again later.",
-                    confirmButtonText: "Close"
+                    confirmButtonText: "Close",
+                    scrollbarPadding: false,
                 });
             }
 
@@ -92,7 +94,8 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
                 icon: "error",
                 title: "Network Error",
                 text: "Unable to connect. Please check your internet connection and try again.",
-                confirmButtonText: "Retry"
+                confirmButtonText: "Retry",
+                scrollbarPadding: false,
             });
         } else {
             // Generic error handling for other types of errors
@@ -100,7 +103,8 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
                 icon: "error",
                 title: "An Error Occurred",
                 text: "Something went wrong. Please try again later.",
-                confirmButtonText: "Close"
+                confirmButtonText: "Close",
+                scrollbarPadding: false,
             });
         }
         return Promise.reject(error); // Reject the promise to propagate the error

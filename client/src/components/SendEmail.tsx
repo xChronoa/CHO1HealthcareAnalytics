@@ -46,6 +46,7 @@ const SendEmail: React.FC<SendEmailProps> = ({ goHome }) => {
                     icon: "error",
                     title: "Error",
                     text: data.error || "Failed to send email.",
+                    scrollbarPadding: false,
                 });
             }
         } catch (error) {
@@ -53,6 +54,7 @@ const SendEmail: React.FC<SendEmailProps> = ({ goHome }) => {
                 icon: "error",
                 title: "Unexpected Error",
                 text: "Could not send the email. Please try again later.",
+                scrollbarPadding: false,
             });
         } finally {
             decrementLoading();

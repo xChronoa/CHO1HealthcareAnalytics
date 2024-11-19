@@ -245,6 +245,7 @@ const Appointment: React.FC = () => {
                     text: generalError || "An unknown error occurred. Please try again.",
                     icon: "error",
                     confirmButtonText: "OK",
+                    scrollbarPadding: false,
                 });
             }
             decrementLoading();
@@ -313,6 +314,7 @@ const Appointment: React.FC = () => {
                     "bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
             buttonsStyling: false,
+            scrollbarPadding: false,
         });
         
         if (!result.isConfirmed) return;
@@ -440,6 +442,7 @@ const Appointment: React.FC = () => {
             text: "Your appointment has been successfully booked.",
             icon: "success",
             confirmButtonText: "OK",
+            scrollbarPadding: false,
         }).then(() => navigate("/appointment/confirmation"));
     };
 
@@ -449,6 +452,7 @@ const Appointment: React.FC = () => {
             text: message,
             icon: "error",
             confirmButtonText: "OK",
+            scrollbarPadding: false,
         });
     };
 

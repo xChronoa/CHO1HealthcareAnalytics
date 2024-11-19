@@ -117,6 +117,7 @@ const CreateAccount: React.FC = () => {
             buttonsStyling: false,
             allowOutsideClick: false,  // Disable closing the modal by clicking outside
             allowEscapeKey: false,     // Disable closing the modal with the ESC key
+            scrollbarPadding: false,
         });
         
         if (!result.isConfirmed) return;
@@ -151,6 +152,7 @@ const CreateAccount: React.FC = () => {
                         "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
                     },
                     buttonsStyling: false,
+                    scrollbarPadding: false,
                 }).then((result) => {
                     if (result.isConfirmed) {
                         setRedirecting(true);

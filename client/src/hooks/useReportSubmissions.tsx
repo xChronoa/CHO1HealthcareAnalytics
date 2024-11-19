@@ -86,6 +86,7 @@ export const useReportSubmissions = (): UseReportSubmission => {
                         "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
                 },
                 buttonsStyling: false,
+                scrollbarPadding: false,
             });
 
             if (!result.isConfirmed) return false;

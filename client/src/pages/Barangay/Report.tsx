@@ -233,6 +233,7 @@ const Report: React.FC = () => {
                 title: "Already Submitted",
                 text: `You have already submitted the report for the report period of ${monthName} ${selectedYear}.`,
                 confirmButtonText: "OK",
+                scrollbarPadding: false,
             });
         }
     };
@@ -265,6 +266,7 @@ const Report: React.FC = () => {
                     "transition-all bg-white border-black border-[1px] ml-2 text-black px-4 py-2 rounded-md hover:bg-gray-200",
             },
             buttonsStyling: false,
+            scrollbarPadding: false,
         });
 
         if (!result.isConfirmed) return false;
@@ -285,6 +287,7 @@ const Report: React.FC = () => {
                 title: "Already Submitted",
                 text: `You have already submitted the report for the selected date.`,
                 confirmButtonText: "OK",
+                scrollbarPadding: false,
             });
             return;
         }
@@ -296,6 +299,7 @@ const Report: React.FC = () => {
                 title: "Invalid Report Date",
                 text: "Please select the report date for this submission.",
                 confirmButtonText: "OK",
+                scrollbarPadding: false,
             });
             return;
         }
@@ -378,6 +382,7 @@ const Report: React.FC = () => {
                     popup: 'incomplete-section alert',
                 },
                 confirmButtonText: "Check and Complete Incomplete Sections",
+                scrollbarPadding: false,
             });
             
             return;
@@ -412,7 +417,8 @@ const Report: React.FC = () => {
                         title: 'Error!',
                         text: errorData.error || "Bad request. Please check your input.",
                         icon: 'error',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        scrollbarPadding: false,
                     });
                 } else {
                     const errorData = await response.json();
@@ -426,7 +432,8 @@ const Report: React.FC = () => {
                     title: 'Success!',
                     text: 'Report submitted successfully.',
                     icon: 'success',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    scrollbarPadding: false,
                 }).then(() => navigate("/barangay"));
             }
 
@@ -436,7 +443,8 @@ const Report: React.FC = () => {
                 title: 'Error!',
                 text: error.message || "An unexpected error occurred.", // Display specific error message
                 icon: 'error',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                scrollbarPadding: false,
             });
         } finally {
             decrementLoading();
