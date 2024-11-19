@@ -17,11 +17,16 @@ export default {
       },
       animation: {
         bounceHigh: 'bounceHigh 1.5s ease-in-out infinite',
+        'caret-blink': 'caret-blink 1.2s ease-out infinite',
       },
       keyframes: {
         bounceHigh: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-5px)' }, // Increased the bounce height
+        },
+        'caret-blink': {
+          '0%,70%,100%': { opacity: '1' },
+          '20%,50%': { opacity: '0' },
         },
       }
     },
