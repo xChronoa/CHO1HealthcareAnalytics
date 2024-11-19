@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Mail\ResetPasswordRequest;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class ResetPasswordController extends Controller
@@ -123,7 +124,11 @@ class ResetPasswordController extends Controller
 
         // Handle validation failure
         if ($validator->fails()) {
-            return response()->json(['error' => 'Invalid input data. Please check your entries and try again.'], 400);
+            $errors = $validator->errors()->all();
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $errors
+            ], 400);
         }
 
         DB::beginTransaction(); // Start the transaction
@@ -135,18 +140,24 @@ class ResetPasswordController extends Controller
                 ->first();
 
             if (!$reset) {
-                return response()->json(['error' => 'Invalid or expired token.'], 400);
+                return response()->json([
+                    'error' => 'The password reset link is invalid or has expired. Please request a new one.'
+                ], 400);
             }
 
             // Optionally, check if the token has expired (you can implement this if you have expiration time in your table)
             // if ($reset->created_at < now()->subHours(1)) {
-            //     return response()->json(['error' => 'Token has expired.'], 400);
+            //     return response()->json([
+            //         'error' => 'This link has expired. Please request a new password reset.'
+            //     ], 400);
             // }
 
             // Retrieve the user by the email associated with the token
             $user = User::where('email', $reset->email)->first();
             if (!$user) {
-                return response()->json(['error' => 'User not found.'], 404);
+                return response()->json([
+                    'error' => 'We could not find a user with that email address.'
+                ], 404);
             }
 
             // Update the user's password
@@ -158,10 +169,19 @@ class ResetPasswordController extends Controller
 
             DB::commit(); // Commit the transaction
 
-            return response()->json(['role' => $user->role, 'message' => 'Password successfully updated. You can now log in with your new password.'], 200);
+            return response()->json([
+                'message' => 'Your password has been successfully updated. You can now log in with your new password.',
+                'role' => $user->role
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack(); // Rollback the transaction in case of failure
-            return response()->json(['error' => 'Failed to reset password. Please try again later.'], 500);
+
+            // Log the exception for debugging and future reference
+            Log::error('Password reset error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'An error occurred while resetting your password. Please try again later.'
+            ], 500);
         }
     }
 
@@ -172,7 +192,7 @@ class ResetPasswordController extends Controller
     public function isTokenValid(Request $request)
     {
         $token = $request->token;
-        
+
         // Check if the token exists in the password_reset_tokens table
         $resetToken = DB::table('password_reset_tokens')->where('token', $token)->first();
 
