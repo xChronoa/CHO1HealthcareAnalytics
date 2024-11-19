@@ -24,7 +24,6 @@
 
     <p><strong>Important Notes:</strong></p>
     <ul>
-        <li>Please arrive at least 15 minutes prior to your appointment time.</li>
         <li>Remember to bring any relevant medical records or documentation.</li>
         <li>If you need to reschedule, kindly contact us at least 24 hours in advance.</li>
     </ul>
