@@ -1,4 +1,4 @@
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { baseAPIUrl } from "../config/apiConfig";
@@ -24,6 +24,7 @@ const CreateNewPassword: React.FC<CreateNewPasswordProps> = ({
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [passwordMatchError, setPasswordMatchError] = useState(false);
+    const [passwordLengthError, setPasswordLengthError] = useState(false);
 
     const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({
         newPassword: false,
@@ -37,13 +38,20 @@ const CreateNewPassword: React.FC<CreateNewPasswordProps> = ({
         }));
     };
 
+    const validatePassword = () => {
+        setPasswordMatchError(password !== confirmPassword);
+        setPasswordLengthError(password.length < 8);
+        return password === confirmPassword && password.length >= 8;
+    };
+
     const handleReset = async () => {
-        // Check if passwords match before proceeding
-        if (password !== confirmPassword) {
-            setPasswordMatchError(true);
-            return;
+        setError("");
+
+        // Validate password and confirm password before proceeding
+        if (!validatePassword()) {
+            return; // Don't proceed if validation fails
         }
-    
+
         try {
             incrementLoading();
             const response = await fetch(`${baseAPIUrl}/auth/reset`, {
@@ -107,66 +115,81 @@ const CreateNewPassword: React.FC<CreateNewPasswordProps> = ({
                         <p className="col-span-1 text-justify">
                             Make sure your new password is 8 characters or more. Try including numbers, letters, and punctuation marks for a strong password.
                         </p>
-
-                        <div className="space-y-5">
-                            {error && <p className="text-red-500">{error}</p>}  {/* Error message display */}
-                            
+                        
+                        <div className="flex flex-col">
+                            {error && 
+                                <div
+                                    className="flex items-center gap-2 p-4 mb-2 text-sm text-red-800 bg-red-100 rounded-lg"
+                                    role="alert"
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faCircleInfo}
+                                        className="color   -[#d66666]"
+                                    />
+                                    <span className="sr-only">Info</span>
+                                    <div>
+                                        <p>{error}</p>
+                                    </div>
+                                </div>
+                            }  {/* Error message display */}
                             {/* New Password Field */}
-                            <div className="relative z-0 w-full mt-5 mb-5 group">
+                            <div className="relative z-0 w-full mt-5 mb-2 group">
                                 <input
                                     type={isVisible.newPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     name="floating_new_password"
                                     id="floating_new_password"
-                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer pr-10"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                                     placeholder=" "
                                     required
                                 />
                                 <label
                                     htmlFor="floating_new_password"
-                                    className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:text-blue-600"
+                                    className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 -translate-y-8 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8"
                                 >
                                     New Password
                                 </label>
                                 <FontAwesomeIcon
                                     onClick={() => togglePasswordVisibility("newPassword")}
                                     icon={isVisible.newPassword ? faEye : faEyeSlash}
-                                    className="absolute text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2"
+                                    className={`absolute ${isVisible.newPassword ? "w-5 h-5" : "w-[1.344rem] h-[1.344rem]"} text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2`}
                                 />
+                                
                             </div>
+                            {passwordLengthError && <div className="text-xs text-red-500">Password must be at least 8 characters long.</div>}
 
                             {/* Confirm Password Field */}
-                            <div className="relative z-0 w-full mt-5 mb-5 group">
-                                {passwordMatchError && (
-                                    <p className="text-red-500">Passwords do not match!</p>
-                                )}
+                            <div className="relative z-0 w-full mt-10 group">
                                 <input
                                     type={isVisible.confirmPassword ? "text" : "password"}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     name="floating_confirm_password"
                                     id="floating_confirm_password"
-                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer pr-10"
+                                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                                     placeholder=" "
                                     required
-                                />
+                                    />
                                 <label
                                     htmlFor="floating_confirm_password"
-                                    className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:text-blue-600"
+                                    className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 -translate-y-8 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8"
                                 >
                                     Confirm Password
                                 </label>
                                 <FontAwesomeIcon
                                     onClick={() => togglePasswordVisibility("confirmPassword")}
                                     icon={isVisible.confirmPassword ? faEye : faEyeSlash}
-                                    className="absolute text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2"
+                                    className={`absolute ${isVisible.confirmPassword ? "w-5 h-5" : "w-[1.344rem] h-[1.344rem]"} text-gray-500 transform -translate-y-1/2 cursor-pointer right-2 top-1/2`}
                                 />
                             </div>
+                            {passwordMatchError && (
+                                <p className="text-xs text-red-500">Passwords do not match!</p>
+                            )}
                         </div>
                     </div>
 
-                    <div className="flex justify-between gap-2">
+                    <div className="flex justify-between gap-2 mt-8">
                         <button
                             type="button"
                             onClick={handleReset}
