@@ -252,8 +252,14 @@ class UserController extends Controller
             return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
         }
 
-        // Attempt to authenticate the user
-        if (Auth::attempt(['email' => $user->email, 'password' => $credentials['password']])) {
+        // Attempt to authenticate the user using email or username
+        $attempt = Auth::attempt(
+            isset($credentials['email'])
+                ? ['email' => $credentials['email'], 'password' => $credentials['password']]
+                : ['username' => $credentials['username'], 'password' => $credentials['password']]
+        );
+
+        if ($attempt) {
             // Check if the user is active
             if ($user->status === "disabled") {
                 return response()->json([
@@ -304,7 +310,6 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $userResponse,
-                'cho_session' => $token
             ], 200)->cookie($cookie);
         }
 
