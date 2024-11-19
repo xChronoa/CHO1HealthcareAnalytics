@@ -5,6 +5,7 @@ import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FormData } from "./Appointment";
 
 interface OTPVerificationProps {
+    phoneNumber: string;
     isPending: boolean;
     resendCountdown: number;
     requestOtp: () => void;
@@ -19,6 +20,7 @@ interface OTPVerificationProps {
 }
 
 const OTPVerification: React.FC<OTPVerificationProps> = ({
+    phoneNumber,
     isPending,
     resendCountdown,
     requestOtp,
@@ -127,8 +129,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({
                                     </p>
                                     <button
                                         onClick={requestOtp}
-                                        // disabled={!phoneNumber || isPending || resendCountdown > 0}
-                                        disabled={false}
+                                        disabled={!phoneNumber || isPending || resendCountdown > 0}
                                         className={`text-blue-600 transition-all rounded  disabled:text-blue-300 disabled:cursor-not-allowed hover:underline hover:opacity-90"}`}
                                     >
                                         {resendCountdown > 0 

@@ -890,6 +890,7 @@ const Appointment: React.FC = () => {
                             errors={errors}
                             isLoading={isLoading}
                             setFormData={setFormData}
+                            phoneNumber={formData.phone_number}
                         />
                     )}
                 </form>
