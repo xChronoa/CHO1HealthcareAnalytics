@@ -14,8 +14,9 @@ import { baseAPIUrl } from "../config/apiConfig";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useLoading } from "../context/LoadingContext";
+import OTPVerification from "./OTPVerification";
 
-interface FormData {
+export interface FormData {
     first_name: string;
     last_name: string;
     sex: string;
@@ -25,9 +26,9 @@ interface FormData {
     appointment_category_name: string;
     email: string;
     phone_number: string;
-    otp: string;
     patient_note: string;
     terms: boolean;
+    otp?: string;
 }
 
 const Appointment: React.FC = () => {
@@ -43,8 +44,8 @@ const Appointment: React.FC = () => {
         appointment_category_name: "",
         email: "",
         phone_number: "",
-        otp: "",
         patient_note: "",
+        otp: "",
         terms: false,
     });
     const [resendCountdown, setResendCountdown] = useState(0);
@@ -103,39 +104,57 @@ const Appointment: React.FC = () => {
         }
     };
 
-    const validateForm = () => {
+    const validateForm = (origin: string) => {
         const errors: Record<string, string> = {};
-        const requiredFields: Array<keyof FormData> = [
-            "first_name", "last_name", "sex", "birthdate", "address", "appointment_date",
-            "appointment_category_name", "email", "phone_number", "otp", "terms"
-        ];
     
-        const minDate = new Date(); // Current date and time
-        minDate.setHours(0, 0, 0, 0); // Reset to the start of the day (midnight)
+        if (origin === "appointment") {
+            // Fields to validate for appointment
+            const requiredFields: Array<keyof FormData> = [
+                "first_name", "last_name", "sex", "birthdate", "address", 
+                "appointment_date", "appointment_category_name", "email", 
+                "phone_number", "terms"
+            ];
     
-        requiredFields.forEach((field) => {
-            const value = formData[field];
-            if (!value || (typeof value === "string" && value.trim() === "")) {
-                errors[field] = field === "terms" ? "You must accept the terms and conditions." : "This field cannot be empty.";
+            const minDate = new Date(); // Current date and time
+            minDate.setHours(0, 0, 0, 0); // Reset to the start of the day (midnight)
+    
+            requiredFields.forEach((field) => {
+                const value = formData[field];
+                if (!value || (typeof value === "string" && value.trim() === "")) {
+                    errors[field] = field === "terms"
+                        ? "You must accept the terms and conditions."
+                        : "This field cannot be empty.";
+                }
+            });
+            
+            // Validate phone number length
+            const phoneNumber = formData.phone_number.trim();
+            if (phoneNumber.length < 10 || phoneNumber.length > 15) {
+                errors["phone_number"] = "Phone number must be between 10 and 15 digits.";
             }
-        });
     
-        // Validate appointment_date
-        const appointmentDate = new Date(formData.appointment_date);
-        if (isNaN(appointmentDate.getTime())) {
-            errors["appointment_date"] = "Invalid appointment date.";
-        } else if (appointmentDate <= minDate) {
-            errors["appointment_date"] = "Appointment date must be later than today's date.";
-        }
+            // Validate appointment_date
+            const appointmentDate = new Date(formData.appointment_date);
+            if (isNaN(appointmentDate.getTime())) {
+                errors["appointment_date"] = "Invalid appointment date.";
+            } else if (appointmentDate <= minDate) {
+                errors["appointment_date"] = "Appointment date must be later than today's date.";
+            }
     
-        // Validate birthdate
-        const birthdate = new Date(formData.birthdate);
-        if (isNaN(birthdate.getTime())) {
-            errors["birthdate"] = "Invalid birthdate.";
-        } else {
-            const age = calculateAge(birthdate);
-            if (age < 18) {
-                errors["birthdate"] = "You must be at least 18 years old.";
+            // Validate birthdate
+            const birthdate = new Date(formData.birthdate);
+            if (isNaN(birthdate.getTime())) {
+                errors["birthdate"] = "Invalid birthdate.";
+            } else {
+                const age = calculateAge(birthdate);
+                if (age < 18) {
+                    errors["birthdate"] = "You must be at least 18 years old.";
+                }
+            }
+        } else if (origin === "otp-verify") {
+            // Only validate OTP
+            if (!formData.otp || formData.otp.trim() === "") {
+                errors["otp"] = "OTP is required.";
             }
         }
     
@@ -163,6 +182,8 @@ const Appointment: React.FC = () => {
 
     const requestOtp = async (event?: MouseEvent<HTMLButtonElement>) => {
         event?.preventDefault();
+        
+        if(resendCountdown > 0) return;
     
         setErrors({});
     
@@ -198,7 +219,7 @@ const Appointment: React.FC = () => {
     };
     
 
-    const verifyOTP = async (): Promise<boolean> => {
+    const verifyOTP = async (otp: string): Promise<boolean> => {
         try {
             if (!confirmationResult) {
                 setErrors((prev) => ({ ...prev, otp: "You must request an OTP before verifying." }));
@@ -207,7 +228,7 @@ const Appointment: React.FC = () => {
                 return false;
             }
 
-            const result = await confirmationResult.confirm(formData.otp);
+            const result = await confirmationResult.confirm(otp);
             
             return !!result;
         } catch (error: any) {
@@ -237,7 +258,7 @@ const Appointment: React.FC = () => {
         setGeneralError(null);
 
         // Validate form data
-        const validationErrors = validateForm();
+        const validationErrors = validateForm("appointment");
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             scrollToError(Object.keys(validationErrors)[0]);
@@ -261,7 +282,7 @@ const Appointment: React.FC = () => {
                         <span>${sex}</span>
 
                         <span class="font-semibold">Birthdate:</span>
-                        <span>${birthdate}</span>
+                        <span>${formatDateForDisplay(birthdate)}</span>
 
                         <span class="font-semibold">Address:</span>
                         <span class="break-words">${address}</span>
@@ -296,6 +317,23 @@ const Appointment: React.FC = () => {
         
         if (!result.isConfirmed) return;
         
+        toggleForm();
+        requestOtp();
+    };
+
+    const bookAppointment = async () => {
+        setErrors({});
+        
+        // Validate form data
+        const validationErrors = validateForm("otp-verify");
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            scrollToError(Object.keys(validationErrors)[0]);
+            return;
+        }
+        
+        if (!formData.otp) return;
+
         incrementLoading();
 
         // Check if OTP is already verified and valid from session storage or previous request
@@ -303,11 +341,11 @@ const Appointment: React.FC = () => {
         
         if (!isOtpValid) {
             // If OTP is not valid, request OTP verification
-            const otpVerified = await verifyOTP();  // OTP verification process
+            const otpVerified = await verifyOTP(formData.otp);  // OTP verification process
             if (!otpVerified) return;
             sessionStorage.setItem("otpValid", "true");  // Store OTP validity for future use
         }
-    
+
         try {
             const response = await fetch(`${baseAPIUrl}/appointments`, {
                 method: "POST",
@@ -332,6 +370,7 @@ const Appointment: React.FC = () => {
                 queue_number: result.appointment.queue_number,
             }));
             showSuccessAlert();
+            toggleForm();
         } catch (error) {
             handleErrorResponse(error as Response | Error);
         } finally {
@@ -497,6 +536,13 @@ const Appointment: React.FC = () => {
             day: "numeric",
             year: "numeric",
         });
+    };
+    
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleForm = () => {
+        setIsOpen((prev) => !prev);
+        document.body.style.overflow = isOpen ? "" : "hidden";
     };
 
     return (
@@ -754,42 +800,9 @@ const Appointment: React.FC = () => {
                             </span>
                         )}
                         <div
-                            className="flex items-center justify-center w-full mt-2 mb-0"
+                            className="absolute z-40 flex items-center justify-center w-full mt-2 mb-0"
                             id="recaptcha"
                         />
-                    </div>
-
-                    <div className="flex flex-col mb-3 input-group">
-                        <button
-                            type="button"
-                            onClick={requestOtp}
-                            disabled={!formData.phone_number || isPending || resendCountdown > 0}
-                            className={`px-4 py-2 text-white transition-all rounded  ${!formData.phone_number || isPending || resendCountdown > 0 ? "bg-[#3d8c40] cursor-not-allowed" : "bg-green hover:opacity-90"}`}
-                        >
-                            {resendCountdown > 0 
-                                ? `Resend OTP in ${resendCountdown}`
-                                : isPending
-                                ? "Sending OTP"
-                                : "Send OTP"
-                            }
-                        </button>
-                    </div>
-
-                    <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="otp">OTP:</label>
-                        <input
-                            className="w-full border-gray-300 rounded-md border-[1px]"
-                            type="text"
-                            name="otp"
-                            id="otp"
-                            placeholder="Enter OTP"
-                            value={formData.otp}
-                            onChange={handleChange}
-                            required
-                        />
-                        {errors.otp && (
-                            <span className="text-red-600">{errors.otp}</span>
-                        )}
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
@@ -860,6 +873,21 @@ const Appointment: React.FC = () => {
                     >
                         {isLoading ? "Submitting..." : "Submit"}
                     </button>
+                    {isOpen && (
+                        <OTPVerification
+                            resendCountdown={resendCountdown}
+                            isPending={isPending}
+                            requestOtp={requestOtp}
+                            verifyOTP={verifyOTP}
+                            isOpen={isOpen}
+                            toggleForm={toggleForm}
+                            onVerified={bookAppointment}
+                            formData={formData}
+                            errors={errors}
+                            isLoading={isLoading}
+                            setFormData={setFormData}
+                        />
+                    )}
                 </form>
             </div>
         </div>
