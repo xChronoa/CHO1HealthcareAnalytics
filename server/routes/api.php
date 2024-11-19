@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Carbon;
 
 // Sanctum
 use Laravel\Sanctum\PersonalAccessToken;
@@ -67,17 +69,34 @@ Route::get('/auth/check', function (Request $request) {
 
     // Check if the token exists
     if (!$token) {
-        return response()->json(['message' => 'Please log in to continue.', 'status' => "not_logged"], 401);
+        return response()->json([
+            'message' => 'You are not logged in. Please log in to continue.',
+            'status' => "not_logged"
+        ], 401);
     }
 
     try {
-        // Attempt to find the token in the database
-        $tokenRecord = PersonalAccessToken::findToken(decrypt($token));
+        // Attempt to decrypt and find the token in the database
+        $decryptedToken = decrypt($token);
+        $tokenRecord = PersonalAccessToken::findToken($decryptedToken);
 
         // Check if the token is found
         if (!$tokenRecord) {
-            return response()->json(['message' => 'Your session has expired. Please log in again.'], 401)
-                            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
+            return response()->json([
+                'message' => 'Your session has expired or is invalid. Please log in again.'
+            ], 401)
+            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
+        }
+
+        // Check if the token has expired
+        if ($tokenRecord->expires_at && Carbon::parse($tokenRecord->expires_at)->isPast()) {
+            // Token is expired, delete it
+            $tokenRecord->delete();
+
+            return response()->json([
+                'message' => 'Your session has expired. Please log in again to continue.'
+            ], 401)
+            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
         }
 
         // Token is valid; retrieve the associated user
@@ -86,14 +105,15 @@ Route::get('/auth/check', function (Request $request) {
         // Check if the user is disabled
         if ($user->status === 'disabled') {
             // Clear the cookie to log out the user
-            return response()->json(['message' => 'Your account has been disabled. Please contact support for assistance.'])
-                            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
+            return response()->json([
+                'message' => 'Your account has been disabled. Please contact support for assistance.'
+            ], 403)  // Forbidden status code
+            ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
         }
 
-        // Build the response array
+        // Build the response array with user details
         $response = [
             'role' => $user->role,
-            // Include barangay information if available
             'barangay_name' => optional($user->barangay)->barangay_name,
             'username' => $user->username,
             'status' => $user->status,
@@ -103,12 +123,23 @@ Route::get('/auth/check', function (Request $request) {
 
         return response()->json($response);
         
+    } catch (DecryptException $e) {
+        // Handle decryption failure (invalid token)
+        return response()->json([
+            'message' => 'Invalid session token. Please log in again.'
+        ], 400)  // Bad Request status code
+        ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
     } catch (ModelNotFoundException $e) {
         // Handle case where token does not correspond to a user
-        return response()->json(['message' => 'User not found. Please log in again.'], 404);
+        return response()->json([
+            'message' => 'User not found. Please log in again to continue.'
+        ], 404)  // Not Found status code
+        ->withCookie(cookie('cho_session', null, -1, '/', 'localhost', false, true, true, 'lax'));
     } catch (\Exception $e) {
         // Handle any unexpected errors
-        return response()->json(['message' => 'An unexpected error occurred. Please try again later.'], 500);
+        return response()->json([
+            'message' => 'Something went wrong. Please try again later.'
+        ], 500);  // Internal Server Error status code
     }
 });
 
