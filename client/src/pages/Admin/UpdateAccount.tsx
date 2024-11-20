@@ -133,12 +133,12 @@ const UpdateAccount: React.FC = () => {
                     <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
                     <div className="w-full h-[2px] bg-black"></div>
                 </header>
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center flex-1 w-full">
                     <form 
-                        className="w-full sm:w-2/4 p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
+                        className="w-11/12 text-xs sm:text-sm md:text-base sm:w-3/4 md:w-1/2 p-4 sm:p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
                         onSubmit={handleSubmit}
                     >
-                        <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
+                        <h2 className="py-2 pb-4 text-lg font-bold text-center uppercase sm:text-2xl">
                             Update Account
                         </h2>
 

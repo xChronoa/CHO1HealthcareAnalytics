@@ -195,17 +195,17 @@ const CreateAccount: React.FC = () => {
     }, []);
 
     return (
-        <div className="flex flex-col w-11/12 min-h-screen py-12">
+        <div className="container flex flex-col w-11/12 min-h-screen py-12">
             <header className="mb-4">
                 <h1 className="mb-2 text-2xl font-bold">Manage Accounts</h1>
                 <div className="w-full h-[2px] bg-black"></div>
             </header>
             <div className="flex items-center justify-center flex-1 w-full">
                 <form 
-                    className="w-11/12 sm:w-3/5 h-full p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
+                    className="w-11/12 text-xs sm:text-sm md:text-base sm:w-3/4 md:w-1/2 h-full p-4 sm:p-8 bg-white shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-lg border border-gray-300 border-1"
                     onSubmit={handleSubmit}
                 >
-                    <h2 className="py-2 pb-4 text-2xl font-bold text-center uppercase">
+                    <h2 className="py-2 pb-4 text-lg font-bold text-center uppercase sm:text-2xl">
                         Create Account
                     </h2>
 
@@ -296,10 +296,10 @@ const CreateAccount: React.FC = () => {
                                 style={{ boxShadow: "none" }} // Correct inline style
                             />
                             <GeneratePasswordIcon 
-                                className="cursor-pointer transition hover:bg-gray-200 py-[.63rem] px-3 border-gray-300 border bg-gray-100"
+                                className="cursor-pointer transition hover:bg-gray-200 py-[.35rem] sm:py-[.50rem] md:py-[.625rem] px-3 border-gray-300 border bg-gray-100"
                                 onClick={generatePassword} 
                             />
-                            <div className="cursor-pointer flex justify-center items-center icon py-[.5rem] px-2 border-gray-300 border bg-gray-100 hover:bg-gray-200 transition" onClick={togglePassword}>
+                            <div className="cursor-pointer flex justify-center items-center icon py-[.25rem] sm:py-[.375rem] md:py-[.5rem] px-2 border-gray-300 border bg-gray-100 hover:bg-gray-200 transition" onClick={togglePassword}>
                                 <FontAwesomeIcon
                                     
                                     icon={showPassword ? faEye : faEyeSlash}
