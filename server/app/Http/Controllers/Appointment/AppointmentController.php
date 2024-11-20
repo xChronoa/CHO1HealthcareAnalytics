@@ -23,7 +23,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $appointments = Appointment::with('patient', 'appointmentCategory')->get();
+        $appointments = Appointment::with('patient', 'category')->get();
 
         return response()->json($appointments);
     }
@@ -34,7 +34,7 @@ class AppointmentController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'sex' => 'required|in:Male,Female',
+            'sex' => 'required|in:male,female',
             'birthdate' => 'required|date',
             'address' => 'required|string|max:255',
             'phone_number' => 'nullable|string|max:20',
@@ -182,7 +182,7 @@ class AppointmentController extends Controller
      */
     public function show(int $id)
     {
-        $appointment = Appointment::with('patient', 'appointmentCategory')->findOrFail($id);
+        $appointment = Appointment::with('patient', 'category')->findOrFail($id);
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found'], 404);
