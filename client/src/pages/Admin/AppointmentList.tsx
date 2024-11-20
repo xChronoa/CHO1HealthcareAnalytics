@@ -120,6 +120,22 @@ const AppointmentList: React.FC = () => {
         ));
     }, [appointments])
 
+    const formatDateForDisplay = (dateStr: string) => {
+        if(!dateStr) return "";
+        
+        const [year, month, day] = dateStr.split("-");
+
+        return new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day)
+        ).toLocaleDateString("en-PH", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
+
     return (
         <>
             <div className="container w-11/12 pt-6 pb-12">
@@ -235,7 +251,7 @@ const AppointmentList: React.FC = () => {
                                 currentAppointments.map((appointment) => (
                                     <div
                                         key={appointment.patient.patient_id}
-                                        className="grid grid-cols-1 p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
+                                        className="flex flex-col items-start p-6 bg-white rounded-lg shadow-lg outline outline-1 outline-gray-300"
                                     >
                                         <h3 className="text-lg font-bold uppercase">
                                             {appointment.patient.first_name}{" "}
@@ -268,7 +284,7 @@ const AppointmentList: React.FC = () => {
                                                 Birthdate:
                                             </span>
                                             <span>
-                                                {appointment.patient.birthdate}
+                                                {formatDateForDisplay(appointment.patient.birthdate)}
                                             </span>
 
                                             <span className="font-semibold">
@@ -289,16 +305,13 @@ const AppointmentList: React.FC = () => {
                                                 Phone#:
                                             </span>
                                             <span>
-                                                {
-                                                    appointment.patient
-                                                        .phone_number
-                                                }
+                                                {appointment.patient.phone_number}
                                             </span>
 
                                             <span className="font-semibold">
                                                 Patient Note:
                                             </span>
-                                            <span className="break-words">
+                                            <span className="text-justify break-words">
                                                 {appointment.patient_note ||
                                                     "None"}
                                             </span>
