@@ -34,19 +34,22 @@ export interface FormData {
 const Appointment: React.FC = () => {
     const { isLoading, incrementLoading, decrementLoading } = useLoading();
     const { loading, fetchAppointmentCategories, appointmentCategories } = useAppointmentCategory();
-    const [formData, setFormData] = useState<FormData>({
-        first_name: "",
-        last_name: "",
-        sex: "",
-        birthdate: "",
-        address: "",
-        appointment_date: "",
-        appointment_category_name: "",
-        email: "",
-        phone_number: "",
-        patient_note: "",
-        otp: "",
-        terms: false,
+    const [formData, setFormData] = useState<FormData>(() => {
+        const savedFormData = sessionStorage.getItem('appointmentData');
+        return savedFormData ? JSON.parse(savedFormData) : {
+            first_name: "",
+            last_name: "",
+            sex: "",
+            birthdate: "",
+            address: "",
+            appointment_date: "",
+            appointment_category_name: "",
+            email: "",
+            phone_number: "",
+            patient_note: "",
+            otp: "",
+            terms: false,
+        };
     });
     const [resendCountdown, setResendCountdown] = useState(0);
     const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
@@ -273,7 +276,7 @@ const Appointment: React.FC = () => {
             html: `
             <p class="mb-4">Are you sure you want to book this appointment?</p>
                 <div class="border-2 border-black rounded-lg text-xs text-left p-4">
-                    <h3 class="text-lg font-bold mb-2">
+                    <h3 class="text-sm sm:text-lg font-bold mb-2">
                         ${first_name} ${last_name}
                     </h3>
                     <div class="w-full h-[2px] border-green border-t-[3px] rounded-md mb-4"></div>
@@ -308,6 +311,7 @@ const Appointment: React.FC = () => {
             confirmButtonText: "Yes, book it!",
             cancelButtonText: "No, cancel!",
             customClass: {
+                title: "text-lg sm:text-2xl",
                 confirmButton:
                     "bg-green text-white px-4 py-2 rounded-md hover:bg-[#3d8c40]",
                 cancelButton:
@@ -548,6 +552,14 @@ const Appointment: React.FC = () => {
         setIsOpen((prev) => !prev);
         document.body.style.overflow = isOpen ? "" : "hidden";
     };
+
+    useEffect(() => {
+        const hasData = Object.values(formData).some(value => value !== "");
+        
+        if (hasData) {
+            sessionStorage.setItem('appointmentData', JSON.stringify(formData));
+        }
+    }, [formData]);
 
     return (
         <div className="container">
