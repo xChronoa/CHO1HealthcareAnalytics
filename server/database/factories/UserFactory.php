@@ -2,43 +2,91 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
+use App\Models\Barangay;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * The name of the factory's corresponding model.
+     *
+     * @var string
      */
-    protected static ?string $password;
+    protected $model = User::class;
 
     /**
      * Define the model's default state.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'username' => $this->faker->userName,
-            'email' => $this->faker->unique()->safeEmail,
-            'password' => bcrypt('password123'), // Use bcrypt for password
-            'role' => 'encoder',
-            'status' => 'active',
+            'username' => $this->faker->unique()->userName(),
+            'password' => bcrypt('password'), // Default password, you might want to change this
+            'email' => $this->faker->unique()->safeEmail(),
+            'role' => $this->faker->randomElement(['encoder', 'admin']),
+            'barangay_id' => Barangay::factory(),
+            'status' => $this->faker->randomElement(['active', 'disabled']),
+            'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Indicate that the user is an encoder.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
      */
-    public function unverified(): static
+    public function encoder()
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => 'encoder',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function admin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => 'admin',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the user is active.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function active()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'active',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the user is disabled.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function disabled()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'disabled',
+            ];
+        });
     }
 }
