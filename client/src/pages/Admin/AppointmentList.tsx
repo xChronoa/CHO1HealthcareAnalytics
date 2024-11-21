@@ -276,7 +276,7 @@ const AppointmentList: React.FC = () => {
                                             <span className="font-semibold">
                                                 Sex:
                                             </span>
-                                            <span>
+                                            <span className="capitalize">
                                                 {appointment.patient.sex}
                                             </span>
 
