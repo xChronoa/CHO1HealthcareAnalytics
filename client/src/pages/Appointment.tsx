@@ -283,7 +283,7 @@ const Appointment: React.FC = () => {
 
                     <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-3">
                         <span class="font-semibold">Sex:</span>
-                        <span>${sex}</span>
+                        <span class="capitalize">${sex}</span>
 
                         <span class="font-semibold">Birthdate:</span>
                         <span>${formatDateForDisplay(birthdate)}</span>
@@ -642,20 +642,20 @@ const Appointment: React.FC = () => {
                                     type="radio"
                                     name="sex"
                                     id="male"
-                                    value="Male"
-                                    checked={formData.sex === "Male"}
+                                    value="male"
+                                    checked={formData.sex.toLowerCase() === "male"}
                                     onChange={handleChange}
                                     required
                                 />
                                 <label htmlFor="male">Male</label>
-                            </div>
+                            </div>  
                             <div className="flex gap-2 female">
                                 <input
                                     type="radio"
                                     name="sex"
                                     id="female"
-                                    value="Female"
-                                    checked={formData.sex === "Female"}
+                                    value="female"
+                                    checked={formData.sex.toLowerCase() === "female"}
                                     onChange={handleChange}
                                     required
                                 />
