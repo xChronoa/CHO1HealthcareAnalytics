@@ -1,7 +1,7 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { memo, MouseEvent } from "react";
-import { Link } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 interface SidebarButtonProps {
     icon: IconProp;
@@ -28,12 +28,32 @@ const SidebarButton: React.FC<SidebarButtonProps> = memo(
             }
         };
 
+        // Get the current location
+        const location = useLocation();
+
+        const isActiveRoute =
+            ([
+                "/admin/manage/create",
+                "/admin/manage/accounts",
+                "/admin/manage/update",
+            ].some((path) => location.pathname.startsWith(path)) &&
+                labelText === "Manage Account") ||
+            (location.pathname.startsWith("/admin/barangays") &&
+                labelText === "Barangay");
+
         return (
-            <Link
+            <NavLink
                 to={destination}
-                className={`${additionalStyle} relative overflow-hidden flex ${
-                    isMinimized ? "justify-center" : "justify-self-end"
-                } items-center w-11/12 gap-5 p-3 rounded-md shadow-gray-500 shadow-md cursor-pointer hover:scale-95 transition-transform`}
+                end
+                className={({ isActive }) =>
+                    `${additionalStyle} relative overflow-hidden flex ${
+                        isMinimized ? "justify-center" : "justify-self-end"
+                    } ${
+                        isActive ? "bg-green text-white scale-95" : ""
+                    } items-center w-11/12 gap-5 p-3 rounded-md shadow-gray-500 shadow-md cursor-pointer hover:scale-95 transition-transform ${
+                        isActiveRoute ? "bg-green text-white scale-95" : ""
+                    }`
+                }
                 onClick={handleClick}
             >
                 <FontAwesomeIcon icon={icon} className="justify-self-start" />
@@ -46,7 +66,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = memo(
                 >
                     {labelText}
                 </h3>
-            </Link>
+            </NavLink>
         );
     }
 );
