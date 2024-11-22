@@ -210,7 +210,7 @@ const SubmittedM2: React.FC<SubmittedM2Props> = ({
                     </h1>
                 </div>
             ) : (
-                reports !== null && reports.length > 0 ? (
+                reports !== null && Object.keys(reports.data.data).length > 0 ? (
                     <>
                         <button
                             onClick={handlePrint}
