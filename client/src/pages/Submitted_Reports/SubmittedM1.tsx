@@ -325,7 +325,9 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                     </h1>
                 </div>
             ) : (
-                reports !== null ? (
+                reports !== null && 
+                fpReports !== null && 
+                modernWRAReports !== null ? (
                     <>
                         <button
                             onClick={handlePrint}
