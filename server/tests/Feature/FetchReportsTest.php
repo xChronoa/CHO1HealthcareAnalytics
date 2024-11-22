@@ -2,6 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Barangay;
+use App\Models\M2_Report\MorbidityReport;
+use App\Models\ReportStatus;
+use App\Models\ReportSubmission;
+use App\Models\ReportSubmissionTemplate;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +25,7 @@ class FetchReportsTest extends TestCase
 
     // Test fetching reports without filters
 
-    public function test_get_women_of_reproductive_ages_without_filters()
+    public function test_women_of_reproductive_ages_without_filters()
     {
         $admin = \App\Models\User::factory()->create(['role' => 'admin']);
         $response = $this->post('/api/login', ['email' => $admin->email, 'password' => 'password']);
@@ -237,7 +243,7 @@ class FetchReportsTest extends TestCase
         $token = $response->json('token');
 
         $barangay = \Database\Factories\BarangayFactory::new()->create(['barangay_name' => 'Sample Barangay']);
-        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => 2023]);
+        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => "2023"]);
         $reportSubmission = \Database\Factories\ReportSubmissionFactory::new()->create([
             'barangay_id' => $barangay->barangay_id,
             'report_submission_template_id' => $reportTemplate->report_submission_template_id,
@@ -284,7 +290,7 @@ class FetchReportsTest extends TestCase
 
         // Create necessary data
         $barangay = \Database\Factories\BarangayFactory::new()->create();
-        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => 2023]);
+        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => "2023"]);
         $reportSubmission = \Database\Factories\ReportSubmissionFactory::new()->create([
             'barangay_id' => $barangay->barangay_id,
             'report_submission_template_id' => $reportTemplate->report_submission_template_id,
@@ -426,10 +432,18 @@ class FetchReportsTest extends TestCase
             ->postJson('/api/service-data-reports', []); // No filters provided
 
         // Assert: Check that the response returns a 400 status code and the correct error message
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
-                'status' => 'error',
-                'message' => 'Report month and year must be provided.', // Match the actual API response
+                "status" => "error",
+                "message" => "Validation failed",
+                "errors" => [
+                    "report_month" => [
+                        "The report month field is required."
+                    ],
+                    "report_year" => [
+                        "The report year field is required."
+                    ]
+                ]
             ]);
     }
 
@@ -447,10 +461,18 @@ class FetchReportsTest extends TestCase
             ]);
 
         // Assert: Check that the response returns a 400 status code
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
-                'status' => 'error',
-                'message' => 'Report month and year must be provided.',
+                "status" => "error",
+                "message" => "Validation failed",
+                "errors" => [
+                    "report_month" => [
+                        "The report month field is required."
+                    ],
+                    "report_year" => [
+                        "The report year field is required."
+                    ]
+                ]
             ]);
     }
 
@@ -470,10 +492,18 @@ class FetchReportsTest extends TestCase
             ]);
 
         // Assert: Check response status and ensure the data set is empty
-        $response->assertStatus(400)
+        $response->assertStatus(422)
             ->assertJson([
-                'status' => 'error',
-                'message' => 'Report month and year must be provided.',
+                "status" => "error",
+                "message" => "Validation failed",
+                "errors" => [
+                    "report_month" => [
+                        "The report month field is required."
+                    ],
+                    "report_year" => [
+                        "The report year field is required."
+                    ]
+                ]
             ]);
     }
 
@@ -529,7 +559,7 @@ class FetchReportsTest extends TestCase
 
         $service = \App\Models\M1_Report\Service::factory()->create(['service_name' => 'Health Service']);
         $barangay = \App\Models\Barangay::factory()->create(['barangay_name' => 'Sample Barangay']);
-        $reportTemplate = \App\Models\ReportSubmissionTemplate::factory()->create(['report_year' => 2023]);
+        $reportTemplate = \App\Models\ReportSubmissionTemplate::factory()->create(['report_year' => "2023"]);
         $reportSubmission = \App\Models\ReportSubmission::factory()->create([
             'barangay_id' => $barangay->barangay_id,
             'report_submission_template_id' => $reportTemplate->report_submission_template_id,
@@ -578,6 +608,252 @@ class FetchReportsTest extends TestCase
                 'year' => 2050,
             ]);
 
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'data' => [],
+            ]);
+    }
+
+
+
+    // |------------------------------------------|
+    //
+    //
+    //      SECTION: Morbidity Reports
+    //
+    //
+    // |------------------------------------------|
+
+    public function test_morbidity_reports_should_return_bad_request_when_filters_are_missing()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Act: Make a POST request without any filters
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', []);
+    
+        // Assert: Check that the response returns an error with status 400
+        $response->assertStatus(400)
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Filters are required.',
+            ]);
+    }
+
+    public function test_morbidity_reports_should_return_empty_data_set_when_using_invalid_filters()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Act: Make a POST request with filters that do not match any records
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', [
+            'barangay_name' => 'NonExistentBarangay',
+            'year' => '2050'
+        ]);
+    
+        // Assert: Check response status and ensure the data set is empty
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'success',
+                'data' => [],
+            ]);
+    }
+
+    public function test_morbidity_reports_should_return_successful_response_when_filtering_by_valid_barangay_name()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Create necessary data for the test
+        $barangay = \Database\Factories\BarangayFactory::new()->create(['barangay_name' => 'Valid Barangay']);
+        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => "2023"]);
+        $reportSubmission = \Database\Factories\ReportSubmissionFactory::new()->create([
+            'barangay_id' => $barangay->barangay_id,
+            'report_submission_template_id' => $reportTemplate->report_submission_template_id,
+        ]);
+        $reportStatus = \Database\Factories\ReportStatusFactory::new()->create(['report_submission_id' => $reportSubmission->report_submission_id]);
+        $disease = \Database\Factories\M2_Report\DiseaseFactory::new()->create();
+        $ageCategory = \Database\Factories\AgeCategoryFactory::new()->create();
+    
+        \Database\Factories\M2_Report\MorbidityReportFactory::new()->create([
+            'report_status_id' => $reportStatus->report_status_id,
+            'disease_id' => $disease->disease_id,
+            'age_category_id' => $ageCategory->age_category_id,
+            'male' => 10,
+            'female' => 15,
+        ]);
+    
+        // Act: Make a POST request with a valid barangay name filter
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', [
+            'barangay_name' => 'Valid Barangay',
+        ]);
+    
+        // Assert: Check response status and structure
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    '*' => [
+                        'report_id',
+                        'disease_name',
+                        'age_category',
+                        'male',
+                        'female',
+                        'report_status',
+                        'barangay_name',
+                        'report_period',
+                    ],
+                ],
+            ])
+            ->assertJsonFragment([
+                'status' => 'success',
+                'barangay_name' => 'Valid Barangay',
+            ]);
+    }
+
+    public function test_morbidity_reports_should_return_successful_response_when_filtering_by_valid_year()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Create necessary data for the test
+        $disease = \Database\Factories\M2_Report\DiseaseFactory::new()->create();
+        $ageCategory = \Database\Factories\AgeCategoryFactory::new()->create();
+        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => "2023"]);
+        $reportSubmission = \Database\Factories\ReportSubmissionFactory::new()->create(['report_submission_template_id' => $reportTemplate->report_submission_template_id]);
+        $reportStatus = \Database\Factories\ReportStatusFactory::new()->create(['report_submission_id' => $reportSubmission->report_submission_id]);
+        \Database\Factories\M2_Report\MorbidityReportFactory::new()->create([
+            'disease_id' => $disease->disease_id,
+            'age_category_id' => $ageCategory->age_category_id,
+            'report_status_id' => $reportStatus->report_status_id,
+        ]);
+    
+        // Act: Make a POST request with a valid year filter
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', [
+            'year' => 2023,
+        ]);
+    
+        // Assert: Check response status and ensure the data structure is correct
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    '*' => [
+                        'report_id',
+                        'disease_name',
+                        'age_category',
+                        'male',
+                        'female',
+                        'report_status',
+                        'barangay_name',
+                        'report_period',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_morbidity_reports_should_return_successful_response_when_filtering_by_valid_barangay_name_and_year()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Create necessary data for the test
+        $barangay = \Database\Factories\BarangayFactory::new()->create(['barangay_name' => 'Valid Barangay']);
+        $reportTemplate = \Database\Factories\ReportSubmissionTemplateFactory::new()->create(['report_year' => "2023"]);
+        $reportSubmission = \Database\Factories\ReportSubmissionFactory::new()->create([
+            'barangay_id' => $barangay->barangay_id,
+            'report_submission_template_id' => $reportTemplate->report_submission_template_id,
+        ]);
+        $reportStatus = \Database\Factories\ReportStatusFactory::new()->create(['report_submission_id' => $reportSubmission->report_submission_id]);
+        $disease = \Database\Factories\M2_Report\DiseaseFactory::new()->create();
+        $ageCategory = \Database\Factories\AgeCategoryFactory::new()->create();
+    
+        \Database\Factories\M2_Report\MorbidityReportFactory::new()->create([
+            'report_status_id' => $reportStatus->report_status_id,
+            'disease_id' => $disease->disease_id,
+            'age_category_id' => $ageCategory->age_category_id,
+        ]);
+    
+        // Act: Make a POST request with valid filters
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', [
+            'barangay_name' => 'Valid Barangay',
+            'year' => 2023,
+        ]);
+    
+        // Assert: Check response status and structure
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    '*' => [
+                        'report_id',
+                        'disease_name',
+                        'age_category',
+                        'male',
+                        'female',
+                        'report_status',
+                        'barangay_name',
+                        'report_period',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_morbidity_reports_should_return_empty_data_set_when_no_records_match_filters()
+    {
+        // Arrange: Create an admin user and log in to obtain a Sanctum token
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $response->json('token');
+    
+        // Act: Make a GET request with filters that do not match any records
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/morbidity-reports', [
+            'barangay_name' => 'NonExistentBarangay',
+            'year' => '2050'
+        ]);
+    
+        // Assert: Check response status and ensure the data set is empty
         $response->assertStatus(200)
             ->assertJson([
                 'status' => 'success',

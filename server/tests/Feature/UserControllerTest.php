@@ -4,160 +4,248 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test user creation (POST /api/users)
-     *
-     * @return void
-     */
     public function test_create_user()
     {
-        // Create a user manually for authentication
-        $user = User::create([
-            'username' => 'existing_user',
-            'email' => 'existing@example.com',
-            'password' => bcrypt('password123'), // Ensure you hash the password
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', ['email' => $admin->email, 'password' => 'password']);
+        $token = $response->json('token');
+
+        // Arrange: Create a barangay
+        $barangay = \App\Models\Barangay::factory()->create([
+            'barangay_name' => 'Sample Barangay'
         ]);
 
-        // Generate a bearer token for the created user
-        $token = $user->createToken('TestToken')->plainTextToken;
+        // Act: Send a POST request to create a new user
+        $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->postJson('/api/users', [
+                'username' => 'newuser',
+                'password' => 'securepassword',
+                'email' => 'newuser@example.com',
+                'role' => 'encoder',
+                'status' => 'active',
+                'barangay_name' => $barangay->barangay_name
+            ]);
 
-        // Data to create a new user
-        $data = [
-            'username' => 'john_doe',
-            'email' => 'john@example.com',
-            'password' => 'password123',
-        ];
-
-        // Simulate a POST request with Bearer token authentication
-        $response = $this->postJson('/api/users', $data, [
-            'Authorization' => 'Bearer ' . $token
-        ]);
-
-        // Assert the user is created and the correct response is returned
+        // Assert: Check if the response status is 201 and the user is created
         $response->assertStatus(201)
-                 ->assertJson([
-                     'username' => 'john_doe',
-                     'email' => 'john@example.com',
-                 ]);
+            ->assertJson([
+                'username' => 'newuser',
+                'email' => 'newuser@example.com',
+                'role' => 'encoder',
+                'barangay_id' => $barangay->barangay_id,
+                'status' => 'active',
+            ]);
 
-        // Optionally, check if the user is present in the database
         $this->assertDatabaseHas('users', [
-            'email' => 'john@example.com',
+            'username' => 'newuser',
+            'email' => 'newuser@example.com',
+            'role' => 'encoder',
+            'barangay_id' => $barangay->barangay_id,
+            'status' => 'active',
         ]);
     }
 
-    /**
-     * Test user update (PUT /api/users/{id})
-     *
-     * @return void
-     */
     public function test_update_user()
     {
-        // Create a user manually for authentication
-        $user = User::create([
-            'username' => 'test_user',
-            'email' => 'testuser@example.com',
-            'password' => bcrypt('password123'),
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', ['email' => $admin->email, 'password' => 'password']);
+        $token = $response->json('token');
+
+        // Arrange: Create a user and a barangay
+        $user = \App\Models\User::factory()->create();
+        $barangay = \App\Models\Barangay::factory()->create([
+            'barangay_name' => 'Updated Barangay'
         ]);
 
-        // Generate a bearer token for the created user
-        $token = $user->createToken('TestToken')->plainTextToken;
+        // Act: Send a PUT request to update the user
+        $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->putJson('/api/users/' . $user->user_id, [
+                'username' => 'updatedusername',
+                'email' => 'updatedemail@example.com',
+                'barangay_name' => $barangay->barangay_name,
+                'status' => 'active'
+            ]);
 
-        // Data to update the user
-        $data = [
-            'username' => 'updated_user',
-            'email' => 'updated@example.com',
-        ];
-
-        // Simulate a PUT request to update the user with Bearer token authentication
-        $response = $this->putJson("/api/users/{$user->id}", $data, [
-            'Authorization' => 'Bearer ' . $token
-        ]);
-
-        // Assert the response status and data
-        $response->assertStatus(200)
-                 ->assertJson([
-                     'username' => 'updated_user',
-                     'email' => 'updated@example.com',
-                 ]);
-
-        // Assert the database was updated
+        // Assert: Check if the response is successful and the user is updated
+        $response->assertStatus(200);
         $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'username' => 'updated_user',
-            'email' => 'updated@example.com',
+            'user_id' => $user->user_id,
+            'username' => 'updatedusername',
+            'email' => 'updatedemail@example.com',
+            'barangay_id' => $barangay->barangay_id,
+            'status' => 'active'
         ]);
     }
 
-    /**
-     * Test fetching a user (GET /api/users/{id})
-     *
-     * @return void
-     */
-    public function test_show_user()
-    {
-        // Create a user manually for authentication
-        $user = User::create([
-            'username' => 'view_user',
-            'email' => 'viewuser@example.com',
-            'password' => bcrypt('password123'),
-        ]);
-
-        // Generate a bearer token for the created user
-        $token = $user->createToken('TestToken')->plainTextToken;
-
-        // Simulate a GET request to show the user details with Bearer token authentication
-        $response = $this->getJson("/api/users/{$user->id}", [
-            'Authorization' => 'Bearer ' . $token
-        ]);
-
-        // Assert the response status and data
-        $response->assertStatus(200)
-                 ->assertJson([
-                     'id' => $user->id,
-                     'username' => $user->username,
-                     'email' => $user->email,
-                 ]);
-    }
-
-    /**
-     * Test disabling a user (PATCH /api/users/{id}/disable)
-     *
-     * @return void
-     */
     public function test_disable_user()
     {
-        // Create a user manually for authentication
-        $user = User::create([
-            'username' => 'disable_user',
-            'email' => 'disableuser@example.com',
-            'password' => bcrypt('password123'),
-        ]);
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', ['email' => $admin->email, 'password' => 'password']);
+        $token = $response->json('token');
 
-        // Generate a bearer token for the created user
-        $token = $user->createToken('TestToken')->plainTextToken;
+        // Arrange: Create a user with active status
+        $user = \App\Models\User::factory()->create(['status' => 'active']);
 
-        // Simulate a PATCH request to disable the user with Bearer token authentication
-        $response = $this->patchJson("/api/users/disable/{$user->id}", [], [
-            'Authorization' => 'Bearer ' . $token
-        ]);
+        // Act: Send a request to disable the user
+        $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->putJson("/api/users/disable/{$user->user_id}");
 
-        // Assert the response status and check that the user's status is now disabled
+        // Assert: Check if the response is successful and the user status is updated
         $response->assertStatus(200)
-                 ->assertJson([
-                     'status' => 'disabled',
-                 ]);
+            ->assertJson(['message' => 'User status updated to disabled successfully.']);
 
-        // Assert the database has been updated
+        // Verify the user's status in the database
         $this->assertDatabaseHas('users', [
-            'id' => $user->id,
+            'user_id' => $user->user_id,
             'status' => 'disabled',
         ]);
     }
+
+    public function test_user_endpoint_unauthorized_without_token()
+    {
+        // Act: Send a GET request to the user endpoint without an authentication token
+        $response = $this->getJson('/api/user');
+
+        // Assert: Check if the response status is 401 and contains the 'Unauthenticated' message
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => "Unauthenticated.",
+            ]);
+    }
+
+    public function test_show_user_with_all_fields_populated()
+    {
+        $admin = \App\Models\User::factory()->create(['role' => 'admin']);
+        $response = $this->post('/api/login', ['email' => $admin->email, 'password' => 'password']);
+        $token = $response->json('token');
+
+        // Arrange: Create a user with all fields populated and a related barangay
+        $barangay = \App\Models\Barangay::factory()->create();
+        $user = \App\Models\User::factory()->create([
+            'barangay_id' => $barangay->barangay_id,
+            'status' => 'active',
+        ]);
+
+        // Act: Send a GET request to fetch the user details
+        $response = $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->getJson("/api/users/{$user->user_id}");
+
+        // Assert: Check if the response status is 200 and contains the correct user data
+        $response->assertStatus(200)
+            ->assertJson([
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $user->role,
+                'barangay_name' => $barangay->barangay_name,
+                'status' => $user->status,
+                'created_at' => $user->created_at->toISOString(),
+                'updated_at' => $user->updated_at->toISOString(),
+            ]);
+    }
+
+    // public function test_auth_check_returns_session_expired_message_when_token_is_expired()
+    // {
+    //     // Arrange: Create a user and a personal access token for that user
+    //     $user = \App\Models\User::factory()->create(['status' => 'active']);
+    //     $token = $user->createToken('TestToken', ['*']);
+    //     $expiredToken = $token->p;
+    //     $expiredToken->expires_at = now()->subDay(); // Set the token to be expired
+    //     $expiredToken->save();
+
+    //     // Encrypt the token's plain text ID to simulate the cookie value
+    //     $encryptedToken = encrypt($expiredToken->id);
+
+    //     // Act: Send a GET request to the /auth/check endpoint with the expired token
+    //     $response = $this->withCookie('cho_session', $encryptedToken)
+    //         ->getJson('/api/auth/check');
+
+    //     // Assert: Check if the response status is 401 and contains the 'Your session has expired' message
+    //     $response->assertStatus(401)
+    //         ->assertJson([
+    //             'message' => 'Your session has expired. Please log in again to continue.'
+    //         ]);
+    // }
+
+    // public function test_auth_check_returns_disabled_message_when_user_status_is_disabled()
+    // {
+    //     // Arrange: Create a user with 'disabled' status
+    //     $user = \App\Models\User::factory()->create(['status' => 'disabled']);
+    //     $token = $user->createToken('TestToken')->plainTextToken;
+
+    //     // Simulate the 'cho_session' cookie with the encrypted token
+    //     $encryptedToken = encrypt($token);
+
+    //     // Act: Send a GET request to the '/auth/check' endpoint with the cookie
+    //     $response = $this->withCookie('cho_session', $encryptedToken)
+    //         ->getJson('/api/auth/check');
+
+    //     // Assert: Check if the response status is 403 and contains the correct message
+    //     $response->assertStatus(403)
+    //         ->assertJson([
+    //             'message' => 'Your account has been disabled. Please contact support for assistance.',
+    //         ]);
+    // }
+
+    // public function test_should_return_user_details_when_token_is_valid_and_user_is_active()
+    // {
+    //     // Arrange: Create an active user and generate a valid token
+    //     $user = \App\Models\User::factory()->create(['status' => 'active']);
+    //     $token = $user->createToken('TestToken')->plainTextToken;
+    //     $encryptedToken = encrypt($token);
+
+    //     // Act: Send a GET request to the /auth/check endpoint with the valid token
+    //     $response = $this->withCookie('cho_session', $encryptedToken)
+    //         ->getJson('/api/auth/check');
+
+    //     // Assert: Check if the response status is 200 and contains the correct user data
+    //     $response->assertStatus(200)
+    //         ->assertJson([
+    //             'role' => $user->role,
+    //             'barangay_name' => optional($user->barangay)->barangay_name,
+    //             'username' => $user->username,
+    //             'status' => $user->status,
+    //             'email' => $user->email,
+    //             'user_id' => $user->user_id,
+    //         ]);
+    // }
+
+    // public function test_auth_check_returns_something_went_wrong_on_unexpected_exception()
+    // {
+    //     // Mock the request to simulate the presence of a 'cho_session' cookie//-
+    //     $request = \Mockery::mock(Request::class); //+
+    //     $request->shouldReceive('cookie')->with('cho_session')->andReturn('mocked_token');
+
+    //     // Mock the decrypt function to throw a generic exception//-
+    //     \Illuminate\Support\Facades\Crypt::shouldReceive('decrypt')->andThrow(new \Exception('Unexpected error'));
+
+    //     // Act: Call the route and capture the response//-
+    //     $response = $this->getJson('/api/auth/check', ['cho_session' => 'mocked_token']);
+
+    //     // Assert: Check if the response status is 500 and contains the 'Something went wrong' message//-
+    //     $response->assertStatus(500)
+    //         ->assertJson([
+    //             'message' => 'Something went wrong. Please try again later.',
+    //         ]);
+    // }
+
+    // public function test_auth_check_returns_401_when_user_not_logged_in()
+    // {
+    //     // Act: Send a GET request to the auth check endpoint without a session cookie
+    //     $response = $this->getJson('/api/auth/check');
+
+    //     // Assert: Check if the response status is 401 and contains the 'not_logged' status
+    //     $response->assertStatus(401)
+    //         ->assertJson([
+    //             'message' => 'You are not logged in. Please log in to continue.',
+    //             'status' => 'not_logged',
+    //         ]);
+    // }
 }
