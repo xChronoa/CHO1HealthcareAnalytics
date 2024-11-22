@@ -71,7 +71,7 @@ class UserController extends Controller
 
             // Default status to 'active' if not provided
             if (!isset($data['status'])) {
-                $data['status'] = ucfirst('active');
+                $data['status'] = 'active';
             }
 
             // Create user
