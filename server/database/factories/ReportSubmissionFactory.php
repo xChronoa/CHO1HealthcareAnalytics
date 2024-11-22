@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\ReportSubmission;
 use App\Models\ReportSubmissionTemplate;
 use App\Models\Barangay;
+use App\Models\ReportSubmission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ReportSubmissionFactory extends Factory
 {
-    protected $model = ReportSubmissionTemplate::class;
+    protected $model = ReportSubmission::class;
 
     public function definition()
     {
