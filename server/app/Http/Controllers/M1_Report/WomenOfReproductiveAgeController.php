@@ -10,12 +10,28 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class WomenOfReproductiveAgeController extends Controller
 {
     public function getWomenOfReproductiveAges(Request $request): JsonResponse
     {
         try {
+            
+            // Validate input parameters
+            $validator = Validator::make($request->all(), [
+                'barangayName' => 'nullable|string|max:255',
+                'year' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            
             // Get the input parameters from the request
             $barangayName = $request->input('barangayName');
             $year = $request->input('year');

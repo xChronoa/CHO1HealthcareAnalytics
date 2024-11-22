@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 
 // Model
 use App\Models\M1_Report\FamilyPlanningReport;
+use Illuminate\Support\Facades\Validator;
 
 class FamilyPlanningReportController extends Controller
 {
@@ -24,6 +25,20 @@ class FamilyPlanningReportController extends Controller
     public function getFamilyPlanningReports(Request $request)
     {
         try {
+            // Validate input parameters
+            $validator = Validator::make($request->all(), [
+                'barangayName' => 'nullable|string|max:255',
+                'year' => 'nullable|integer',
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             // Get barangay and year from the request query parameters
             $barangayName = $request->input('barangay_name'); // Adjust the key as necessary
             $year = $request->input('year'); // Adjust the key as necessary

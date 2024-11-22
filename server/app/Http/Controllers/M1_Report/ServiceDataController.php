@@ -7,10 +7,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
-use App\Models\M1_Report\Indicator;
 use App\Models\M1_Report\ServiceData;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ServiceDataController extends Controller
 {
@@ -23,10 +23,26 @@ class ServiceDataController extends Controller
     public function getServiceDataReports(Request $request): JsonResponse
     {
         try {
-            // Get parameters from the request body
-            $serviceName = $request->input('service_name'); // Get service_name from request body
-            $barangayName = $request->input('barangay_name'); // Get barangay name from request body
-            $year = $request->input('year'); // Get year from request body
+            // Validate input parameters
+            $validator = Validator::make($request->all(), [
+                'service_name' => 'nullable|string|max:255', // service_name is nullable, string, max 255 characters
+                'barangay_name' => 'nullable|string|max:255', // barangay_name is nullable, string, max 255 characters
+                'year' => 'nullable|integer', // year is nullable, integer, exactly 4 digits, and between 1900 and 2100
+            ]);
+
+            // Check if validation fails
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY); // 422 Unprocessable Entity for validation errors
+            }
+
+            // If validation passes, retrieve the validated parameters
+            $serviceName = $request->input('service_name');
+            $barangayName = $request->input('barangay_name');
+            $year = $request->input('year');
 
             // Build the query with eager loading and filtering
             $query = ServiceData::with([
