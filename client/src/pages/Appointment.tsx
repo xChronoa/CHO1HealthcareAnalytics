@@ -212,6 +212,8 @@ const Appointment: React.FC = () => {
             startTransition(() => {
                 setConfirmationResult(confirmationResult);
             });
+
+            toggleForm();
         } catch (error: any) {
             // Reset countdown in case of error
             setResendCountdown(0);
@@ -323,7 +325,6 @@ const Appointment: React.FC = () => {
         
         if (!result.isConfirmed) return;
         
-        toggleForm();
         requestOtp();
     };
 
