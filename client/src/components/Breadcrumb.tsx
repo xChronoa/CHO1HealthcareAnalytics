@@ -29,7 +29,9 @@ const Breadcrumb: React.FC = () => {
 
     // Helper to fetch readable label
     const getLabel = (segment: string): string =>
-        labels[segment] || segment.replace(/-/g, " ");
+        labels[segment]
+            ? labels[segment]
+            : segment.replace(/-/g, " ").replace(/%20/g, " ");
 
     // Find the index of "barangays" and "submitted" in the path
     const barangaysIndex = pathSegments.indexOf("barangays");
