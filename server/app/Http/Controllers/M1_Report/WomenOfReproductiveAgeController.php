@@ -91,6 +91,21 @@ class WomenOfReproductiveAgeController extends Controller
     public function getFilteredWomenOfReproductiveAges(Request $request): JsonResponse
     {
         try {
+            // Validate request inputs
+            $validator = Validator::make($request->all(), [
+                'barangay_id' => 'nullable|sometimes|integer|exists:barangays,barangay_id',
+                'report_month' => 'required|integer',
+                'report_year' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
             // Get the authenticated user and request parameters
             $user = Auth::user();
             $barangayId = $request->barangay_id;

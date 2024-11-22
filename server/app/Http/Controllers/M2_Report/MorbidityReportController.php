@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class MorbidityReportController extends Controller
 {
@@ -22,6 +23,29 @@ class MorbidityReportController extends Controller
     public function getMorbidityReports(Request $request)
     {
         try {
+            // Validate input parameters
+            $validator = Validator::make($request->all(), [
+                'barangay_name' => 'nullable|string|max:255', // barangay_name is nullable, string, max 255 characters
+                'year' => 'nullable|integer'
+            ]);
+
+            // Check if validation fails
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], Response::HTTP_UNPROCESSABLE_ENTITY); // 422 Unprocessable Entity for validation errors
+            }
+
+            // Ensure at least one filter is present
+            if (!$request->filled('barangay_name') && !$request->filled('year')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Filters are required.',
+                ], Response::HTTP_BAD_REQUEST); // 400 Bad Request for missing filters
+            }
+
             // Get parameters from the request body
             $barangayName = $request->input('barangay_name'); // Get barangay name from request body
             $year = $request->input('year'); // Get year from request body
@@ -98,6 +122,21 @@ class MorbidityReportController extends Controller
     public function getFilteredMorbidityReports(Request $request)
     {
         try {
+            // Validate request inputs
+            $validator = Validator::make($request->all(), [
+                'barangay_id' => 'nullable|sometimes|integer|exists:barangays,barangay_id',
+                'report_month' => 'required|integer',
+                'report_year' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
             // Get the authenticated user and request parameters
             $user = Auth::user();
             $barangayId = $request->input('barangay_id');
