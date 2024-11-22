@@ -72,7 +72,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                             Accept: "application/json",
                         },
                         credentials: "include",
-                        body: JSON.stringify({ barangay_name: barangay, year: year })
+                        body: JSON.stringify({ barangay_name: barangay, year: Number(year) })
                     }
                 );
 

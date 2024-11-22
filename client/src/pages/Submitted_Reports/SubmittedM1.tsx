@@ -108,8 +108,8 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         credentials: "include",
                         body: JSON.stringify({
                             barangay_id: barangayId,
-                            report_month: selectedMonth,
-                            report_year: selectedYear,
+                            report_month: Number(selectedMonth),
+                            report_year: Number(selectedYear),
                         }),
                     }
                 );
@@ -147,8 +147,8 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         credentials: "include",
                         body: JSON.stringify({
                             barangay_id: barangayId,
-                            report_month: selectedMonth,
-                            report_year: selectedYear,
+                            report_month: Number(selectedMonth),
+                            report_year: Number(selectedYear),
                         }),
                     }
                 );
@@ -186,8 +186,8 @@ const SubmittedM1: React.FC<SubmittedM1Props> = ({
                         credentials: "include",
                         body: JSON.stringify({
                             barangay_id: barangayId,
-                            report_month: selectedMonth,
-                            report_year: selectedYear,
+                            report_month: Number(selectedMonth),
+                            report_year: Number(selectedYear),
                         }),
                     }
                 );

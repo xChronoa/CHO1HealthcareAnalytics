@@ -111,7 +111,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                             Accept: "application/json",
                         },
                         credentials: "include",
-                        body: JSON.stringify({ selectedService, barangay_name: barangay, year: year })
+                        body: JSON.stringify({ selectedService, barangay_name: barangay, year: Number(year) })
                     }
                 );
 
