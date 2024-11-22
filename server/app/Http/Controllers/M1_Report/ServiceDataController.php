@@ -27,7 +27,7 @@ class ServiceDataController extends Controller
             $validator = Validator::make($request->all(), [
                 'service_name' => 'nullable|string|max:255', // service_name is nullable, string, max 255 characters
                 'barangay_name' => 'nullable|string|max:255', // barangay_name is nullable, string, max 255 characters
-                'year' => 'nullable|integer', // year is nullable, integer, exactly 4 digits, and between 1900 and 2100
+                'year' => 'nullable|integer',
             ]);
 
             // Check if validation fails
@@ -128,6 +128,22 @@ class ServiceDataController extends Controller
     public function getFilteredServiceDataReports(Request $request): JsonResponse
     {
         try {
+            // Validate request inputs
+            $validator = Validator::make($request->all(), [
+                'service_name' => 'nullable|string|max:255',
+                'barangay_id' => 'nullable|sometimes|integer|exists:barangays,barangay_id',
+                'report_month' => 'required|integer',
+                'report_year' => 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
             // Get the authenticated user and request parameters
             $user = Auth::user();
             $serviceName = $request->service_name;
