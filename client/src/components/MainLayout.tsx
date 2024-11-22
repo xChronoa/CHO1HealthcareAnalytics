@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import Footer from "./Footer";
 
-import cabuyao_logo from "../assets/images/cabuyao_logo.png";
+import cho_logo from "../assets/images/cho_logo.png";
 import { useAuth } from "../context/AuthContext";
 import logos from "../assets/logoImports";
 import { useSidebarContext } from "../context/SidebarContext";
@@ -30,7 +30,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
     const { isMinimized } = useSidebarContext();
     const { user } = useAuth();
-    const logoPath = user?.barangay_name ? logos[user.barangay_name.toLowerCase()] : cabuyao_logo;
+    const logoPath = user?.barangay_name ? logos[user.barangay_name.toLowerCase()] : cho_logo;
 
     return (
         <>
@@ -40,7 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ sidebarConfig }) => {
                 barangay={user?.barangay_name}
                 username={user?.username}
             />
-            <Header logoPath={cabuyao_logo} />
+            <Header logoPath={cho_logo} />
             <main className={`relative flex flex-col items-center flex-grow transition-all ${!isMinimized ? "lg:pl-52" : "lg:pl-14"} bg-almond min-h-screen`}>
                 <Breadcrumb />
                 <Outlet />
