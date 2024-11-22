@@ -16,7 +16,7 @@ export interface MorbidityReport {
 interface UseMorbidityReport {
     error: string | null;
     morbidityReports: MorbidityReport[];
-    fetchMorbidityReports: (barangayName: string, year: String | null) => Promise<void>;
+    fetchMorbidityReports: (barangayName: string, year: String | number | null) => Promise<void>;
 }
 
 // Create the custom hook
@@ -25,7 +25,7 @@ export const useMorbidityReport = (): UseMorbidityReport => {
     const [error, setError] = useState<string | null>(null);
     const [morbidityReports, setMorbidityReports] = useState<MorbidityReport[]>([]);
 
-    const fetchMorbidityReports = useCallback(async (barangayName: string, year: String | null) => {
+    const fetchMorbidityReports = useCallback(async (barangayName: string, year: String | number | null) => {
         try {
             incrementLoading();
             setError(null);

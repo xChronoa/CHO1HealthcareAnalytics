@@ -18,7 +18,7 @@ export interface WomenOfReproductiveAge {
 interface UseWra {
     error: string | null;
     wraData: WomenOfReproductiveAge[];
-    fetchWra: (barangayName: string, year: String | null) => Promise<void>;
+    fetchWra: (barangayName: string, year: String | number | null) => Promise<void>;
 }
 
 export const useWra = (): UseWra => {
@@ -26,7 +26,7 @@ export const useWra = (): UseWra => {
     const [error, setError] = useState<string | null>(null);
     const [wraData, setWraData] = useState<WomenOfReproductiveAge[]>([]);
 
-    const fetchWra = useCallback(async (barangayName: string, year: String | null) => {
+    const fetchWra = useCallback(async (barangayName: string, year: String | number | null) => {
         try {
             incrementLoading();
             setError(null);
