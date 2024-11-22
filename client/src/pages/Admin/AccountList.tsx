@@ -219,7 +219,7 @@ const AccountList: React.FC = () => {
                                                         onClick={() =>
                                                             handleDisable(user)
                                                         }
-                                                        className="flex-1 p-2 text-white bg-red-600 border-black rounded-lg shadow-md border-1 shadow-gray-400"
+                                                        className="flex-1 p-2 text-white transition-all bg-red-500 border-black rounded-lg shadow-md border-1 shadow-gray-400 disabled:opacity-50 disabled:scale-100 active:scale-95 hover:bg-red-300 disabled:hover:bg-red-500 disabled:cursor-not-allowed"
                                                         disabled={user?.status?.toLowerCase() === "disabled" || !user}
                                                     >
                                                         Disable
