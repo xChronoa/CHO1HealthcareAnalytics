@@ -995,11 +995,25 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     serviceData.length > 0 ? (
                                         renderCharts()
                                     ) : (
-                                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
-                                            <h1 className="text-center">
-                                                No submitted reports were found for Barangay {barangay} for the year {year}. 
-                                            </h1>
-                                        </div>
+                                        (barangay ?? "") === "" ? (
+                                            <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                                                <h1 className="text-center">
+                                                    It seems no valid barangay has been selected. Kindly choose one from the list.
+                                                </h1>
+                                            </div>
+                                        ) : barangay === "all" ? (
+                                            <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                                                <h1 className="text-center">
+                                                    No submitted reports were found for any barangay for the year {year}.
+                                                </h1>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
+                                                <h1 className="text-center">
+                                                    No submitted reports were found for Barangay {barangay} for the year {year}. 
+                                                </h1>
+                                            </div>
+                                        )
                                     )
                                 ) : (
                                     <ModernWRAChart setIsButtonDisabled={setIsButtonDisabled} barangay={barangay} year={year}/>
