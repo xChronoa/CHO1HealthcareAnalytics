@@ -60,7 +60,7 @@ class ServiceDataController extends Controller
             }
 
             // Apply filtering if barangay_name is provided
-            if ($barangayName) {
+            if ($barangayName !== 'all') {
                 $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
                     $q->where('barangay_name', $barangayName);
                 });

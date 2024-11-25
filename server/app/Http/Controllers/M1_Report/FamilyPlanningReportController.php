@@ -51,7 +51,7 @@ class FamilyPlanningReportController extends Controller
             ]);
 
             // Apply filtering if barangay and year are provided
-            if ($barangayName) {
+            if ($barangayName !== "all") {
                 $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
                     $q->where('barangay_name', $barangayName);
                 });

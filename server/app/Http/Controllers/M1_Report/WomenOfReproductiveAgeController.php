@@ -43,7 +43,7 @@ class WomenOfReproductiveAgeController extends Controller
             ]);
     
             // Apply filters if provided
-            if ($barangayName) {
+            if ($barangayName !== 'all') {
                 $query->whereHas('reportStatus.reportSubmission.barangay', function ($q) use ($barangayName) {
                     $q->where('barangay_name', $barangayName);
                 });
