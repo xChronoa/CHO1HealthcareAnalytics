@@ -41,8 +41,8 @@ export const ModernWRA: React.FC<ModernWRAProps> = ({ data, updateData }) => {
                     );
 
                     return (
-                        <label key={category} className="block">
-                            <span className="text-gray-700 md:hidden">{category}</span>
+                        <label key={category} className="block md:required-label-before">
+                            <span className="text-gray-700 required-label-after md:hidden">{category}</span>
                             <input
                                 type="number"
                                 placeholder="0"

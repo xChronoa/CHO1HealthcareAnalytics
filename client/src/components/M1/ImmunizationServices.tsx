@@ -54,8 +54,8 @@ export const ImmunizationServices: React.FC<ServiceProps> = ({
                             <label className="flex flex-col justify-center w-full text-gray-700 border-b-2 border-black md:col-span-2">
                                 {indicator.indicator_name}
                             </label>
-                            <label className="block">
-                                <span className="text-gray-700 md:hidden">
+                            <label className="block md:required-label-before">
+                                <span className="text-gray-500 required-label-after md:hidden">
                                     Male
                                 </span>
                                 <input
@@ -87,8 +87,8 @@ export const ImmunizationServices: React.FC<ServiceProps> = ({
                                     }
                                 />
                             </label>
-                            <label className="block">
-                                <span className="text-gray-700 md:hidden">
+                            <label className="block md:required-label-before">
+                                <span className="text-gray-500 required-label-after md:hidden">
                                     Female
                                 </span>
                                 <input
@@ -120,8 +120,8 @@ export const ImmunizationServices: React.FC<ServiceProps> = ({
                                     }
                                 />
                             </label>
-                            <label className="block">
-                                <span className="text-gray-700 md:hidden">
+                            <label className="block md:empty-before">
+                                <span className="text-gray-500 md:hidden">
                                     Remarks
                                 </span>
                                 <input

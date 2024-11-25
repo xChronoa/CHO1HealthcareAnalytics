@@ -54,7 +54,7 @@ Teenage Pregnancy</legend>
                     {/* Header Row */}
                     <div className="items-center justify-center hidden grid-cols-1 gap-4 mb-2 text-center lg:grid lg:grid-cols-9 sm:gap-2">
                         {ageCategories.map((category) => (
-                            <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
+                            <div key={category} className="font-semibold text-gray-500 border-b-2 border-black text-nowrap">
                                 {category !== "20 and above" &&
                                     category !== "12 and below"
                                         ? category

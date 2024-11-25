@@ -87,8 +87,8 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
 
                                 {!categoryIndicatorIds.has(indicator.indicator_id) ? (
                                         <>
-                                            <label className="block">
-                                                <span className="text-gray-700 md:hidden">
+                                            <label className="block md:required-label-before">
+                                                <span className="text-gray-500 md:hidden required-label-after">
                                                     Male
                                                 </span>
                                                 <input
@@ -120,8 +120,8 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                     }
                                                 />
                                             </label>
-                                            <label className="block">
-                                                <span className="text-gray-700 md:hidden">
+                                            <label className="block md:required-label-before">
+                                                <span className="text-gray-500 md:hidden required-label-after">
                                                     Female
                                                 </span>
                                                 <input
@@ -154,8 +154,8 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                 />
                                             </label>
                                             <div className="hidden md:block"/>
-                                            <label className="block">
-                                                <span className="text-gray-700 md:hidden">
+                                            <label className="block md:empty-before">
+                                                <span className="text-gray-500 md:hidden">
                                                     Remarks
                                                 </span>
                                                 <input
@@ -191,8 +191,8 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                         <>
                                             <div className="hidden md:block"/>
                                             <div className="hidden md:block"/>
-                                            <label className="block">
-                                                <span className="text-gray-700 md:hidden">
+                                            <label className="block md:required-label-before">
+                                                <span className="text-gray-700 md:hidden required-label-after">
                                                     Total
                                                 </span>
                                                 <input
@@ -224,7 +224,7 @@ export const NonCommunicableDisease: React.FC<ServiceProps> = ({
                                                     }
                                                 />
                                             </label>
-                                            <label className="block">
+                                            <label className="block md:empty-before">
                                                 <span className="text-gray-700 md:hidden">
                                                     Remarks
                                                 </span>

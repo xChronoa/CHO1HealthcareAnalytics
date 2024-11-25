@@ -68,13 +68,13 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                             Indicator
                         </div>
                         <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
-                            10 - 14 yo
+                            10 - 14
                         </div>
                         <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
-                            15 - 19 yo
+                            15 - 19
                         </div>
                         <div className="font-semibold text-gray-700 border-b-2 border-black text-nowrap">
-                            20 - 49 yo
+                            20 - 49
                         </div>
                         <div className="font-semibold text-gray-700 border-b-2 border-black">
                             Total
@@ -119,9 +119,9 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                 </label>
                                 {!indicator.parent_indicator_id || indicator.parent_indicator_id === 34 || indicator.parent_indicator_id === 37 ? (
                                     <>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
-                                                10 - 14 yo
+                                        <label className="block md:required-label-before">
+                                            <span className="text-gray-500 md:hidden required-label-after">
+                                                10 - 14
                                             </span>
                                             <input
                                                 type="number"
@@ -152,9 +152,9 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                                 }
                                             />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
-                                                15 - 19 yo
+                                        <label className="block md:required-label-before">
+                                            <span className="text-gray-500 md:hidden required-label-after">
+                                                15 - 19
                                             </span>
                                             <input
                                                 type="number"
@@ -185,9 +185,9 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                                 }
                                             />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
-                                                20 - 49 yo
+                                        <label className="block md:required-label-before">
+                                            <span className="text-gray-500 md:hidden required-label-after">
+                                                20 - 49
                                             </span>
                                             <input
                                                 type="number"
@@ -219,8 +219,8 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                             />
                                         </label>
                                         <div className="hidden md:block"/>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
+                                        <label className="block md:empty-before">
+                                            <span className="text-gray-500 md:hidden">
                                                 Remarks
                                             </span>
                                             <input
@@ -256,8 +256,8 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                         <div className="hidden md:block"/>
                                         <div className="hidden md:block"/>
                                         <div className="hidden md:block"/>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
+                                        <label className="block md:required-label-before">
+                                            <span className="text-gray-500 md:hidden required-label-after">
                                                 Total
                                             </span>
                                             <input
@@ -288,8 +288,8 @@ export const IntrapartumCare: React.FC<ServiceProps> = ({
                                                 }
                                             />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-gray-700 md:hidden">
+                                        <label className="block md:empty-before">
+                                            <span className="text-gray-500 md:hidden">
                                                 Remarks
                                             </span>
                                             <input

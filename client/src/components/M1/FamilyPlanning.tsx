@@ -174,10 +174,10 @@ export const FamilyPlanning: React.FC<FamilyPlanningProps> = ({
                                             {method.method_name}
                                         </div>
                                         {inputFields.map((field) => (
-                                            <div key={field.key} className="relative">
+                                            <div key={field.key} className="relative md:required-label-before">
                                                 <label
                                                     htmlFor={field.key}
-                                                    className="absolute top-[-1.2rem] left-0 md:hidden text-[.8rem] text-gray-500"
+                                                    className="absolute top-[-1.2rem] left-0 required-label-after md:hidden text-[.8rem] text-gray-500"
                                                 >{field.label}</label>
                                                 <input
                                                     key={field.key}

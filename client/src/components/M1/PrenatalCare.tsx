@@ -78,16 +78,16 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                             return (
                                 <div
                                     key={indicator.indicator_id}
-                                    className={`grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 items-center ${
-                                        isIndented ? "md:indent-8" : ""
-                                    }`}
+                                    className={`grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 items-center `}
                                 >
-                                    <label className="flex items-center justify-start w-full text-gray-700 border-b-2 border-black">
+                                    <label className={`flex items-center justify-start w-full text-gray-700 border-b-2 border-black ${
+                                        isIndented ? "md:indent-8" : ""
+                                    }`}>
                                         {indicator.indicator_name}
                                     </label>
-                                    <label className="block">
-                                        <span className="text-gray-700 md:hidden">
-                                            10 - 14 yo
+                                    <label className="block md:required-label-before">
+                                        <span className="text-gray-500 md:hidden required-label-after">
+                                            10 - 14
                                         </span>
                                         <input
                                             type="number"
@@ -118,9 +118,9 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                             }
                                         />
                                     </label>
-                                    <label className="block">
-                                        <span className="text-gray-700 md:hidden">
-                                            15 - 19 yo
+                                    <label className="block md:required-label-before">
+                                        <span className="text-gray-500 md:hidden required-label-after">
+                                            15 - 19
                                         </span>
                                         <input
                                             type="number"
@@ -151,9 +151,9 @@ export const PrenatalCare: React.FC<ServiceProps> = ({
                                             }
                                         />
                                     </label>
-                                    <label className="block">
-                                        <span className="text-gray-700 md:hidden">
-                                            20 - 49 yo
+                                    <label className="block md:required-label-before">
+                                        <span className="text-gray-500 md:hidden required-label-after">
+                                            20 - 49
                                         </span>
                                         <input
                                             type="number"
