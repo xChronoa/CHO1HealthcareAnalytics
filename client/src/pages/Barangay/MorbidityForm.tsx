@@ -187,7 +187,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                     </h3>
                 </div>
                 {diseases.map((disease) => (
-                    <div key={disease.disease_code} className="mb-4 disease">
+                    <div key={disease.disease_code} className="mb-4 shadow-sm disease shadow-gray-500">
                         <button
                             type="button"
                             onClick={() => toggleSection(disease.disease_name)}
@@ -214,7 +214,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                                 )}
                             </div>
 
-                            <div className="bg-white items-center justify-center h-0 bottom-[-1.2rem] left-[50%] group-focus-within:h-4 group-hover:h-4 group-focus-visible:h-4 transition-all">
+                            <div className="bg-white items-center justify-centerbottom-[-1.2rem] left-[50%] h-4 transition-all">
                                 <FontAwesomeIcon
                                     icon={
                                         openSections.includes(
@@ -223,7 +223,7 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                                             ? faCaretUp
                                             : faCaretDown
                                     }
-                                    className="transition-all origin-top scale-0 group-hover:scale-95 group-focus-visible:scale-95 group-focus-within:scale-95 group-open:scale-95"
+                                    className="transition-all origin-top scale-95"
                                 />
                             </div>
                         </button>
@@ -232,15 +232,15 @@ export const MorbidityForm: React.FC<M2ReportProps> = ({
                             <div className="p-4 text-xs bg-gray-100 sm:text-sm">
                                 <div className="grid grid-cols-3 gap-2 mb-2 font-bold text-center uppercase">
                                     <h3 className="w-full border-b-2 border-black">Age Range</h3>
-                                    <h3 className="w-full border-b-2 border-black">Male</h3>
-                                    <h3 className="w-full border-b-2 border-black">Female</h3>
+                                    <h3 className="w-full border-b-2 border-black required-label-after">Male</h3>
+                                    <h3 className="w-full border-b-2 border-black required-label-after">Female</h3>
                                 </div>
                                 {ageCategories.map((category) => (
                                     <div
                                         key={category.age_category_id}
                                         className="grid items-center grid-cols-3 gap-2 mb-2"
                                     >
-                                        <label className="w-full">
+                                        <label className="w-full required-label-after">
                                             {category.age_category}:
                                         </label>
                                         <input
