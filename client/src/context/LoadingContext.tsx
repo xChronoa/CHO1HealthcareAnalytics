@@ -7,6 +7,7 @@ import React, {
     useEffect,
 } from "react";
 import Loading from "../components/Loading";
+import { CSSTransition } from "react-transition-group";
 
 // Define the shape of the context state
 interface LoadingContextType {
@@ -46,14 +47,14 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({
     useEffect(() => {
         // Disable scrolling when loading starts
         if (isLoading) {
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = "hidden";
         } else {
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = "auto";
         }
 
         // Cleanup to re-enable scrolling
         return () => {
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = "auto";
         };
     }, [isLoading]);
 
@@ -62,8 +63,14 @@ export const LoadingProvider: React.FC<{ children: ReactNode }> = ({
             value={{ incrementLoading, decrementLoading, isLoading }}
         >
             {children}
-            {isLoading && <Loading />}
-            {/* Render your loading indicator here */}
+            <CSSTransition
+                in={isLoading}
+                timeout={300}
+                classNames="loading"
+                unmountOnExit
+            >
+                <Loading />
+            </CSSTransition>
         </LoadingContext.Provider>
     );
 };
