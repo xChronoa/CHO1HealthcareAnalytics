@@ -258,22 +258,18 @@ export const M1Report: React.FC<M1ReportProps> = ({
         if (services.length > 0) {
             setReportDatas("m1", sortFormData(formData));
             localStorage.setItem("m1formData", JSON.stringify(formData));
-        }
-    }, [formData, services]); // Add services to the dependency array
-    
-    useEffect(() => {
-        if (services.length > 0) {
             setIncompleteSections(checkIncompleteSections(formData));
         }
-    }, [formData, services]); // Ensure services is included in the dependencies
+    }, [formData, services]);
     
+    // Re-checking incomplete sections.
     useEffect(() => {
         if (services.length > 0) {
             onCheckIncomplete("M1", incompleteSections);
         }
-    }, [incompleteSections, services]); // Add services to the dependency array
+    }, [incompleteSections, services]);
 
-    // useEffect to handle scroll only after loading is complete
+    // Handle scroll only after loading is complete
     useEffect(() => {
         if (!isLoading && topRef.current) {
             topRef.current.scrollIntoView({
@@ -283,16 +279,17 @@ export const M1Report: React.FC<M1ReportProps> = ({
 
             topRef.current.focus();
         }
-    }, [isLoading]); // This effect runs when isLoading changes
+    }, [isLoading]);
 
+    // On page load display agreement.
     useEffect(() => {
         // Check if the user has already dismissed the alert in the current session
         if (sessionStorage.getItem("m1FormDismissed") === "true") {
-            return; // Exit early if the user has already dismissed the alert
+            return;
         }
     
         Swal.fire({
-            icon: "info", // Informational icon
+            icon: "info",
             title: "Please Verify Your Details",
             html: `
                 <div class="text-lg font-medium">
@@ -307,13 +304,13 @@ export const M1Report: React.FC<M1ReportProps> = ({
             `,
             confirmButtonText: "I confirm, don't show again.",
             cancelButtonText: "I confirm, proceed",
-            showCancelButton: true, // Show the cancel button for "Don't Show Again"
-            allowOutsideClick: false, // Prevent closing when clicking outside the alert
-            allowEscapeKey: false, // Prevent closing with the escape key
+            showCancelButton: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
             customClass: {
-                title: "text-xl font-bold text-gray-800", // Tailwind styling for the title
-                htmlContainer: "text-gray-700", // Tailwind styling for the HTML text container
-                popup: "p-4 text-center", // Tailwind styling for the popup container
+                title: "text-xl font-bold text-gray-800",
+                htmlContainer: "text-gray-700", 
+                popup: "p-4 text-center",
                 confirmButton:
                     "transition-all bg-green text-white px-4 py-2 rounded-md hover:bg-[#009900]",
                 cancelButton:
@@ -328,6 +325,31 @@ export const M1Report: React.FC<M1ReportProps> = ({
             }
         });
     }, []);
+    
+    // Hotkey for previous and next button using left and right arrow key.
+    useEffect(() => {
+        if(!isLoading) {
+            // Handle keydown event for hotkeys
+            const handleKeydown = (event: KeyboardEvent) => {
+                if (event.key === 'ArrowLeft' && step !== 1) {
+                    // Trigger Previous Step if it's not the first step
+                    handlePreviousStep();
+                }
+                if (event.key === 'ArrowRight' && step !== totalSteps) {
+                    // Trigger Next Step if it's not the last step
+                    handleNextStep();
+                }
+            };
+    
+            // Add event listener for keydown
+            window.addEventListener('keydown', handleKeydown);
+    
+            // Cleanup the event listener when the component is unmounted
+            return () => {
+                window.removeEventListener('keydown', handleKeydown);
+            };
+        }
+    }, [step, handlePreviousStep, handleNextStep, totalSteps]);
 
     const sectionNames = [
         "Modern FP Unmet Need",
@@ -428,12 +450,14 @@ export const M1Report: React.FC<M1ReportProps> = ({
                         max={totalSteps}
                         value={step}
                         onChange={(e) => {
-                            const typedStep = parseInt(e.target.value, 10);
-
-                            // Only update if within valid range
-                            if (typedStep >= 1 && typedStep <= totalSteps) {
-                                setStep(typedStep);
-                                localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                            if(!isLoading) {
+                                const typedStep = parseInt(e.target.value, 10);
+    
+                                // Only update if within valid range
+                                if (typedStep >= 1 && typedStep <= totalSteps) {
+                                    setStep(typedStep);
+                                    localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                                }
                             }
                         }}
                         className="absolute left-1/2 transform -translate-x-1/2 w-16 p-2 mx-2 text-center border rounded-md shadow-md shadow-[#a3a19d] placeholder-gray-300 border-gray-600 outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"
@@ -458,21 +482,23 @@ export const M1Report: React.FC<M1ReportProps> = ({
                         <>
                             <fieldset className="flex flex-col w-full gap-5 p-4 mt-5 border border-black rounded-md shadow-md shadow-[#a3a19d]">
                                 <legend className="px-2 text-sm font-semibold text-white rounded-lg sm:text-lg bg-green">Projected Population of the Year</legend>
-                                <input
-                                    type="number"
-                                    placeholder="0"
-                                    min="0"
-                                    value={formData.projectedPopulation ?? ""}
-                                    onChange={(e) =>
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            projectedPopulation: e.target.value === "" ? undefined : Math.floor(Number(e.target.value)),
-                                        }))
-                                    }
-                                    className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d] "
-                                    pattern="\d+"
-                                    required
-                                />
+                                <div className="block required-label-before">
+                                    <input
+                                        type="number"
+                                        placeholder="0"
+                                        min="0"
+                                        value={formData.projectedPopulation ?? ""}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                projectedPopulation: e.target.value === "" ? undefined : Math.floor(Number(e.target.value)),
+                                            }))
+                                        }
+                                        className="block w-full p-2 mt-1 border rounded-md shadow-md shadow-[#a3a19d]"
+                                        pattern="\d+"
+                                        required
+                                    />
+                                </div>
                             </fieldset>
                             <ModernWRA
                                 data={formData.wra}
@@ -856,12 +882,14 @@ export const M1Report: React.FC<M1ReportProps> = ({
                         max={totalSteps}
                         value={step}
                         onChange={(e) => {
-                            const typedStep = parseInt(e.target.value, 10);
-
-                            // Only update if within valid range
-                            if (typedStep >= 1 && typedStep <= totalSteps) {
-                                setStep(typedStep);
-                                localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                            if(!isLoading) {
+                                const typedStep = parseInt(e.target.value, 10);
+    
+                                // Only update if within valid range
+                                if (typedStep >= 1 && typedStep <= totalSteps) {
+                                    setStep(typedStep);
+                                    localStorage.setItem("step", JSON.stringify(typedStep)); // Save step to localStorage
+                                }
                             }
                         }}
                         className="absolute left-1/2 transform -translate-x-1/2 w-16 p-2 mx-2 text-center border rounded-md shadow-md shadow-[#a3a19d] placeholder-gray-300 border-gray-600 outline-none focus:ring-blue-500 focus:border-blue-500 focus:ring-1"
