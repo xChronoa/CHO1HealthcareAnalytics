@@ -503,6 +503,13 @@ const Appointment: React.FC = () => {
 
     useEffect(() => {
         fetchAppointmentCategories(formData.appointment_date);
+
+        setFormData((prev) => {
+            return {
+               ...prev,
+                appointment_category_name: "",
+            };
+        })
     }, [formData.appointment_date])
 
     useEffect(() => {
@@ -590,7 +597,7 @@ const Appointment: React.FC = () => {
                     <section className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
                         <div className="flex flex-col justify-center w-full gap-2 first-name">
                             <div className="flex items-center w-full gap-2 first-name">
-                                <label className="min-w-24" htmlFor="first_name">
+                                <label className="flex flex-row min-w-24 required-label-after" htmlFor="first_name">
                                     First Name:
                                 </label>
                                 <input
@@ -613,7 +620,7 @@ const Appointment: React.FC = () => {
                         
                         <div className="flex flex-col justify-center w-full gap-2 last-name ">
                             <div className="flex items-center w-full gap-2 last-name">
-                                <label className="min-w-24" htmlFor="last_name">
+                                <label className="flex flex-row min-w-24 required-label-after" htmlFor="last_name">
                                     Last Name:
                                 </label>
                                 <input
@@ -636,8 +643,8 @@ const Appointment: React.FC = () => {
                     </section>
 
                     <div className="flex flex-col gap-2 mb-3 input-group">
-                        <label htmlFor="sex">Sex:</label>
-                        <div className="flex flex-row gap-5 sex-group justify-evenly">
+                        <label htmlFor="sex" className="required-label-after">Sex:</label>
+                        <div className="flex flex-row gap-5 sex-group">
                             <div className="flex gap-2 male">
                                 <input
                                     type="radio"
@@ -671,7 +678,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="birthdate">Date of Birth:</label>
+                        <label htmlFor="birthdate" className="required-label-after">Date of Birth:</label>
                         <input
                             className="w-full border-gray-300 rounded-md border-[1px]"
                             type="date"
@@ -696,7 +703,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="address">Address:</label>
+                        <label htmlFor="address" className="required-label-after">Address:</label>
                         <input
                             className="w-full border-gray-300 rounded-md border-[1px]"
                             type="text"
@@ -715,7 +722,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="appointment_date">
+                        <label htmlFor="appointment_date" className="required-label-after">
                             Appointment Date:
                         </label>
                         <input
@@ -742,7 +749,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="appointment_category_name">
+                        <label htmlFor="appointment_category_name" className="required-label-after">
                             Appointment Type:
                         </label>
                         <select
@@ -760,14 +767,13 @@ const Appointment: React.FC = () => {
                                 formData.appointment_date !== "" ? (
                                     <>
                                         <option hidden>Select Type</option>
-                                        {appointmentCategories.map(({ category, available_slots }) => (
+                                        {appointmentCategories.map(({ category, is_available }) => (
                                             <option
                                                 key={category.appointment_category_id}
                                                 value={category.appointment_category_name}
-                                                disabled={available_slots <= 0}
+                                                disabled={!is_available}
                                             >
                                                 {category.appointment_category_name} 
-                                                {available_slots != null ? ` (${available_slots} slots)` : ''}
                                             </option>
                                         ))}
                                     </>
@@ -784,7 +790,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="email">Email:</label>
+                        <label htmlFor="email" className="required-label-after">Email:</label>
                         <input
                             className="w-full border-gray-300 rounded-md border-[1px]"
                             type="email"
@@ -801,7 +807,7 @@ const Appointment: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="phone_number">Phone Number:</label>
+                        <label htmlFor="phone_number" className="required-label-after">Phone Number:</label>
                         <PhoneInput
                             defaultCountry="PH"
                             value={formData.phone_number}

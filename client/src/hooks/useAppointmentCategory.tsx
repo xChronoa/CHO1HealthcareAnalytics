@@ -8,7 +8,7 @@ interface Category {
 
 interface AppointmentCategory {
     category: Category;
-    available_slots: number;
+    is_available: boolean;
 }
 
 interface UseAppointmentCategory {
