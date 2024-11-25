@@ -65,7 +65,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
     // Set the selected barangay to the first one fetched
     useEffect(() => {
         if (barangays.length > 0) {
-            setSelectedBarangay(barangays[0].barangay_name);
+            setSelectedBarangay("");
         }
     }, [barangays]);
 
@@ -605,14 +605,18 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                     {isLoading && !selectedBarangay ? (
                                         <option hidden>Loading...</option>
                                     ) : (
-                                        barangays.map((barangay) => (
-                                            <option
-                                                key={barangay.barangay_id}
-                                                value={barangay.barangay_name}
-                                            >
-                                                {barangay.barangay_name}
-                                            </option>
-                                        ))
+                                        <>
+                                            <option hidden>Select Barangay</option>
+                                            <option value="all">All</option>
+                                            {barangays.map((barangay) => (
+                                                <option
+                                                    key={barangay.barangay_id}
+                                                    value={barangay.barangay_name}
+                                                >
+                                                    {barangay.barangay_name}
+                                                </option>
+                                            ))}
+                                        </>
                                     )}
                                 </select>
                             </div>
@@ -677,28 +681,26 @@ const Dashboard: React.FC<DashboardProp> = () => {
                     <div className="dividing-line my-5 w-full h-[2px] bg-black"></div>
                     
                     {/* Chart */}
-                    {selectedYear && selectedBarangay && (
-                        <>
-                            {section === "m1" && (
-                                <ServiceDataChart
-                                    setIsButtonDisabled={setIsButtonDisabled}
-                                    chartRef={chartRef}
-                                    textRef={textRef}
-                                    barangay={selectedBarangay}
-                                    year={selectedYear}
-                                />
-                            )}
-                            {section === "m2" && (
-                                <MorbidityFormChart
-                                    setIsButtonDisabled={setIsButtonDisabled}
-                                    chartRef={chartRef}
-                                    textRef={textRef}
-                                    barangay={selectedBarangay}
-                                    year={selectedYear}
-                                />
-                            )}
-                        </>
-                    )}
+                    <>
+                        {section === "m1" && (
+                            <ServiceDataChart
+                                setIsButtonDisabled={setIsButtonDisabled}
+                                chartRef={chartRef}
+                                textRef={textRef}
+                                barangay={selectedBarangay}
+                                year={selectedYear}
+                            />
+                        )}
+                        {section === "m2" && (
+                            <MorbidityFormChart
+                                setIsButtonDisabled={setIsButtonDisabled}
+                                chartRef={chartRef}
+                                textRef={textRef}
+                                barangay={selectedBarangay}
+                                year={selectedYear}
+                            />
+                        )}
+                    </>
                 </div>
             </div>
         </>
