@@ -1,19 +1,18 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Roboto';
-    src: url('/assets/fonts/Roboto-Regular.ttf') format('truetype'); /* Corrected the format */
+    font-family: "Roboto";
+    src: url("/assets/fonts/Roboto-Regular.ttf") format("truetype"); /* Corrected the format */
     font-weight: normal;
     font-style: normal;
 }
 
 body {
-    @apply font-sans; 
+    @apply font-sans;
 }
 
 /* Barangay/Encoder Submit Report Page - Incomplete Section Alert */
@@ -31,4 +30,21 @@ body {
     .incomplete-section.alert {
         width: 100% !important;
     }
+}
+
+/* CSS Transition - for CSSTransition and Loading */
+/* Fade-in (enter) */
+.loading-enter {
+    @apply opacity-0; /* Start fully transparent */
+}
+.loading-enter-active {
+    @apply transition-opacity duration-300 ease-in-out opacity-100; /* Fade to fully opaque */
+}
+
+/* Fade-out (exit) */
+.loading-exit {
+    @apply opacity-100; /* Start fully opaque */
+}
+.loading-exit-active {
+    @apply transition-opacity duration-300 ease-in-out opacity-0; /* Fade to fully transparent */
 }
