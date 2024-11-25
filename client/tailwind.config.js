@@ -45,5 +45,97 @@ export default {
         };
         addUtilities(newUtilities);
     },
+    function ({ addComponents, theme, e }) {
+      addComponents({
+        '.empty-before::before': {
+          content: '"*"',
+          color: '#F8E9D3',
+        },
+        '.empty-before::before': {
+          content: '"*"',
+          color: '#F8E9D3',
+        },
+        '.empty-after::after': {
+          content: '"*"',
+          color: '#F8E9D3',
+        },
+        
+        // Before
+        '.required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.sm\\:required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.md\\:required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.lg\\:required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.xl\\:required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.2xl\\:required-label-before::before': {
+          content: '"*"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+
+        // After
+        '.required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.sm\\:required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.md\\:required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.lg\\:required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.xl\\:required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+        '.2xl\\:required-label-after::after': {
+          content: '" *"',
+          color: '#ff0000',
+          fontWeight: 'bold',
+          marginLeft: '4px',
+        },
+      });
+    },
   ],
 }
