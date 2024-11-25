@@ -91,13 +91,13 @@ class AppointmentController extends Controller
             $appointmentCategory = AppointmentCategory::where('appointment_category_name', $request->appointment_category_name)->firstOrFail();
             $appointmentCategoryId = $appointmentCategory->appointment_category_id;
 
-            // Define the slot limits and allowed days for each category (use your logic to determine available slots)
-            $slotsPerCategory = [
-                'Maternal Health Consultation' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'slots' => 70],
-                'Animal Bite Vaccination' => ['days' => ['Monday', 'Thursday'], 'slots' => 70],
-                'General Checkup' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
-                'Baby Vaccine' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
-                'TB DOTS' => ['days' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], 'slots' => 70],
+            // Define the allowed days for each category
+            $allowedDaysPerCategory = [
+                'Maternal Health Consultation' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                'Animal Bite Vaccination' => ['Monday', 'Thursday'],
+                'General Checkup' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                'Baby Vaccine' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                'TB DOTS' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
             ];
 
             // Parse the selected date and determine the day of the week
@@ -105,21 +105,8 @@ class AppointmentController extends Controller
             $dayOfWeek = $date->format('l'); // For example, "Monday"
 
             // Check if the appointment category allows appointments on this day
-            if (!in_array($dayOfWeek, $slotsPerCategory[$appointmentCategory->appointment_category_name]['days'] ?? [])) {
+            if (!in_array($dayOfWeek, $allowedDaysPerCategory[$appointmentCategory->appointment_category_name] ?? [])) {
                 return response()->json(['error' => 'Appointments are not available on this day for the selected category.'], 400);
-            }
-
-            // Count existing appointments on the selected date for the category
-            $appointmentsCount = Appointment::where('appointment_category_id', $appointmentCategoryId)
-                ->whereDate('appointment_date', $request->appointment_date)
-                ->count();
-
-            // Calculate the available slots
-            $totalSlots = $slotsPerCategory[$appointmentCategory->appointment_category_name]['slots'];
-            $availableSlots = $totalSlots - $appointmentsCount;
-
-            if ($availableSlots <= 0) {
-                return response()->json(['error' => 'No available slots for the selected category on this date. Please choose another date or category.'], 400);
             }
 
             // Check for the highest queue_number for the given appointment_date
