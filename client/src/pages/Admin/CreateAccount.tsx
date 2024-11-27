@@ -18,7 +18,7 @@ const CreateAccount: React.FC = () => {
         username: "",
         password: "",
         email: "",
-        role: "encoder",
+        role: "",
         barangay_name: "",
     });
     const [redirecting, setRedirecting] = useState(false);
@@ -41,16 +41,22 @@ const CreateAccount: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setErrorMessage({});
-
+        
         // 1. Validate required fields
         const missingFields: string[] = [];
         const formFields = [
             { name: "username", value: user.username! },
             { name: "email", value: user.email! },
             { name: "password", value: user.password! },
-            { name: "barangay_name", value: user.barangay_name! },
+            { name: "role", value: user.role! },
+            {
+                name: "barangay_name",
+                value: user.role === "encoder" ? user.barangay_name! : "",
+                required: user.role === "encoder",
+            },
         ];
 
+        
         // 2. Reset previous error messages
         const errorMessages = document.querySelectorAll('.error-message');
         errorMessages.forEach((errorMessage) => {
@@ -58,11 +64,14 @@ const CreateAccount: React.FC = () => {
         });
 
         formFields.forEach((field) => {
-            if (!field.value.trim()) {
-                missingFields.push(field.name); // Collect names of incomplete fields
+            if ((field.required && !field.value.trim()) || (!field.required && field.value.trim() === "")) {
+                if (field.name === "barangay_name" && user.role !== "encoder") {
+                    return; 
+                }
+                missingFields.push(field.name);
             }
         });
-
+        
         if (missingFields.length > 0) {
             // 3. Scroll to first missing field
             const firstMissingField = document.getElementById(missingFields[0]);
@@ -97,8 +106,13 @@ const CreateAccount: React.FC = () => {
                         <span class="font-semibold">Password:</span>
                         <span class="break-words">${user.password}</span>
 
-                        <span class="font-semibold">Barangay:</span>
-                        <span class="break-words">${user.barangay_name}</span>
+                        <span class="font-semibold">Role:</span>
+                        <span class="break-words capitalize">${user.role}</span>
+
+                        ${user.role === "encoder" ? `
+                            <span class="font-semibold">Barangay:</span>
+                            <span class="break-words capitalize">${user.barangay_name}</span>
+                        ` : ""}
                     </div>
                 </div>
             `,
@@ -133,7 +147,7 @@ const CreateAccount: React.FC = () => {
                     username: "",
                     password: "",
                     email: "",
-                    role: "encoder",
+                    role: "",
                     barangay_name: "",
                 });
                 
@@ -229,6 +243,9 @@ const CreateAccount: React.FC = () => {
                                 {errorMessage.password && (
                                     <p>{errorMessage.password}</p>
                                 )}
+                                {errorMessage.role && (
+                                    <p>{errorMessage.role}</p>
+                                )}
                                 {errorMessage.barangay_name && (
                                     <p>{errorMessage.barangay_name}</p>
                                 )}
@@ -310,31 +327,51 @@ const CreateAccount: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col mb-3 input-group">
-                        <label htmlFor="barangay_name" className="select-none">Barangay</label>
+                        <label htmlFor="role" className="select-none">Role</label>
                         <select
                             className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
-                            name="barangay_name"
-                            id="barangay_name"
-                            value={user.barangay_name}
+                            name="role"
+                            id="role"
+                            value={user.role}
                             onChange={handleChange}
                             required
                         >
                             {/* Can be replaced with the barangay values from the database */}
-                            <option hidden>Select Barangay</option>
-                            {isLoading ? (
-                                <option disabled>Loading...</option>
-                            ) : (
-                                barangays.map((barangay) => (
-                                    <option
-                                        key={barangay.barangay_id}
-                                        value={barangay.barangay_name}
-                                    >
-                                        {barangay.barangay_name}
-                                    </option>
-                                ))
-                            )}
+                            <option hidden>Select Role</option>
+                            <option value="admin - main">Admin - Main</option>
+                            <option value="admin - appointment">Admin - Appointment</option>
+                            <option value="encoder">Encoder</option>
                         </select>
                     </div>
+
+                    {user.role === "encoder" && (
+                        <div className="flex flex-col mb-3 input-group">
+                            <label htmlFor="barangay_name" className="select-none">Barangay</label>
+                            <select
+                                className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1"
+                                name="barangay_name"
+                                id="barangay_name"
+                                value={user.barangay_name}
+                                onChange={handleChange}
+                                required
+                            >
+                                {/* Can be replaced with the barangay values from the database */}
+                                <option hidden>Select Barangay</option>
+                                {isLoading ? (
+                                    <option disabled>Loading...</option>
+                                ) : (
+                                    barangays.map((barangay) => (
+                                        <option
+                                            key={barangay.barangay_id}
+                                            value={barangay.barangay_name}
+                                        >
+                                            {barangay.barangay_name}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                    )}
 
                     <button
                         className={`w-full p-2 my-5 font-bold text-white uppercase transition-all rounded-lg shadow-lg shadow-gray-400 bg-green hover:opacity-75 ${redirecting || isLoading ? "cursor-not-allowed" : ""}`}
