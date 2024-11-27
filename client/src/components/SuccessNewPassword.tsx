@@ -11,7 +11,7 @@ const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({
 
     const handleLoginRedirect = () => {
         // Navigate based on role
-        if (role === "admin") {
+        if (role.startsWith("admin")) {
             navigate("/admin/login");
         } else if (role === "encoder") {
             navigate("/barangay/login");
@@ -64,7 +64,7 @@ const SuccessNewPassword: React.FC<SuccessNewPasswordProps> = ({
                     </div>
                     <div className="flex justify-between gap-2">
                         <Link
-                            to={role === "admin" ? "/admin/login" : role === "encoder" ? "/barangay/login" : "/"}
+                            to={role.startsWith("admin") ? "/admin/login" : role === "encoder" ? "/barangay/login" : "/"}
                             className="transition-all text-[.7rem] sm:text-sm text-white w-full bg-green hover:bg-[#009900] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         >
                             Continue to Login

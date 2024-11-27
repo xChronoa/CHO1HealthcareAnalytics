@@ -50,7 +50,7 @@ const Login: React.FC<LoginProp> = ({ image }) => {
 
     // Redirect if the user is already authenticated
     if (user) {
-        const redirectPath = user.role === "admin" ? "/admin" : "/barangay";
+        const redirectPath = user.role.includes("admin") ? "/admin" : "/barangay";
         return <Navigate to={redirectPath} state={{ from: location }} replace />;
     }
 
