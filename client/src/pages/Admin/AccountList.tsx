@@ -125,7 +125,7 @@ const AccountList: React.FC = () => {
                                                 {user.status}
                                             </td>
                                             <td className="flex items-center justify-center gap-2 px-4 py-2 font-semibold uppercase align-center">
-                                                {user.role === "encoder" ? (
+                                                {user.role === "encoder" || user.role === "admin - appointment" ? (
                                                     <>
                                                         <button
                                                             onClick={() =>
@@ -205,7 +205,7 @@ const AccountList: React.FC = () => {
                                             <span className={`${user.status?.toLowerCase() === "disabled" ? "text-red-500" : "text-green"}`}>{user.status}</span>
                                         </div>
                                         <div className="flex gap-2">
-                                            {user.role === "encoder" ? (
+                                            {user.role === "encoder" || user.role === "admin - appointment" ? (
                                                 <>
                                                     <button
                                                         onClick={() =>
