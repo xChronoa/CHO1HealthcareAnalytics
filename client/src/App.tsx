@@ -72,19 +72,27 @@ function App() {
                             </Route>
 
                             {/* Admin Routes */}
-                            <Route element={<PrivateRoute allowedRoles={['admin']} />}>
+                            <Route element={<PrivateRoute allowedRoles={['admin - main', 'admin - appointment']} />}>
                                 <Route path="admin" element={<MainLayout sidebarConfig={{ type: 'admin' }} />}>
-                                    <Route index element={<Dashboard />} />
-                                    <Route path="reports" element={<Transaction />} />
-                                    <Route path="barangays" element={<BarangayList />} />
-                                    <Route path="appointments" element={<AppointmentList />} />
-                                    <Route path="manage" element={<ManageAccountLayout />}>
-                                        <Route index element={<ManageAccount />} />
-                                        <Route path="create" element={<CreateAccount />} />
-                                        <Route path="update" element={<UpdateAccount />} />
-                                        <Route path="accounts" element={<AccountList />} />
+                                    {/* Admin - Main: Routes for managing everything except appointments */}
+                                    <Route element={<PrivateRoute allowedRoles={['admin - main']} />}>
+                                        <Route index element={<Dashboard />} />
+                                        <Route path="reports" element={<Transaction />} />
+                                        <Route path="barangays" element={<BarangayList />} />
+                                        <Route path="manage" element={<ManageAccountLayout />}>
+                                            <Route index element={<ManageAccount />} />
+                                            <Route path="create" element={<CreateAccount />} />
+                                            <Route path="update" element={<UpdateAccount />} />
+                                            <Route path="accounts" element={<AccountList />} />
+                                        </Route>
+                                        <Route path="barangays/:barangayName/submitted" element={<SubmittedReports />} />
                                     </Route>
-                                    <Route path="barangays/:barangayName/submitted" element={<SubmittedReports />} />
+
+                                    {/* Admin - Appointment: Routes for managing appointments */}
+                                    <Route element={<PrivateRoute allowedRoles={['admin - appointment']} />}>
+                                        <Route path="appointments" element={<AppointmentList />} />
+                                        <Route path="edit/account" element={<UpdateAccount />} />
+                                    </Route>
                                 </Route>
                             </Route>
 
