@@ -153,10 +153,11 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
         borderColor: reportColors[key as string],
         backgroundColor: reportColors[key as string],
         tension: 0.1,
+        hidden: false,
     });
 
     // Chart data generation
-    const chartData = (filteredData: FamilyPlanningReport[], selectedOption: string): ChartData<"line"> => {
+    const chartData = (ageCategory: string, filteredData: FamilyPlanningReport[], selectedOption: string): ChartData<"line"> => {
         const datasets = [
             getDataset("current_users_beginning_month", filteredData),
             getDataset("new_acceptors_prev_month", filteredData),
@@ -167,7 +168,9 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
         ];
 
         const filteredDatasets = selectedOption === "All" 
-            ? datasets 
+        ? datasets 
+        : selectedOption === "Customized"
+            ? datasets.filter(dataset => visibilityState[ageCategory]?.[dataset.label] === false)
             : datasets.filter(dataset => dataset.label === selectedOption);
 
         return {
@@ -269,22 +272,32 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
         }));
     };
 
+    // Define initial state for dynamic category visibility
+    const [visibilityState, setVisibilityState] = useState<{ [key: string]: { [key: string]: boolean } }>({
+        "10-14": {
+        },
+        "15-19": {
+        },
+        "20-29": {
+        },
+    });
+
     useEffect(() => {
         if (options) {
             const fpChartData = {
-                title: `Barangay ${barangay} - Family Planning Chart - ${year}`,
+                title: `${barangay === "all" ? "All Barangay" : `Barangay ${capitalize(barangay)}`} - Family Planning Chart - ${year}`,
                 "10-14": {
-                    data: chartData(data.filter(entry => entry.age_category === "10-14"), selectedOptions["10-14"] || "All"),
+                    data: chartData("10-14", data.filter(entry => entry.age_category === "10-14"), selectedOptions["10-14"] || "All"),
                     options: options,
                     selectedOption: selectedOptions["10-14"] || "All",
                 },
                 "15-19": {
-                    data: chartData(data.filter(entry => entry.age_category === "15-19"), selectedOptions["15-19"] || "All"),
+                    data: chartData("15-19", data.filter(entry => entry.age_category === "15-19"), selectedOptions["15-19"] || "All"),
                     options: options,
                     selectedOption: selectedOptions["15-19"] || "All",
                 },
                 "20-49": {
-                    data: chartData(data.filter(entry => entry.age_category === "20-49"), selectedOptions["20-49"] || "All"),
+                    data: chartData("20-49", data.filter(entry => entry.age_category === "20-49"), selectedOptions["20-49"] || "All"),
                     options: options,
                     selectedOption: selectedOptions["20-49"] || "All",
                 },
@@ -297,12 +310,28 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
             // Store the data in localStorage
             localStorage.setItem('charts', JSON.stringify(charts));
         }
-    }, [selectedOptions, options, data, barangay, year]);
+    }, [selectedOptions, options, data, barangay, year, visibilityState]);
 
     
     useEffect(() => {
             setIsButtonDisabled(!(data.length > 0));
     }, [data, barangay, year])
+
+    // Handler for checkbox change - dynamically handles any category and key visibility
+    const handleCheckboxChange = (subCategory: string, key: string) => {
+        setVisibilityState((prevState) => {
+            const subCategoryVisibility = prevState[subCategory] || {};
+
+            return {
+                ...prevState,
+                [subCategory]: {
+                    ...subCategoryVisibility,
+                    // Toggle the visibility of the key or set it to true if undefined
+                    [key]: subCategoryVisibility[key] !== undefined ? !subCategoryVisibility[key] : false,
+                },
+            };
+        });
+    };
 
     return (
         <>
@@ -328,10 +357,10 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                 <div
                                     key={index}
                                     className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                        ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                                        ${currentSelectedOption === "All" || currentSelectedOption === "Customized" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                                 >   
                                     {/* Resize Icon */}
-                                    {currentSelectedOption !== "All" && (
+                                    {currentSelectedOption !== "All" && currentSelectedOption !== "Customized" && (
                                         <FontAwesomeIcon
                                             icon={isMaximized ? faMinimize : faMaximize}
                                             className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
@@ -355,6 +384,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                                 className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                             >
                                                 <option value="All">All</option>
+                                                <option value="Customized">Customized</option>
                                                 {getLabels(filteredData).map(({ label }, index) => (
                                                     <option key={index} value={label}>
                                                         {label}
@@ -364,13 +394,13 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                         </div>
 
                                         <Line
-                                            data={chartData(filteredData, currentSelectedOption)}
+                                            data={chartData(ageCategory, filteredData, currentSelectedOption)}
                                             options={{
                                                 ...options,
                                                 plugins: {
                                                     ...options.plugins,
                                                     legend: {
-                                                        display: currentSelectedOption !== "All", // Hide legend if "All" is selected
+                                                        display: currentSelectedOption !== "All" && currentSelectedOption !== "Customized", // Hide legend if "All" is selected
                                                     },
                                                     tooltip: {
                                                         ...options.plugins.tooltip,
@@ -414,7 +444,7 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                     </div>
 
                                     {/* Legend */}
-                                    {currentSelectedOption === "All" && (
+                                    {currentSelectedOption === "All" ? (
                                         <div className="h-full rounded-lg legend-container shadow-md shadow-[#a3a19d]">
                                             <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
@@ -429,6 +459,35 @@ const FamilyPlanningChart: React.FC<FamilyPlanningChartProps> = ({
                                                             maxHeight: '1rem',
                                                         }}></span>
                                                         <span className="text-xs">{label}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : currentSelectedOption === "Customized" && (
+                                        <div className="h-full rounded-lg legend-container shadow-md shadow-[#a3a19d]">
+                                            <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                                            <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
+                                                {getLabels(filteredData).map(({ label, color }, index) => (
+                                                    <div 
+                                                        key={index} 
+                                                        className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                        onClick={() => handleCheckboxChange(ageCategory, label)}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={visibilityState[ageCategory]?.[label] === false}
+                                                            className="form-checkbox cursor-pointer"
+                                                            readOnly
+                                                        />
+                                                        <span className="w-12 h-4 rounded-sm cursor-pointer" style={{
+                                                            backgroundColor: color,
+                                                            minWidth: '1rem',
+                                                            minHeight: '1rem', 
+                                                            maxWidth: '1rem',
+                                                            maxHeight: '1rem',
+                                                        }}></span>
+                                                        <span className="text-xs cursor-pointer">{label}</span>
                                                     </div>
                                                 ))}
                                             </div>

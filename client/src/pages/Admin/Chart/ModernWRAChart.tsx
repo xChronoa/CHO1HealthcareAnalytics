@@ -36,7 +36,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
     setIsButtonDisabled
 }) => {
     const { wraData, error, fetchWra } = useWra();
-    const [isMaximized, setIsMaximized] = useState<boolean>(false);
+    const [isMaximized, setIsMaximized] = useState<boolean>(true);
     const [selectedOption, setSelectedOption] = useState("All");
 
     useEffect(() => {
@@ -67,18 +67,47 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
     const generateColor = (): string => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 
     const ageColors = useMemo(() => {
+        // Check if colors are stored in sessionStorage
+        const storedColors = sessionStorage.getItem("ageColors");
+
+        if (storedColors) {
+            // If colors exist in sessionStorage, parse and return them
+            return JSON.parse(storedColors);
+        }
+
+        // If no colors are stored, generate new colors
         const colors: { [key: string]: string } = {};
         ageCategories.forEach((category) => {
             colors[category] = generateColor();
         });
+
+        // Store the generated colors in sessionStorage
+        sessionStorage.setItem("ageColors", JSON.stringify(colors));
+
         return colors;
     }, [ageCategories]);
 
     const chartData = (): ChartData<"line"> => {
-        // Filter age categories based on the selected option
+        // If selectedOption is "Customized", filter the datasets based on visibility
+        if (selectedOption === "Customized") {
+            return {
+                labels,
+                datasets: ageCategories.map((category) => ({
+                    label: capitalize(category),
+                    data: aggregateData(category),
+                    fill: false,
+                    borderColor: ageColors[category],
+                    backgroundColor: ageColors[category],
+                    tension: 0.1,
+                    hidden: visibilityState[category] === false || visibilityState[category] === undefined, // Toggle visibility
+                })),
+            };
+        }
+    
+        // If selectedOption is "All", include all datasets regardless of age category selection
         const filteredAgeCategories = selectedOption === "All"
-            ? ageCategories
-            : ageCategories.filter((category) => category === selectedOption);
+            ? ageCategories // Don't filter any categories when "All" is selected
+            : ageCategories.filter((category) => category === selectedOption); // Filter based on selected option
     
         return {
             labels,
@@ -89,6 +118,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                 borderColor: ageColors[category],
                 backgroundColor: ageColors[category],
                 tension: 0.1,
+                hidden: false,
             })),
         };
     };
@@ -126,7 +156,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                 },
             },
             legend: {
-                display: selectedOption !== "All",
+                display: selectedOption !== "All" && selectedOption !== "Customized",
             },
         },
         scales: {
@@ -147,11 +177,12 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
     };
 
     const toggleSize = () => setIsMaximized(prev => !prev);
+    const [visibilityState, setVisibilityState] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         if(options) {
             const wraChartData = {
-                title: `Barangay ${barangay} - Modern WRA Chart - ${year}`,
+                title:  `${barangay === "all" ? "All Barangay" : `Barangay ${capitalize(barangay)}`} - Modern FP Unmet Need Chart - ${year}`,
                 data: chartData(), // Function that returns the data for male chart
                 options: options         // Male chart options object
             };
@@ -163,11 +194,21 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
             // Store the data in localStorage
             localStorage.setItem('charts', JSON.stringify(charts));
         }
-    }, [selectedOption, options, wraData, barangay, year])
+    }, [selectedOption, options, wraData, barangay, year, visibilityState])
 
     useEffect(() => {
         setIsButtonDisabled(!(wraData.length > 0));
-    }, [wraData, barangay, year])
+    }, [wraData, barangay, year, visibilityState])
+
+    // Define initial state for visibility for dynamic categories
+
+    // Handler for checkbox change - dynamically handles any label and category
+    const handleCheckboxChange = (label: string) => {
+        setVisibilityState((prevState) => ({
+            ...prevState,
+            [label]: prevState[label] !== undefined ? !prevState[label] : true, // Toggle or set to true if undefined
+        }));
+    };
 
     return (
         <>
@@ -181,13 +222,13 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                 wraData.length > 0 ? (
                     <div 
                         className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg md:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
-                                    ${selectedOption === "All" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
+                                    ${selectedOption === "All" || selectedOption === "Customized" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
                     >
                         <>
-                            {selectedOption !== "All" && (
+                            {selectedOption !== "All" && selectedOption !== "Customized" && (
                                 <FontAwesomeIcon
                                     icon={isMaximized ? faMinimize : faMaximize}
-                                    className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125"
+                                    className="absolute top-0 right-0 m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon"
                                     onClick={toggleSize}
                                 />
                             )}
@@ -201,6 +242,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                         className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                                     >
                                         <option value="All">All</option>
+                                        <option value="Customized">Customized</option>
                                         {ageCategories.map((category, index) => (
                                             <option key={index} value={category}>
                                                 {capitalize(category)}
@@ -216,7 +258,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                 />
                             </div>
         
-                            {selectedOption === "All" && (
+                            {selectedOption === "All" ? (
                                 <div className="h-full legend-container shadow-md shadow-[#a3a19d] rounded-lg">
                                     <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
                                     <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
@@ -226,6 +268,36 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                                 <span className="text-xs sm:text-sm text-nowrap">{dataset.label} years old</span>
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+                            ) : selectedOption === "Customized" && (
+                                <div className="h-full legend-container shadow-md shadow-[#a3a19d] rounded-lg">
+                                    <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+                                    <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
+                                    {ageCategories.map((category, index) => {
+                                        // Find the dataset that corresponds to the category
+                                        const dataset = chartData().datasets.find((ds) => ds.label === capitalize(category));
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                onClick={() => handleCheckboxChange(category)} // Handles the click event to toggle state
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={visibilityState[category]} // This binds the checkbox to the visibilityState
+                                                    className="form-checkbox cursor-pointer"
+                                                    onChange={() => handleCheckboxChange(category)} // Ensure the checkbox toggles when clicked
+                                                />
+                                                <span
+                                                    className="w-12 h-4 rounded-sm"
+                                                    style={{ backgroundColor: dataset?.borderColor?.toString() }} // Ensure dataset exists
+                                                ></span>
+                                                <span className="text-xs sm:text-sm text-nowrap">{dataset?.label} years old</span>
+                                            </div>
+                                        );
+                                    })}
                                     </div>
                                 </div>
                             )}

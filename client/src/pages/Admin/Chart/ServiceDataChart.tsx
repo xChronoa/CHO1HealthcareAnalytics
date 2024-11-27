@@ -241,11 +241,13 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             if (!dataForIndicator.length) return null;
     
             // Check if the current indicator matches the selected option
-            const isSelected = currentSelectedOption === "All" || indicator === currentSelectedOption;
+            const isSelected = currentSelectedOption === "All" || indicator === currentSelectedOption || currentSelectedOption === "Customized";
             if (!isSelected) return null;
     
+            const visibilityKey = ageCategory || valueType || "Unknown Category"; // Default to "Unknown Category" if neither is provided
+
             // Create the dataset
-            return {
+            const dataset = {
                 label: indicator || "Unknown Indicator",
                 data: labels.map((label) =>
                     dataForIndicator.reduce(
@@ -258,7 +260,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 borderColor: indicatorColors[indicator || "Unknown Indicator"],
                 backgroundColor: indicatorColors[indicator || "Unknown Indicator"],
                 tension: 0.1,
+                hidden: currentSelectedOption === "Customized" ? visibilityState[visibilityKey]?.[indicator || "Unknown Indicator"] !== false : false,
             };
+
+            return dataset;
         }).filter(dataset => dataset !== null); // Filter out null datasets
     };
 
@@ -269,6 +274,26 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
         maxWidth: '1rem', // Prevents squishing larger than intended
         maxHeight: '1rem', // Prevents squishing larger than intended
     })
+
+    // Define initial state with dynamic first key
+    const [visibilityState, setVisibilityState] = useState<{ [category: string]: { [key: string]: boolean } }>({});
+
+    // Handler for checkbox change - dynamically handles any category and key visibility
+    const handleCheckboxChange = (category: string, key: string) => {
+        setVisibilityState((prevState) => {
+            // If the category doesn't exist, initialize it with an empty object
+            const categoryVisibility = prevState[category] || {};
+
+            return {
+                ...prevState,
+                [category]: {
+                    ...categoryVisibility,
+                    // Toggle the visibility of the key or set it to true if undefined
+                    [key]: categoryVisibility[key] !== undefined ? !categoryVisibility[key] : false,
+                },
+            };
+        });
+    };
 
     const renderCharts = () => {
         const hasAgeCategory = filteredData.some((data) => data.age_category);
@@ -282,6 +307,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             // Generate full datasets for dropdown options
             const fullDatasets = ageCategories.map((ageCategory) => {
                 const validAgeCategory = ageCategory || "Unknown Age Category";
+
                 return {
                     label: validAgeCategory,
                     data: filteredData
@@ -297,27 +323,34 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
 
             // Filtered datasets for display based on selected option
             const datasets = fullDatasets.filter((dataset) => {
-                // Return the dataset if "All" is selected or if it matches the selected age category
+                // Include the dataset if "All" is selected, or it matches the selected option, or if "Customized" is selected
                 return currentOption === "All" ||
-                    dataset.label === currentOption;
+                    dataset.label === currentOption ||
+                    currentOption === "Customized";
             }).map((dataset) => {
-
-                // Adjusted label
-
+                // Adjusted label for display
                 const adjustedLabel = dataset.label === "12 and below" 
                                         ? "12 years old and below" 
                                         : dataset.label === "20 and above" 
                                             ? "20 years old and above" 
-                                            : `${dataset.label} years old`
+                                            : `${dataset.label} years old`;
 
-                // Structure the dataset in the required format
+                // Data generation based on the selected option
+                const data = currentOption === "Customized"
+                    ? filteredData
+                        .filter((data) => data.age_category === dataset.label) // Use dataset.label for filtering
+                        .map((data) => data.value)
+                    : filteredData
+                        .filter((data) => data.age_category === dataset.label) // Default logic for non-customized
+                        .map((data) => data.value);
+
+                // Return the dataset structure, adding the hidden property only for "Customized"
                 return {
                     label: adjustedLabel,
-                    data: filteredData
-                        .filter((data) => data.age_category === dataset.label) // Filter based on the label
-                        .map((data) => data.value),
+                    data: data,
                     borderColor: dataset.borderColor,
                     backgroundColor: dataset.backgroundColor,
+                    hidden: currentOption === "Customized" && visibilityState[dataset.label]?.[dataset.label] === false, // Hide the dataset when customized and visibilityState is false
                 };
             });
 
@@ -327,10 +360,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             return (
                 <div 
                     className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg sm:flex-row transition-all w-full shadow-md shadow-[#a3a19d] 
-                        ${currentOption === "All" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
+                        ${currentOption === "All" || currentOption === "Customized" ? "sm:w-full" : isMaximized ? "sm:w-full" : "sm:w-9/12"}`}
                 >
                     {/* Resize Icon */}
-                    {currentOption !== "All" && (
+                    {currentOption !== "All" && currentOption !== "Customized" && (
                         <FontAwesomeIcon
                             icon={isMaximized ? faMinimize : faMaximize}
                             className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon lg:block"
@@ -352,6 +385,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                             >
                                 <option value="All">All</option>
+                                <option value="Customized">Customized</option>
                                 {fullDatasets.map(({ label }, index) => (
                                     <option key={index} value={label}>
                                         {label === "12 and below" ? "12 years old and below"
@@ -369,7 +403,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 plugins: {
                                     ...options.plugins,
                                     legend: {
-                                        display: currentOption !== "All", // Hide legend if "All" is selected
+                                        display: currentOption !== "All" && currentOption !== "Customized", // Hide legend if "All" is selected
                                     }
                                 }
                             }}
@@ -377,7 +411,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     </div>
 
                     {/* Legend */}
-                    {currentOption === "All" && (
+                    {currentOption === "All" ? (
                         <div className="legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden border-r h-full xl:max-w-xs">
                             <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
@@ -397,6 +431,36 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                                 }
                                             </span>
                                         </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : currentOption === "Customized" && (
+                        <div className="h-full rounded-lg legend-container shadow-md shadow-[#a3a19d]">
+                            <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                            <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
+                                {fullDatasets.map((dataset, index) => (
+                                    <div 
+                                        key={index} 
+                                        className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                        onClick={() => handleCheckboxChange(dataset.label, dataset.label)}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={visibilityState[dataset.label]?.[dataset.label] !== false}
+                                            className="form-checkbox cursor-pointer"
+                                            readOnly
+                                        />
+                                        <span className="w-12 h-4 rounded-sm shrink-0" style={{backgroundColor: dataset.backgroundColor}}></span>
+                                        <span className="text-sm whitespace-nowrap">
+                                            {dataset.label === "12 and below"
+                                                ? "12 years old and below"
+                                                : dataset.label === "20 and above"
+                                                    ? "20 years old and below"
+                                                    : `${dataset.label} years old`
+                                            }
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -440,10 +504,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         return (
                             <div key={ageCategory} 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                                ${currentSelectedOption === "All" || currentSelectedOption === "Customized" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
-                                {currentSelectedOption !== "All" && (
+                                {currentSelectedOption !== "All" && currentSelectedOption !== "Customized" && (
                                     <FontAwesomeIcon
                                         icon={isMaximized ? faMinimize : faMaximize}
                                         className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon xl:block"
@@ -464,6 +528,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
+                                            <option value="Customized">Customized</option>
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
                                                 <option key={index} value={label}>
                                                     {label}
@@ -481,7 +546,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             plugins: {
                                                 ...options.plugins,
                                                 legend: {
-                                                    display: currentSelectedOption !== "All", // Hide legend if "All" is selected
+                                                    display: currentSelectedOption !== "All" && currentSelectedOption !== "Customized", // Hide legend if "All" is selected
                                                 }
                                             }
                                         }}
@@ -489,13 +554,36 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 </div>
                                 
                                 {/* Legend */}
-                                {currentSelectedOption === "All" && (
+                                {currentSelectedOption === "All" ? (
                                     <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
+                                                    <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
+                                                    <span className="text-xs text-nowrap">{label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : currentSelectedOption === "Customized" && (
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                        <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+            
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
+                                            {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    onClick={() => handleCheckboxChange(ageCategory, label)}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={visibilityState[ageCategory]?.[label] === false}
+                                                        className="form-checkbox cursor-pointer"
+                                                        readOnly
+                                                    />
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
                                                     <span className="text-xs text-nowrap">{label}</span>
                                                 </div>
@@ -525,10 +613,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         return (
                             <div key={valueType} 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                                ${currentSelectedOption === "All" || currentSelectedOption === "Customized" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
-                                {currentSelectedOption !== "All" && (
+                                {currentSelectedOption !== "All" && currentSelectedOption !== "Customized" && (
                                     <FontAwesomeIcon
                                         icon={isMaximized ? faMinimize : faMaximize}
                                         className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon xl:block"
@@ -549,6 +637,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
+                                            <option value="Customized">Customized</option>
                                             {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (
                                                 <option key={index} value={label}>
                                                     {label}
@@ -566,7 +655,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             plugins: {
                                                 ...options.plugins,
                                                 legend: {
-                                                    display: currentSelectedOption !== "All", // Hide legend if "All" is selected
+                                                    display: currentSelectedOption !== "All" && currentSelectedOption !== "Customized", // Hide legend if "All" is selected
                                                 }
                                             }
                                         }}
@@ -574,13 +663,36 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 </div>
                                 
                                 {/* Legend */}
-                                {currentSelectedOption === "All" && (
+                                {currentSelectedOption === "All" ? (
                                     <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
                                             {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                                 <div key={index} className="flex items-center gap-2 mb-2">
+                                                    <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
+                                                    <span className="text-xs text-nowrap">{label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : currentSelectedOption === "Customized" && (
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                        <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+            
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
+                                            {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    onClick={() => handleCheckboxChange(valueType, label)}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={visibilityState[valueType]?.[label] === false}
+                                                        className="form-checkbox cursor-pointer"
+                                                        readOnly
+                                                    />
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
                                                     <span className="text-xs text-nowrap">{label}</span>
                                                 </div>
@@ -613,10 +725,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 return (
                     <div key={ageCategory} 
                         className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                        ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                        ${currentSelectedOption === "All" || currentSelectedOption === "Customized" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                     >
                         {/* Resize Icon */}
-                        {currentSelectedOption !== "All" && (
+                        {currentSelectedOption !== "All" && currentSelectedOption !== "Customized" && (
                             <FontAwesomeIcon
                                 icon={isMaximized ? faMinimize : faMaximize}
                                 className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon lg:block"
@@ -637,6 +749,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
                                     <option value="All">All</option>
+                                    <option value="Customized">Customized</option>
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
                                         <option key={index} value={label}>
                                             {label}
@@ -654,7 +767,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     plugins: {
                                         ...options.plugins,
                                         legend: {
-                                            display: currentSelectedOption !== "All", // Hide legend if "All" is selected
+                                            display: currentSelectedOption !== "All" && currentSelectedOption !== "Customized", // Hide legend if "All" is selected
                                         }
                                     }
                                 }}
@@ -662,7 +775,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         </div>
 
                         {/* Legend */}
-                        {currentSelectedOption === "All" && (
+                        {currentSelectedOption === "All" ? (
                             <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
@@ -670,6 +783,29 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
                                             <span className="inline-block w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
+                                            <span className="text-xs">{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : currentSelectedOption === "Customized" && (
+                            <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+    
+                                <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
+                                    {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
+                                        <div 
+                                            key={index} 
+                                            className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                            onClick={() => handleCheckboxChange(ageCategory, label)}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={visibilityState[ageCategory]?.[label] === false}
+                                                className="form-checkbox cursor-pointer"
+                                                readOnly
+                                            />
+                                            <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
                                             <span className="text-xs">{label}</span>
                                         </div>
                                     ))}
@@ -697,10 +833,10 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 return (
                     <div key={valueType} 
                         className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                        ${currentSelectedOption === "All" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
+                        ${currentSelectedOption === "All" || currentSelectedOption === "Customized" ? "xl:w-full" : isMaximized ? "xl:w-full" : "xl:w-9/12"}`}
                     >
                         {/* Resize Icon */}
-                        {currentSelectedOption !== "All" && (
+                        {currentSelectedOption !== "All" && currentSelectedOption !== "Customized" && (
                             <FontAwesomeIcon
                                 icon={isMaximized ? faMinimize : faMaximize}
                                 className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer hover:text-green hover:scale-125 resize-icon xl:block"
@@ -721,6 +857,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     className="flex-1 px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
                                     <option value="All">All</option>
+                                    <option value="Customized">Customized</option>
                                     {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (
                                         <option key={index} value={label}>
                                             {label}
@@ -738,7 +875,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     plugins: {
                                         ...options.plugins,
                                         legend: {
-                                            display: currentSelectedOption !== "All", // Hide legend if "All" is selected
+                                            display: currentSelectedOption !== "All" && currentSelectedOption !== "Customized", // Hide legend if "All" is selected
                                         }
                                     }
                                 }}
@@ -746,13 +883,36 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         </div>
                         
                         {/* Legend */}
-                        {currentSelectedOption === "All" && (
+                        {currentSelectedOption === "All" ? (
                             <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                 <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
                                     {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                         <div key={index} className="flex items-center gap-2 mb-2">
+                                            <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
+                                            <span className="text-xs">{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : currentSelectedOption === "Customized" && (
+                            <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByIndicator(null, valueType).length > 13 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+    
+                                <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
+                                    {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
+                                        <div 
+                                            key={index} 
+                                            className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                            onClick={() => handleCheckboxChange(valueType, label)}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={visibilityState[valueType]?.[label] === false}
+                                                className="form-checkbox cursor-pointer"
+                                                readOnly
+                                            />
                                             <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
                                             <span className="text-xs">{label}</span>
                                         </div>
@@ -893,7 +1053,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 });
 
                 const serviceDataChart = {
-                    title: `Barangay ${barangay} - ${selectedService} Planning Chart - ${year}`,
+                    title: `${barangay === "all" ? "All Barangay" : `Barangay ${capitalize(barangay)}`} - ${selectedService} Planning Chart - ${year}`,
                     "Teenage Pregnancy": {
                         data: { labels: labels, datasets: datasets  },
                         options: options,        // Female chart options object
@@ -909,7 +1069,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 localStorage.setItem('charts', JSON.stringify(charts));
             } else {
                 const serviceDataChart = {
-                    title: `Barangay ${barangay} - ${selectedService} Planning Chart - ${year}`,
+                    title: `${barangay === "all" ? "All Barangay" : `Barangay ${capitalize(barangay)}`} - ${selectedService} Planning Chart - ${year}`,
                     "10-14": {
                         data: {labels: labels, datasets: aggregateDataByCurrentOption("10-14", null, selectedOptions["10-14"] || "All")},
                         options: options,
@@ -926,19 +1086,19 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                         selectedOption: selectedOptions["20-49"] || "All",
                     },
                     male: {
-                        data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "male", selectedOptions["male"] || "All")}, // Function that returns the data for male chart
+                        data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "male",selectedOptions["male"] || "All")}, // Function that returns the data for male chart
                         options: options,         // Male chart options object
-                        selectedOption: selectedOptions['male'] || "All",
+                        selectedOption: selectedOptions["male"] || "All",
                     },
                     female: {
                         data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "female", selectedOptions["female"] || "All")}, // Function that returns the data for female chart
                         options: options,        // Female chart options object
-                        selectedOption: selectedOptions['female'] || "All",
+                        selectedOption: selectedOptions["female"] || "All",
                     },
                     total: {
                         data: {labels: labels, datasets: aggregateDataByCurrentOption(null, "total", selectedOptions["total"] || "All")}, // Function that returns the data for female chart
                         options: options,        // Female chart options object
-                        selectedOption: selectedOptions['total'] || "All",
+                        selectedOption: selectedOptions["total"] || "All",
                     },
                 };
         
@@ -950,7 +1110,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                 localStorage.setItem('charts', JSON.stringify(charts));
             }
         }
-    }, [selectedService, selectedOptions, options, serviceData]);
+    }, [selectedService, selectedOptions, options, serviceData, visibilityState]);
 
     useEffect(() => {
         if(selectedService !== "Family Planning" && selectedService !== "Modern FP Unmet Need") {

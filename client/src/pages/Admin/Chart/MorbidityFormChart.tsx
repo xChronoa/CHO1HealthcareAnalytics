@@ -44,8 +44,8 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     const [selectedOptionMale, setSelectedOptionMale] = useState<string>("All");
     const [selectedOptionFemale, setSelectedOptionFemale] = useState<string>("All");
     const [maximizedCharts, setMaximizedCharts] = useState<{ [key: string]: boolean }>({
-        male: false,
-        female: false,
+        male: true,
+        female: true,
     });
     
     // Custom Hooks
@@ -91,6 +91,12 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             backgroundColor: diseaseColors[disease],
             tension: 0.1,
             gender: key,
+            hidden:
+                (key === "male" && selectedOptionMale === "Customized"
+                    ? visibilityMale[disease] === false || visibilityMale[disease] === undefined
+                    : key === "female" && selectedOptionFemale === "Customized"
+                    ? visibilityFemale[disease] === false || visibilityFemale[disease] === undefined
+                    : false),
         }));
 
         return datasets;
@@ -99,10 +105,22 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
     const getChartData = (key: "male" | "female") => {
         const selectedOption = key === "male" ? selectedOptionMale : selectedOptionFemale;
         const datasets = aggregateDataByDisease(key);
-
-        // Filter datasets based on the selected option
-        const filteredDatasets = selectedOption === "All" ? datasets : datasets.filter(dataset => dataset.label === selectedOption);
-
+    
+        // If selectedOption is "Customized", filter the datasets based on visibility
+        if (selectedOption === "Customized") {
+            const visibilityState = key === "male" ? visibilityMale : visibilityFemale;
+            const visibleDatasets = datasets.filter(dataset => visibilityState[dataset.label] !== false);
+            return {
+                labels,
+                datasets: visibleDatasets,
+            };
+        }
+    
+        // If selectedOption is "All" or specific dataset, apply filtering normally
+        const filteredDatasets = selectedOption === "All"
+            ? datasets
+            : datasets.filter(dataset => dataset.label === selectedOption);
+    
         return {
             labels,
             datasets: filteredDatasets,
@@ -189,7 +207,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                 },
             },
             legend: {
-                display: selectedOptionMale !== "All",
+                display: selectedOptionMale !== "All" && selectedOptionMale !== "Customized",
             },
         },
         scales: {
@@ -273,7 +291,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                 },
             },
             legend: {
-                display: selectedOptionFemale !== "All",
+                display: selectedOptionFemale !== "All" && selectedOptionFemale !== "Customized",
             },
         },
         scales: {
@@ -338,9 +356,29 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
 
     const { isMinimized } = useSidebarContext();
 
+
+    const [visibilityMale, setVisibilityMale] = useState<{
+        [key: string]: boolean;
+    }>({});
+    const [visibilityFemale, setVisibilityFemale] = useState<{
+        [key: string]: boolean;
+    }>({});
+
+    const handleCheckboxChange = (
+        label: string,
+        gender: "male" | "female",
+    ) => {
+        const setVisibilityForGender = gender === "male" ? setVisibilityMale : setVisibilityFemale;
+
+        setVisibilityForGender((prevState) => ({
+            ...prevState,
+            [label]: !prevState[label], // Toggle between true and false
+        }));
+    };
+    
     return (
         <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
-            <h1 id="chart-title" className={`self-center w-full ${isMinimized ? "lg:w-11/12" : "w-full"} p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green`} ref={textRef}>Morbidity Report</h1>
+            <h1 id="chart-title" className={`self-center w-full lg:w-11/12 ${isMinimized ? "lg:w-11/12" : "w-full"} p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green`} ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -350,14 +388,14 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className={`flex flex-col items-center w-full gap-8 ${isMinimized ? "lg:w-11/12" : "w-full"} print:w-full chart-container`}>
+                        <div className={`flex flex-col items-center w-full lg:w-11/12 gap-8 ${isMinimized ? "lg:w-11/12" : "w-full"} print:w-full chart-container`}>
                             {/* Male Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md print:w-full shadow-[#a3a19d] 
-                                            ${selectedOptionMale === "All" ? "xl:w-full" : maximizedCharts.male ? "xl:w-full" : "xl:w-9/12"}`}
+                                            ${selectedOptionMale === "All" || selectedOptionMale === "Customized" ? "xl:w-full" : maximizedCharts.male ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
-                                {selectedOptionMale !== "All" && 
+                                {selectedOptionMale !== "All" && selectedOptionMale !== "Customized" && 
                                     <FontAwesomeIcon
                                         icon={maximizedCharts.male ? faMinimize : faMaximize}
                                         className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer resize-icon xl:block hover:text-green hover:scale-125"
@@ -376,6 +414,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                             className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
+                                            <option value="Customized">Customized</option>
                                             {aggregateDataByDisease("male").map((dataset, index) => (
                                                 <option key={index} value={dataset.label}>
                                                     {dataset.label}
@@ -393,7 +432,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                 </div>
 
                                 {/* Legend */}
-                                {selectedOptionMale === "All" && (
+                                {selectedOptionMale === "All" ? (
                                     <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${getChartData("male").datasets.length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
@@ -406,6 +445,37 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                             ))}
                                         </div>
                                     </div>
+                                ) : selectedOptionMale === "Customized" && (
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByDisease("male").length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                        <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByDisease("male").length > 10 ? "pb-10" : null}`}>
+                                            {aggregateDataByDisease("male").map((dataset, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    onClick={() =>
+                                                        handleCheckboxChange(
+                                                            dataset.label,
+                                                            "male",
+                                                        )
+                                                    }
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            visibilityMale[
+                                                                dataset.label
+                                                            ]
+                                                        }
+                                                        className="form-checkbox cursor-pointer"
+                                                    />
+                                                    <span className="w-6 h-4 rounded-sm cursor-pointer" style={{ backgroundColor: dataset.borderColor }}></span>
+                                                    <span className="text-xs cursor-pointer">{dataset.label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
             
@@ -414,10 +484,10 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                             {/* Female Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md shadow-[#a3a19d]
-                                            ${selectedOptionFemale === "All" ? "xl:w-full" : maximizedCharts.female ? "xl:w-full" : "xl:w-9/12"}`}
+                                            ${selectedOptionFemale === "All" || selectedOptionFemale === "Customized" ? "xl:w-full" : maximizedCharts.female ? "xl:w-full" : "xl:w-9/12"}`}
                             >
                                 {/* Resize Icon */}
-                                {selectedOptionFemale !== "All" && 
+                                {selectedOptionFemale !== "All" && selectedOptionFemale !== "Customized" && 
                                     <FontAwesomeIcon
                                         icon={maximizedCharts.female ? faMinimize : faMaximize}
                                         className="absolute top-0 right-0 hidden m-5 text-2xl transition-all cursor-pointer xl:block hover:text-green hover:scale-125 resize-icon"
@@ -436,6 +506,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                             className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
                                             <option value="All">All</option>
+                                            <option value="Customized">Customized</option>
                                             {aggregateDataByDisease("female").map((dataset, index) => (
                                                 <option key={index} value={dataset.label}>
                                                     {dataset.label}
@@ -452,7 +523,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                 </div>
 
                                 {/* Legend */}
-                                {selectedOptionFemale === "All" && (
+                                {selectedOptionFemale === "All" ? (
                                     <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${getChartData("female").datasets.length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
@@ -461,6 +532,37 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                                 <div key={index} className="flex items-center gap-2 mb-2">
                                                     <span className="w-6 h-4 rounded-sm" style={{ backgroundColor: dataset.borderColor }}></span>
                                                     <span className="text-xs">{dataset.label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : selectedOptionFemale === "Customized" && (
+                                    <div className={`legend-container rounded-lg shadow-md shadow-[#a3a19d] overflow-hidden ${aggregateDataByDisease("female").length > 10 ? "h-56 md:h-80 xl:h-[28rem] lg:h-[25rem]" : "h-fit"} border-r xl:max-w-xs`}>
+                                        <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
+
+                                        <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByDisease("female").length > 10 ? "pb-10" : null}`}>
+                                            {aggregateDataByDisease("female").map((dataset, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    onClick={() =>
+                                                        handleCheckboxChange(
+                                                            dataset.label,
+                                                            "female",
+                                                        )
+                                                    }
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            visibilityFemale[
+                                                                dataset.label
+                                                            ]
+                                                        }
+                                                        className="form-checkbox cursor-pointer"
+                                                    />
+                                                    <span className="w-6 h-4 rounded-sm cursor-pointer" style={{ backgroundColor: dataset.borderColor }}></span>
+                                                    <span className="text-xs cursor-pointer">{dataset.label}</span>
                                                 </div>
                                             ))}
                                         </div>
