@@ -99,11 +99,11 @@ const UpdateAccount: React.FC = () => {
                     title: "Account Updated!",
                     text: "The account details were successfully updated.",
                     icon: "success",
-                    confirmButtonText: `${userDetails && userDetails.role === "admin" ? "Go to Accounts List" : "Ok"}`,
+                    confirmButtonText: `${userDetails && userDetails.role === "admin - main" ? "Go to Accounts List" : "Ok"}`,
                     customClass: {
                         confirmButton: "transition-all bg-blue-400 text-white px-4 py-2 rounded-md hover:opacity-75",
                     }
-                }).then(() => navigate(`${userDetails && userDetails.role === "admin" ? "/admin/manage/accounts" : "/barangay"}`));
+                }).then(() => navigate(`${userDetails && userDetails.role === "admin - main" ? "/admin/manage/accounts" : "/barangay"}`));
             }
         }
     };
