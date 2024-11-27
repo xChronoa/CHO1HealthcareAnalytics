@@ -92,42 +92,58 @@ const Sidebar: React.FC<SidebarProps> = memo(
                                     icon={faUserPen}
                                     labelText="Edit Account"
                                     isMinimized={isMinimized}
-                                    destination={`${user && user.role === "admin" ? "manage/update" : "edit/account"}`}
+                                    destination={`${user && user.role === "admin - main" ? "manage/update" : "edit/account"}`}
                                 />
                             </>
                         ) : 
                         (
-                            <>
-                                <SidebarButton
-                                    icon={faChartColumn}
-                                    labelText="Dashboard"
-                                    isMinimized={isMinimized}
-                                    destination=""
-                                />
-                                <SidebarButton
-                                    icon={faFileContract}
-                                    labelText="Reports"
-                                    isMinimized={isMinimized}
-                                    destination="reports"
-                                />
-                                <SidebarButton
-                                    icon={faTent}
-                                    labelText="Barangay"
-                                    isMinimized={isMinimized}
-                                    destination="barangays"
-                                />
-                                <SidebarButton
-                                    icon={faCalendarCheck}
-                                    labelText="Appointments"
-                                    isMinimized={isMinimized}
-                                    destination="appointments"
-                                />
-                                <SidebarButton
-                                    icon={faUserPen}
-                                    labelText="Manage Account"
-                                    isMinimized={isMinimized}
-                                    destination="manage"
-                                />
+                            <>  
+                                {user && user.role === "admin - main" && (
+                                    <>
+                                        <SidebarButton
+                                            icon={faChartColumn}
+                                            labelText="Dashboard"
+                                            isMinimized={isMinimized}
+                                            destination=""
+                                        />
+                                        <SidebarButton
+                                            icon={faFileContract}
+                                            labelText="Reports"
+                                            isMinimized={isMinimized}
+                                            destination="reports"
+                                        />
+                                        <SidebarButton
+                                            icon={faTent}
+                                            labelText="Barangay"
+                                            isMinimized={isMinimized}
+                                            destination="barangays"
+                                        />
+                                    </>
+                                )}
+                                {user && user.role === "admin - appointment" && (
+                                    <>
+                                        <SidebarButton
+                                            icon={faCalendarCheck}
+                                            labelText="Appointments"
+                                            isMinimized={isMinimized}
+                                            destination="appointments"
+                                        />
+                                        <SidebarButton
+                                            icon={faUserPen}
+                                            labelText="Edit Account"
+                                            isMinimized={isMinimized}
+                                            destination={`edit/account`}
+                                        />
+                                    </>
+                                )}
+                                {user && user.role === "admin - main" && (
+                                    <SidebarButton
+                                        icon={faUserPen}
+                                        labelText="Manage Account"
+                                        isMinimized={isMinimized}
+                                        destination="manage"
+                                    />
+                                )}
                             </>
                         )}
                         <div className="flex items-end justify-center flex-1 w-full py-8 justify-self-end">
