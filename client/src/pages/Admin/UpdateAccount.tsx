@@ -108,7 +108,7 @@ const UpdateAccount: React.FC = () => {
         }
     };
 
-    const [isNotEditable] = useState<boolean>(userDetails?.role === "encoder");
+    const [isNotEditable] = useState<boolean>(userDetails?.role === "encoder" || userDetails?.role === "admin - appointment");
 
     const handleChange = (
         event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -219,7 +219,7 @@ const UpdateAccount: React.FC = () => {
                             />
                         </div>
 
-                        {userDetails && userDetails?.role === "encoder" ? (
+                        {userDetails && (userDetails?.role === "encoder" || userDetails?.role === "admin - appointment") ? (
                             <>
                                 <div className="flex flex-col mb-3 input-group">
                                     <label htmlFor="password">Password</label>
@@ -272,35 +272,37 @@ const UpdateAccount: React.FC = () => {
                             </>
                         ) : null} 
 
-                        <div className="flex flex-col mb-3 input-group">
-                            <label htmlFor="barangay_name">Barangay</label>
-                            <select
-                                className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1 disabled:bg-neutral-300 disabled:cursor-not-allowed"
-                                name="barangay_name"
-                                id="barangay_name"
-                                required
-                                value={user.barangay_name}
-                                onChange={handleChange}
-                                disabled={isNotEditable}
-                            >
-                                {/* Can be replaced with the barangay values from the database */}
-                                <option hidden>Select Barangay</option>
-                                {isLoading ? (
-                                    <option disabled>Loading...</option>
-                                ) : (
-                                    barangays.map((barangay) => (
-                                        <option
-                                            key={barangay.barangay_id}
-                                            value={barangay.barangay_name}
-                                        >
-                                            {barangay.barangay_name}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                        </div>
+                        {user && user?.role !== "admin - appointment" && (
+                            <div className="flex flex-col mb-3 input-group">
+                                <label htmlFor="barangay_name">Barangay</label>
+                                <select
+                                    className="py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-lg indent-2 border-1 disabled:bg-neutral-300 disabled:cursor-not-allowed"
+                                    name="barangay_name"
+                                    id="barangay_name"
+                                    required
+                                    value={user.barangay_name}
+                                    onChange={handleChange}
+                                    disabled={isNotEditable}
+                                >
+                                    {/* Can be replaced with the barangay values from the database */}
+                                    <option hidden>Select Barangay</option>
+                                    {isLoading ? (
+                                        <option disabled>Loading...</option>
+                                    ) : (
+                                        barangays.map((barangay) => (
+                                            <option
+                                                key={barangay.barangay_id}
+                                                value={barangay.barangay_name}
+                                            >
+                                                {barangay.barangay_name}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
+                        )}
                         
-                        {userDetails && userDetails.role === "admin" ? (
+                        {userDetails && userDetails.role === "admin - main" ? (
                             <div className="flex flex-col mb-3 input-group">
                                 <label htmlFor="status">Status</label>
                                 <select
