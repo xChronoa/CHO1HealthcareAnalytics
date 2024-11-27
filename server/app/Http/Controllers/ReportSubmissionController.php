@@ -224,7 +224,7 @@ class ReportSubmissionController extends Controller
             }
 
             // Determine if the user is an admin or encoder
-            $isAdmin = $user->role === 'admin';
+            $isAdmin = $user->role === 'admin - main';
             $isEncoder = $user->role === 'encoder';
 
             if (!$isAdmin && !$isEncoder) {
