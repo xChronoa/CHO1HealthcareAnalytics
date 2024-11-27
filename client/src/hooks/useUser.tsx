@@ -24,6 +24,7 @@ interface Errors {
     username?: string;
     password?: string;
     password_confirmation?: string;
+    role?: string;
     barangay_name?: string;
 }
 
