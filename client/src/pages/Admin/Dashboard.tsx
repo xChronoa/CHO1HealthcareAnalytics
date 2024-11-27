@@ -368,7 +368,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                     plugins: {
                                                         ...ageCategoryData.options.plugins, // Include other plugins options if any
                                                         legend: {
-                                                            display: ageCategoryData.selectedOption !== "All", // Hide legend if "All" is selected
+                                                            display: ageCategoryData.selectedOption !== "All" && ageCategoryData.selectedOption !== "Customized",
                                                         },
                                                     },
                                                 },
@@ -460,7 +460,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                             plugins: {
                                                                 ...ageCategoryData.options.plugins,
                                                                 legend: {
-                                                                    display: ageCategoryData.selectedOption !== "All",
+                                                                    display: ageCategoryData.selectedOption !== "All" && ageCategoryData.selectedOption !== "Customized",
                                                                 },
                                                             },
                                                         },
@@ -497,7 +497,7 @@ const Dashboard: React.FC<DashboardProp> = () => {
                                                             plugins: {
                                                                 ...valueTypeData.options.plugins,
                                                                 legend: {
-                                                                    display: valueTypeData.selectedOption !== "All",
+                                                                    display: valueTypeData.selectedOption !== "All" && valueTypeData.selectedOption !== "Customized",
                                                                 },
                                                             },
                                                         },
