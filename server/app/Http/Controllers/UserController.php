@@ -45,7 +45,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'email' => 'required|string|email|max:255|unique:users,email',
             'role' => 'required|string',
-            'barangay_name' => 'required|string|exists:barangays,barangay_name',
+            'barangay_name' => 'sometimes|string|exists:barangays,barangay_name',
         ]);
 
         if ($validator->fails()) {
