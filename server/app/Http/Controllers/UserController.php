@@ -45,7 +45,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'email' => 'required|string|email|max:255|unique:users,email',
             'role' => 'required|string',
-            'barangay_name' => 'sometimes|string|exists:barangays,barangay_name',
+            'barangay_name' => 'nullable|sometimes|string|exists:barangays,barangay_name',
         ]);
 
         if ($validator->fails()) {
@@ -57,15 +57,26 @@ class UserController extends Controller
         $data['password'] = Hash::make($data['password']); // Encrypt the password
 
         try {
-            // Convert barangay name to barangay_id
-            $barangay = Barangay::where('barangay_name', $data['barangay_name'])->first();
-
-            // Check if the barangay exists
-            if (!$barangay) {
-                return response()->json(['error' => 'Barangay not found!'], 404);
+            if (!empty($data['barangay_name'])) {
+                // Trim whitespace and check if barangay_name is not empty
+                $barangayName = trim($data['barangay_name']);
+                if ($barangayName === '') {
+                    return response()->json(['error' => 'Barangay name cannot be empty!'], 400);
+                }
+    
+                // Convert barangay name to barangay_id
+                $barangay = Barangay::where('barangay_name', $barangayName)->first();
+    
+                // Check if the barangay exists
+                if (!$barangay) {
+                    return response()->json(['error' => 'Barangay not found!'], 404);
+                }
+    
+                $data['barangay_id'] = $barangay->barangay_id; // Assign barangay_id to data array
+            } else {
+                $data['barangay_id'] = null; // Assign null if barangay_name is not provided
             }
-            $data['barangay_id'] = $barangay->barangay_id; // Assign barangay_id to data array
-
+            
             // Remove barangay name from data array
             unset($data['barangay_name']);
 
