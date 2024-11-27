@@ -19,6 +19,13 @@ export const PrivateRoute: React.FC<{ allowedRoles: string[] }> = ({
     }
 
     if (user && !allowedRoles.includes(user.role)) {
+        // Handle redirection based on specific roles
+        if (user.role === "admin - appointment") {
+            return <Navigate to="/admin/appointments" />;
+        } else if (user.role === "admin - main") {
+            return <Navigate to="/admin" />;
+        }
+
         const targetPath = location.pathname.endsWith("/")
             ? `${location.pathname}not-found`
             : `${location.pathname}/not-found`;
