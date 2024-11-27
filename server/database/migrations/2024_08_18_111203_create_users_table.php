@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('username');
             $table->string('password');
             $table->string('email')->unique();
-            $table->enum('role', ['encoder', 'admin']);
+            $table->enum('role', ['encoder', 'admin - main', 'admin - appointment']);
             $table->foreignId('barangay_id')->nullable()->constrained('barangays', 'barangay_id');
             $table->enum('status', ['active', 'disabled']);
             $table->rememberToken();
