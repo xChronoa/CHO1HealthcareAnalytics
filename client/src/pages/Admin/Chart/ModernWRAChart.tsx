@@ -72,7 +72,7 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
             colors[category] = generateColor();
         });
         return colors;
-    }, [ageCategories]);
+    }, [wraData]);
 
     const chartData = (): ChartData<"line"> => {
         // If selectedOption is "Customized", filter the datasets based on visibility
