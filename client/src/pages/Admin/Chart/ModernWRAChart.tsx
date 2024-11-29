@@ -67,23 +67,10 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
     const generateColor = (): string => `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 
     const ageColors = useMemo(() => {
-        // Check if colors are stored in sessionStorage
-        const storedColors = sessionStorage.getItem("ageColors");
-
-        if (storedColors) {
-            // If colors exist in sessionStorage, parse and return them
-            return JSON.parse(storedColors);
-        }
-
-        // If no colors are stored, generate new colors
         const colors: { [key: string]: string } = {};
         ageCategories.forEach((category) => {
             colors[category] = generateColor();
         });
-
-        // Store the generated colors in sessionStorage
-        sessionStorage.setItem("ageColors", JSON.stringify(colors));
-
         return colors;
     }, [ageCategories]);
 
@@ -281,13 +268,13 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                         return (
                                             <div
                                                 key={index}
-                                                className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
                                                 onClick={() => handleCheckboxChange(category)} // Handles the click event to toggle state
                                             >
                                                 <input
                                                     type="checkbox"
                                                     checked={visibilityState[category]} // This binds the checkbox to the visibilityState
-                                                    className="form-checkbox cursor-pointer"
+                                                    className="cursor-pointer form-checkbox"
                                                     onChange={() => handleCheckboxChange(category)} // Ensure the checkbox toggles when clicked
                                                 />
                                                 <span
