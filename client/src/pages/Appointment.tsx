@@ -596,7 +596,7 @@ const Appointment: React.FC = () => {
                 >
                     <section className="flex flex-row flex-wrap gap-5 mb-3 input-group lg:flex-nowrap">
                         <div className="flex flex-col justify-center w-full gap-2 first-name">
-                            <div className="flex items-center w-full gap-2 first-name">
+                            <div className="flex flex-col w-full gap-2 first-name">
                                 <label className="flex flex-row min-w-24 required-label-after" htmlFor="first_name">
                                     First Name:
                                 </label>
@@ -619,7 +619,7 @@ const Appointment: React.FC = () => {
                         </div>
                         
                         <div className="flex flex-col justify-center w-full gap-2 last-name ">
-                            <div className="flex items-center w-full gap-2 last-name">
+                            <div className="flex flex-col w-full gap-2 last-name">
                                 <label className="flex flex-row min-w-24 required-label-after" htmlFor="last_name">
                                     Last Name:
                                 </label>
