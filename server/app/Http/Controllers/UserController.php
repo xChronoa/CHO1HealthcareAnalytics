@@ -283,7 +283,8 @@ class UserController extends Controller
 
             // Define the path based on role
             $validPaths = [
-                'admin' => ['/admin/login', '/'],
+                'admin - main' => ['/admin/login', '/'],
+                'admin - appointment' => ['/admin/login', '/'],
                 'encoder' => ['/barangay/login'],
             ];
 
