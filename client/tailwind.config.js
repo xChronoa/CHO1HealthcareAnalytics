@@ -62,9 +62,10 @@ export default {
         
         // Before
         '.required-label-before::before': {
-          content: '"*"',
+          content: '"* Required"',
           color: '#ff0000',
-          fontWeight: 'bold',
+          fontSize: ".8rem",
+          fontStyle: "italic",
           marginLeft: '4px',
         },
         '.sm\\:required-label-before::before': {
@@ -100,9 +101,10 @@ export default {
 
         // After
         '.required-label-after::after': {
-          content: '" *"',
+          content: '"* Required"',
           color: '#ff0000',
-          fontWeight: 'bold',
+          fontSize: ".8rem",
+          fontStyle: "italic",
           marginLeft: '4px',
         },
         '.sm\\:required-label-after::after': {
