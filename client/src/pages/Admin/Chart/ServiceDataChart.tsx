@@ -216,7 +216,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
             }
         });
         return colors;
-    }, [ageCategories]);
+    }, [serviceData]);
 
     const aggregateDataByCurrentOption = (ageCategory: string | null, valueType: string | null, currentSelectedOption: string) => {
         // Extract unique indicators from the filtered data
@@ -295,6 +295,45 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
         });
     };
 
+    const toggleAllCheckboxes = (fullDatasets: any[], valueType?: string, ageCategory?: string) => {
+        const newVisibilityState: { [key: string]: { [key: string]: boolean } } = {};
+    
+        // Determine the firstKey to use: either valueType, ageCategory, or fallback to dataset.label
+        const firstKey = valueType || ageCategory || fullDatasets.map(dataset => dataset.label);
+    
+        // Iterate over the selected firstKey (singular value or dataset label)
+        if (Array.isArray(firstKey)) {
+            firstKey.forEach(key => {
+                newVisibilityState[key] = {};
+    
+                fullDatasets.forEach(dataset => {
+                    newVisibilityState[key][dataset.label] = areAllChecked(fullDatasets, key);
+                });
+            });
+        } else {
+            // If firstKey is a singular value (not an array)
+            newVisibilityState[firstKey] = {};
+    
+            fullDatasets.forEach(dataset => {
+                newVisibilityState[firstKey][dataset.label] = areAllChecked(fullDatasets, firstKey);
+            });
+        }
+    
+        // Merge newVisibilityState with the previous state to retain existing values
+        setVisibilityState(prevState => ({
+            ...prevState,
+            ...newVisibilityState
+        }));
+    };
+    
+    const areAllChecked = (fullDatasets: any[], firstKey?: string) => {
+        return fullDatasets.every(dataset => {
+            // Check visibility for the specific key (valueType or ageCategory) or fallback to dataset.label
+            const key = firstKey || dataset.label;
+            return visibilityState[key]?.[dataset.label] === false;
+        });
+    };
+
     const renderCharts = () => {
         const hasAgeCategory = filteredData.some((data) => data.age_category);
         const hasValueType = filteredData.some((data) => data.value_type);
@@ -350,7 +389,7 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                     data: data,
                     borderColor: dataset.borderColor,
                     backgroundColor: dataset.backgroundColor,
-                    hidden: currentOption === "Customized" && visibilityState[dataset.label]?.[dataset.label] === false, // Hide the dataset when customized and visibilityState is false
+                    hidden: currentOption === "Customized" && visibilityState[dataset.label]?.[dataset.label] !== false, // Hide the dataset when customized and visibilityState is false
                 };
             });
 
@@ -384,8 +423,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 }))} 
                                 className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                             >
-                                <option value="All">All</option>
-                                <option value="Customized">Customized</option>
+                                <option value="All" className="font-extrabold uppercase">ALL</option>
+                                <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                 {fullDatasets.map(({ label }, index) => (
                                     <option key={index} value={label}>
                                         {label === "12 and below" ? "12 years old and below"
@@ -440,16 +479,33 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                             <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                             <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
-                                {fullDatasets.map((dataset, index) => (
+                                {/* Check All/Uncheck All Checkbox */}
+                                <div
+                                    className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                    onClick={() => toggleAllCheckboxes(fullDatasets)} // Pass fullDatasets to toggleAllCheckboxes
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={areAllChecked(fullDatasets)} // Check if all datasets are selected
+                                        className="cursor-pointer form-checkbox"
+                                        onChange={() => toggleAllCheckboxes(fullDatasets)} // Toggle all based on fullDatasets
+                                    />
+                                    <span className="text-xs sm:text-sm text-nowrap">
+                                        Check All / Uncheck All
+                                    </span>
+                                </div>
+
+                                {/* Individually Checkbox */}
+                                {fullDatasets.reverse().map((dataset, index) => (
                                     <div 
                                         key={index} 
-                                        className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                        className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none print:px-0 print:py-0 hover:bg-blue-500 hover:text-white"
                                         onClick={() => handleCheckboxChange(dataset.label, dataset.label)}
                                     >
                                         <input
                                             type="checkbox"
-                                            checked={visibilityState[dataset.label]?.[dataset.label] !== false}
-                                            className="form-checkbox cursor-pointer"
+                                            checked={visibilityState[dataset.label]?.[dataset.label] === false}
+                                            className="cursor-pointer form-checkbox"
                                             readOnly
                                         />
                                         <span className="w-12 h-4 rounded-sm shrink-0" style={{backgroundColor: dataset.backgroundColor}}></span>
@@ -527,8 +583,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             })} 
                                             className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
-                                            <option value="All">All</option>
-                                            <option value="Customized">Customized</option>
+                                            <option value="All" className="font-extrabold uppercase">ALL</option>
+                                            <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
                                                 <option key={index} value={label}>
                                                     {label}
@@ -572,16 +628,33 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
             
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
+                                            {/* Check All/Uncheck All Checkbox */}
+                                            <div
+                                                className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                                onClick={() => toggleAllCheckboxes(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Pass valueType to toggleAllCheckboxes
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={areAllChecked(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Check if all datasets are selected
+                                                    className="cursor-pointer form-checkbox"
+                                                    onChange={() => toggleAllCheckboxes(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Toggle all based on valueType
+                                                />
+                                                <span className="text-xs sm:text-sm text-nowrap">
+                                                    Check All / Uncheck All
+                                                </span>
+                                            </div>
+
+                                            {/* Individual Check */}
                                             {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                                 <div 
                                                     key={index} 
-                                                    className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none print:px-0 print:py-0 hover:bg-blue-500 hover:text-white"
                                                     onClick={() => handleCheckboxChange(ageCategory, label)}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={visibilityState[ageCategory]?.[label] === false}
-                                                        className="form-checkbox cursor-pointer"
+                                                        className="cursor-pointer form-checkbox"
                                                         readOnly
                                                     />
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -636,8 +709,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                             })} 
                                             className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
-                                            <option value="All">All</option>
-                                            <option value="Customized">Customized</option>
+                                            <option value="All" className="font-extrabold uppercase">ALL</option>
+                                            <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                             {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (
                                                 <option key={index} value={label}>
                                                     {label}
@@ -681,16 +754,33 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
             
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
+                                            {/* Check All/Uncheck All Checkbox */}
+                                            <div
+                                                className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                                onClick={() => toggleAllCheckboxes(aggregateDataByIndicator(null, valueType), valueType)} // Pass valueType to toggleAllCheckboxes
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={areAllChecked(aggregateDataByIndicator(null, valueType), valueType)} // Check if all datasets are selected
+                                                    className="cursor-pointer form-checkbox"
+                                                    onChange={() => toggleAllCheckboxes(aggregateDataByIndicator(null, valueType), valueType)} // Toggle all based on valueType
+                                                />
+                                                <span className="text-xs sm:text-sm text-nowrap">
+                                                    Check All / Uncheck All
+                                                </span>
+                                            </div>
+
+                                            {/* Individual Check */}
                                             {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                                 <div 
                                                     key={index} 
-                                                    className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none print:px-0 print:py-0 hover:bg-blue-500 hover:text-white"
                                                     onClick={() => handleCheckboxChange(valueType, label)}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={visibilityState[valueType]?.[label] === false}
-                                                        className="form-checkbox cursor-pointer"
+                                                        className="cursor-pointer form-checkbox"
                                                         readOnly
                                                     />
                                                     <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -748,8 +838,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     })} 
                                     className="px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
-                                    <option value="All">All</option>
-                                    <option value="Customized">Customized</option>
+                                    <option value="All" className="font-extrabold uppercase">ALL</option>
+                                    <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label }, index) => (
                                         <option key={index} value={label}>
                                             {label}
@@ -793,16 +883,33 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
     
                                 <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(ageCategory, null).length > 13 ? "pb-12" : null}`}>
+                                    {/* Check All/Uncheck All Checkbox */}
+                                    <div
+                                        className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                        onClick={() => toggleAllCheckboxes(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Pass valueType to toggleAllCheckboxes
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={areAllChecked(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Check if all datasets are selected
+                                            className="cursor-pointer form-checkbox"
+                                            onChange={() => toggleAllCheckboxes(aggregateDataByIndicator(ageCategory, null), ageCategory)} // Toggle all based on valueType
+                                        />
+                                        <span className="text-xs sm:text-sm text-nowrap">
+                                            Check All / Uncheck All
+                                        </span>
+                                    </div>
+
+                                    {/* Individual Check */}
                                     {aggregateDataByIndicator(ageCategory, null).map(({ label, backgroundColor }, index) => (
                                         <div 
                                             key={index} 
-                                            className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                            className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none print:px-0 print:py-0 hover:bg-blue-500 hover:text-white"
                                             onClick={() => handleCheckboxChange(ageCategory, label)}
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={visibilityState[ageCategory]?.[label] === false}
-                                                className="form-checkbox cursor-pointer"
+                                                className="cursor-pointer form-checkbox"
                                                 readOnly
                                             />
                                             <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>
@@ -856,8 +963,8 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                     })} 
                                     className="flex-1 px-2 py-2 text-[9.5px] lg:text-xs font-bold text-black rounded-lg w-full sm:w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                 >
-                                    <option value="All">All</option>
-                                    <option value="Customized">Customized</option>
+                                    <option value="All" className="font-extrabold uppercase">ALL</option>
+                                    <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                     {aggregateDataByIndicator(null, valueType).map(({ label }, index) => (
                                         <option key={index} value={label}>
                                             {label}
@@ -901,16 +1008,33 @@ const ServiceDataChart: React.FC<ServiceDataChartProps> = ({
                                 <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
     
                                 <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByIndicator(null, valueType).length > 13 ? "pb-12" : null}`}>
+                                    {/* Check All/Uncheck All Checkbox */}
+                                    <div
+                                        className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                        onClick={() => toggleAllCheckboxes(aggregateDataByIndicator(null, valueType), valueType)} // Pass valueType to toggleAllCheckboxes
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={areAllChecked(aggregateDataByIndicator(null, valueType), valueType)} // Check if all datasets are selected
+                                            className="cursor-pointer form-checkbox"
+                                            onChange={() => toggleAllCheckboxes(aggregateDataByIndicator(null, valueType), valueType)} // Toggle all based on valueType
+                                        />
+                                        <span className="text-xs sm:text-sm text-nowrap">
+                                            Check All / Uncheck All
+                                        </span>
+                                    </div>
+
+                                    {/* Individual Check */}
                                     {aggregateDataByIndicator(null, valueType).map(({ label, backgroundColor }, index) => (
                                         <div 
                                             key={index} 
-                                            className="print:px-0 print:py-0 px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                            className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none print:px-0 print:py-0 hover:bg-blue-500 hover:text-white"
                                             onClick={() => handleCheckboxChange(valueType, label)}
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={visibilityState[valueType]?.[label] === false}
-                                                className="form-checkbox cursor-pointer"
+                                                className="cursor-pointer form-checkbox"
                                                 readOnly
                                             />
                                             <span className="w-6 h-4 rounded-sm" style={legendColorStyle(backgroundColor)}></span>

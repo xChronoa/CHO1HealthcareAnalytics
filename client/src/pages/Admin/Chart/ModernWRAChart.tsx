@@ -197,6 +197,23 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
         }));
     };
 
+    // Check if all checkboxes are selected
+    const areAllChecked = () => {
+        return ageCategories.every((category) => visibilityState[category]);
+    };
+
+    // Toggle all checkboxes (Check All / Uncheck All)
+    const toggleAllCheckboxes = () => {
+        const allChecked = areAllChecked();
+        const newState: { [key: string]: boolean } = {};
+
+        ageCategories.forEach((category) => {
+            newState[category] = !allChecked; // If all checked, uncheck all; else check all
+        });
+        
+        setVisibilityState(newState); // Update state dynamically
+    };
+
     return (
         <>
             {error ? (
@@ -228,8 +245,8 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                         onChange={(e) => setSelectedOption(e.target.value)} 
                                         className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black border border-black rounded-lg w-full sm:w-fit bg-white shadow-md shadow-[#a3a19d]"
                                     >
-                                        <option value="All">All</option>
-                                        <option value="Customized">Customized</option>
+                                        <option value="All" className="font-extrabold uppercase">ALL</option>
+                                        <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                         {ageCategories.map((category, index) => (
                                             <option key={index} value={category}>
                                                 {capitalize(category)}
@@ -261,6 +278,20 @@ const ModernWRAChart: React.FC<ModernWRAProps> = ({
                                 <div className="h-full legend-container shadow-md shadow-[#a3a19d] rounded-lg">
                                     <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
                                     <div className="w-full h-full p-2 overflow-y-auto bg-gray-200 border-r rounded-b-lg legend-list">
+
+                                        {/* Check All/Uncheck All Checkbox */}
+                                        <div
+                                            className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                            onClick={() => toggleAllCheckboxes()}
+                                            >
+                                            <input
+                                                type="checkbox"
+                                                checked={areAllChecked()} // Dynamically determine if all are checked
+                                                className="cursor-pointer form-checkbox"
+                                                onChange={() => toggleAllCheckboxes()}
+                                            />
+                                            <span className="text-xs sm:text-sm text-nowrap">Check All / Uncheck All</span>
+                                        </div>
                                     {ageCategories.map((category, index) => {
                                         // Find the dataset that corresponds to the category
                                         const dataset = chartData().datasets.find((ds) => ds.label === capitalize(category));

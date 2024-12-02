@@ -376,9 +376,40 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
         }));
     };
     
+    const toggleAllCheckboxes = (gender: "male" | "female", datasets: any[]) => {
+        const setVisibilityForGender = gender === "male" ? setVisibilityMale : setVisibilityFemale;
+        const visibilityForGender = gender === "male" ? visibilityMale : visibilityFemale;
+    
+        // Extract labels (disease names) from the datasets
+        const labels = datasets.map((dataset) => dataset.label);
+    
+        // Check if all labels are currently checked
+        const allChecked = labels.every((label) => visibilityForGender[label]);
+    
+        // Update the visibility state
+        setVisibilityForGender((prevState) => ({
+            ...prevState,
+            ...labels.reduce((acc, label) => ({
+                ...acc,
+                [label]: !allChecked, // Toggle all based on the current state
+            }), {}),
+        }));
+    };
+    
+    const areAllChecked = (gender: "male" | "female", datasets: any[]) => {
+        const visibilityForGender = gender === "male" ? visibilityMale : visibilityFemale;
+    
+        // Extract labels (disease names) from the datasets
+        const labels = datasets.map((dataset) => dataset.label);
+    
+        // Check if all labels are currently visible
+        return labels.every((label) => visibilityForGender[label]);
+    };
+    
+
     return (
-        <section className="flex flex-col items-center py-8 bg-almond" id="myChart" ref={chartRef}>
-            <h1 id="chart-title" className={`self-center w-full lg:w-11/12 ${isMinimized ? "lg:w-11/12" : "w-full"} p-2 text-2xl font-bold text-center text-white align-middle rounded-lg bg-green`} ref={textRef}>Morbidity Report</h1>
+        <section className="flex flex-col items-center py-8 mt-9 bg-almond" id="myChart" ref={chartRef}>
+            <h1 id="chart-title" className={`self-center ${isMinimized ? "lg:w-11/12" : "w-full"} p-2 sm:text-lg text-sm font-bold text-center text-white align-middle rounded-lg bg-green`} ref={textRef}>Morbidity Report</h1>
             {error ? (
                 <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                     <h1 className="font-bold text-center text-red-500">
@@ -388,7 +419,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
             ) : (
                 morbidityReports.length > 0 ? (
                     <>
-                        <div className={`flex flex-col items-center w-full lg:w-11/12 gap-8 ${isMinimized ? "lg:w-11/12" : "w-full"} print:w-full chart-container`}>
+                        <div className={`flex flex-col items-center gap-8 ${isMinimized ? "lg:w-11/12" : "w-full"} print:w-full chart-container`}>
                             {/* Male Chart */}
                             <div 
                                 className={`chart relative flex flex-col gap-2 p-4 bg-white rounded-lg xl:flex-row transition-all w-full shadow-md print:w-full shadow-[#a3a19d] 
@@ -413,8 +444,8 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                             onChange={(e) => setSelectedOptionMale(e.target.value)} 
                                             className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
-                                            <option value="All">All</option>
-                                            <option value="Customized">Customized</option>
+                                            <option value="All" className="font-extrabold uppercase">ALL</option>
+                                            <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                             {aggregateDataByDisease("male").map((dataset, index) => (
                                                 <option key={index} value={dataset.label}>
                                                     {dataset.label}
@@ -450,10 +481,25 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByDisease("male").length > 10 ? "pb-10" : null}`}>
+                                            {/* Check All/Uncheck All Checkbox */}
+                                            <div
+                                                className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                                onClick={() => toggleAllCheckboxes("male", aggregateDataByDisease("male"))} // Pass gender and fullDatasets to toggleAllCheckboxes
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={areAllChecked("male", aggregateDataByDisease("male"))} // Dynamically check if all datasets for the gender are selected
+                                                    className="cursor-pointer form-checkbox"
+                                                    onChange={() => toggleAllCheckboxes("male", aggregateDataByDisease("male"))} // Toggle all based on gender and fullDatasets
+                                                />
+                                                <span className="text-xs sm:text-sm text-nowrap">
+                                                    Check All / Uncheck All
+                                                </span>
+                                            </div>
                                             {aggregateDataByDisease("male").map((dataset, index) => (
                                                 <div 
                                                     key={index} 
-                                                    className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
                                                     onClick={() =>
                                                         handleCheckboxChange(
                                                             dataset.label,
@@ -468,7 +514,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                                                 dataset.label
                                                             ]
                                                         }
-                                                        className="form-checkbox cursor-pointer"
+                                                        className="cursor-pointer form-checkbox"
                                                     />
                                                     <span className="w-6 h-4 rounded-sm cursor-pointer" style={{ backgroundColor: dataset.borderColor }}></span>
                                                     <span className="text-xs cursor-pointer">{dataset.label}</span>
@@ -505,8 +551,8 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                             onChange={(e) => setSelectedOptionFemale(e.target.value)} 
                                             className="px-2 py-2 text-[9.5px] sm:text-xs font-bold text-black rounded-lg w-fit bg-white border border-black shadow-md shadow-[#a3a19d]"
                                         >
-                                            <option value="All">All</option>
-                                            <option value="Customized">Customized</option>
+                                            <option value="All" className="font-extrabold uppercase">ALL</option>
+                                            <option value="Customized" className="font-extrabold uppercase">CUSTOMIZED</option>
                                             {aggregateDataByDisease("female").map((dataset, index) => (
                                                 <option key={index} value={dataset.label}>
                                                     {dataset.label}
@@ -541,10 +587,26 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                         <h3 className="px-2 py-2 text-xs font-semibold text-center text-white uppercase rounded-t-lg sm:text-sm bg-green">Legend</h3>
 
                                         <div className={`w-full h-full p-2 overflow-y-auto bg-gray-200 legend-list ${aggregateDataByDisease("female").length > 10 ? "pb-10" : null}`}>
+                                            {/* Check All/Uncheck All Checkbox */}
+                                            <div
+                                                className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
+                                                onClick={() => toggleAllCheckboxes("female", aggregateDataByDisease("female"))} // Pass gender and fullDatasets to toggleAllCheckboxes
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={areAllChecked("female", aggregateDataByDisease("female"))} // Dynamically check if all datasets for the gender are selected
+                                                    className="cursor-pointer form-checkbox"
+                                                    onChange={() => toggleAllCheckboxes("female", aggregateDataByDisease("female"))} // Toggle all based on gender and fullDatasets
+                                                />
+                                                <span className="text-xs sm:text-sm text-nowrap">
+                                                    Check All / Uncheck All
+                                                </span>
+                                            </div>
+
                                             {aggregateDataByDisease("female").map((dataset, index) => (
                                                 <div 
                                                     key={index} 
-                                                    className="px-2 rounded-md py-1 flex items-center gap-2 mb-2 cursor-pointer hover:bg-blue-500 hover:text-white transition-all select-none"
+                                                    className="flex items-center gap-2 px-2 py-1 mb-2 transition-all rounded-md cursor-pointer select-none hover:bg-blue-500 hover:text-white"
                                                     onClick={() =>
                                                         handleCheckboxChange(
                                                             dataset.label,
@@ -559,7 +621,7 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                                                                 dataset.label
                                                             ]
                                                         }
-                                                        className="form-checkbox cursor-pointer"
+                                                        className="cursor-pointer form-checkbox"
                                                     />
                                                     <span className="w-6 h-4 rounded-sm cursor-pointer" style={{ backgroundColor: dataset.borderColor }}></span>
                                                     <span className="text-xs cursor-pointer">{dataset.label}</span>
@@ -573,19 +635,19 @@ const MorbidityFormChart: React.FC<MorbidityFormChartProps> = ({
                     </>
                 ) : (
                     (barangay ?? "") === "" ? (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md lg:w-11/12 no-submitted-report shadow-gray-400">
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                             <h1 className="text-center">
                                 It seems no valid barangay has been selected. Kindly choose one from the list.
                             </h1>
                         </div>
                     ) : barangay === "all" ? (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md lg:w-11/12 no-submitted-report shadow-gray-400">
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                             <h1 className="text-center">
                                 No submitted reports were found for any barangay for the year {year}.
                             </h1>
                         </div>
                     ) : (
-                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md lg:w-11/12 no-submitted-report shadow-gray-400">
+                        <div className="w-full p-12 bg-white rounded-b-lg shadow-md no-submitted-report shadow-gray-400">
                             <h1 className="text-center">
                                 No submitted reports were found for Barangay {barangay} for the year {year}.
                             </h1>
