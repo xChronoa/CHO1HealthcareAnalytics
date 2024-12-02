@@ -33,7 +33,7 @@ import { IncompleteUpdate } from "../../types/IncompleteForm";
 import { useLoading } from "../../context/LoadingContext";
 import Swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faArrowUp, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 interface M1ReportProps {
     setReportDatas: (type: "m1" | "m2", data: any) => void;
@@ -435,11 +435,12 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== 1 ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d] flex flex-col items-center gap-2 justify-center"
                             onClick={handlePreviousStep}
                             disabled={step === 1}
                         >
-                            Previous
+                            <FontAwesomeIcon icon={faChevronLeft} /> 
+                            Previous 
                         </button>
                     ) : null}
                     
@@ -467,11 +468,12 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== totalSteps ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            className="w-24 px-5 py-2 gap-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d] flex flex-col items-center justify-center"
                             onClick={handleNextStep}
                             disabled={step === totalSteps} // Adjust based on the max step
                         >
-                            Next
+                            <FontAwesomeIcon icon={faChevronRight} />
+                            Next 
                         </button>
                     ) : null}
                 </div>
@@ -867,11 +869,12 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== 1 ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            className="w-24 px-5 py-2 gap-2 text-white flex flex-col items-center justify-center transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
                             onClick={handlePreviousStep}
                             disabled={step === 1}
                         >
-                            Previous
+                            <FontAwesomeIcon icon={faChevronLeft} />
+                            Previous  
                         </button>
                     ) : null}
 
@@ -899,11 +902,12 @@ export const M1Report: React.FC<M1ReportProps> = ({
                     {step !== totalSteps ? (
                         <button
                             type="button"
-                            className="w-24 px-5 py-2 text-white transition-all rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
+                            className="w-24 px-5 py-2 text-white transition-all flex flex-col items-center justify-center gap-2 rounded cursor-pointer hover:opacity-75 bg-green shadow-md shadow-[#a3a19d]"
                             onClick={handleNextStep}
                             disabled={step === totalSteps} // Adjust based on the max step
                         >
-                            Next
+                            <FontAwesomeIcon icon={faChevronRight} />
+                            Next 
                         </button>
                     ) : null}
                 </div>
